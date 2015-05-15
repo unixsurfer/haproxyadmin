@@ -8,7 +8,7 @@ haproxyadmin.haproxy
 This module implements the haproxyadmin API.
 
 :copyright: (c) 2015 by Pavlos Parissis.
-:license: GPLv2, see LICENSE for more details.
+:license: Apache 2.0, see LICENSE for more details.
 
 """
 import os

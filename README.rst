@@ -82,7 +82,7 @@ feedback. Please post your comments, bug reports, wishes on my `issues page
 Licensing
 ~~~~~~~~~
 
-GPLv2
+Apache 2.0
 
 
 Acknowledgement
