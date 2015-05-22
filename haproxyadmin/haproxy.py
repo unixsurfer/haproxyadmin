@@ -567,7 +567,7 @@ class HAProxy(object):
 
         return ret
 
-    def metric(self, name):
+    def metric(self, name, calculation=True):
         """Return the value of a metric.
 
         Performs a calculation on the metric across all HAProxy processes.
@@ -585,7 +585,10 @@ class HAProxy(object):
 
         metrics = [x.metric(name) for x in self._hap_processes]
 
-        return calculate(name, metrics)
+        if calculation:
+            return calculate(name, metrics)
+        else:
+            return metrics
 
     def pools(self, name=None):
         """Return a list with Pool objects.
