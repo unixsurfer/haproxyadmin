@@ -87,26 +87,6 @@ class _HAProxyProcess(object):
             else:
                 unix_socket.close()
 
-    def run_commandold(self, command):
-        """Run a command to HAProxy process.
-
-        Arguments:
-            command (str): A valid HAProxy command.
-
-        Returns:
-            OK string if command is executed successfully otherwise message
-            returned by HAProxy.
-
-        """
-        # We either get '' or an error message followed by ''
-        # NOTE: when command failed error message is always the 1st element
-        # and 2nd element is the empty string
-        result = self.send_command(command)
-        if len(result) == 1 and not result[0]:
-            return 'OK'
-        else:
-            return result[0]
-
     def run_command(self, command, full_output=False):
         """Run a command to HAProxy process.
 
