@@ -18,7 +18,7 @@ from .frontend import Frontend
 from .pool import Pool
 from .poolmember import PoolMember
 from .utils import (is_unix_socket, cmd_across_all_procs, calculate, isint,
-                    should_die, check_command, check_output)
+                    should_die, check_command, check_output, compare_values)
 
 from .internal import _HAProxyProcess
 
@@ -269,6 +269,38 @@ class HAProxy(object):
                                        cmd)
 
         return check_command(results)
+
+    @property
+    def totalrequests(self):
+        """Return total cumulative number of requests processed by all processes.
+
+        This counts requests processed by frontends and backends.
+
+        :rtype: integer
+
+        Usage::
+
+          >>> from haproxyadmin import haproxy
+          >>> hap = haproxy.HAProxy(socket_dir='/run/haproxy')
+          >>> hap.totalrequests
+          457
+        """
+        return self.metric('CumReq')
+
+    @property
+    def processids(self):
+        """Return the process IDs of each HAProxy process.
+
+        :rtype: list
+
+        Usage::
+
+          >>> from haproxyadmin import haproxy
+          >>> hap = haproxy.HAProxy(socket_dir='/run/haproxy')
+          >>> hap.processids
+          [22029, 22028, 22027, 22026]
+        """
+        return [x.metric('Pid') for x in self._hap_processes]
 
     @should_die
     def del_acl(self, acl, key):
@@ -885,6 +917,117 @@ class HAProxy(object):
             raise ValueError(map_info_proc1)
 
         return map_info_proc1
+
+    @property
+    def uptime(self):
+        """Return update of HAProxy process
+
+        :rtype: string
+
+        Usage::
+
+          >>> from haproxyadmin import haproxy
+          >>> hap = haproxy.HAProxy(socket_dir='/run/haproxy')
+          >>> hap.uptime
+          '4d 0h16m26s'
+        """
+        values = cmd_across_all_procs(self._hap_processes, 'metric',
+                                      'Uptime')
+
+        # Just return the uptime of the 1st process
+        return values[0][1]
+
+    @property
+    def description(self):
+        """Return description of HAProxy
+
+        :rtype: string
+
+        Usage::
+
+          >>> from haproxyadmin import haproxy
+          >>> hap = haproxy.HAProxy(socket_dir='/run/haproxy')
+          >>> hap.description
+          'test'
+        """
+        values = cmd_across_all_procs(self._hap_processes, 'metric',
+                                      'description')
+
+        return compare_values(values)
+
+    @property
+    def nodename(self):
+        """Return nodename of HAProxy
+
+        :rtype: string
+
+        Usage::
+
+          >>> from haproxyadmin import haproxy
+          >>> hap = haproxy.HAProxy(socket_dir='/run/haproxy')
+          >>> hap.nodename
+          'test.foo.com'
+        """
+        values = cmd_across_all_procs(self._hap_processes, 'metric',
+                                      'node')
+
+        return compare_values(values)
+
+    @property
+    def uptimesec(self):
+        """Return uptime of HAProxy process in seconds
+
+        :rtype: integer
+
+        Usage::
+
+          >>> from haproxyadmin import haproxy
+          >>> hap = haproxy.HAProxy(socket_dir='/run/haproxy')
+          >>> hap.uptimesec
+          346588
+        """
+        values = cmd_across_all_procs(self._hap_processes, 'metric',
+                                      'Uptime_sec')
+
+        # Just return the uptime of the 1st process
+        return values[0][1]
+
+    @property
+    def releasedate(self):
+        """Return release date of HAProxy
+
+        :rtype: string
+
+        Usage::
+
+          >>> from haproxyadmin import haproxy
+          >>> hap = haproxy.HAProxy(socket_dir='/run/haproxy')
+          >>> hap.releasedate
+          '2014/10/31'
+        """
+        values = cmd_across_all_procs(self._hap_processes, 'metric',
+                                      'Release_date')
+
+        return compare_values(values)
+
+    @property
+    def version(self):
+        """Return version of HAProxy
+
+        :rtype: string
+
+        Usage::
+          >>> from haproxyadmin import haproxy
+          >>> hap = haproxy.HAProxy(socket_dir='/run/haproxy')
+          >>> hap.version()
+          '1.5.8'
+        """
+        # If multiple version of HAProxy share the same socket directory
+        # then this wil always raise IncosistentData exception.
+        # TODO: Document this on README
+        values = cmd_across_all_procs(self._hap_processes, 'metric', 'Version')
+
+        return compare_values(values)
 
 
 HAPROXY_METRICS = HAProxy.HAPROXY_METRICS
