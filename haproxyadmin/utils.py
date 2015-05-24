@@ -374,7 +374,7 @@ def info2dict(raw_info):
     """
     info = {}
     for line in raw_info:
-        line = line.strip()
+        line = line.lstrip()
         if ': ' in line:
             key, value = line.split(': ', 1)
             info[key] = value
