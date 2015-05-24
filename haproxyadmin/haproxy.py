@@ -548,7 +548,7 @@ class HAProxy(object):
 
     @property
     def maxconn(self):
-        """Return the configured maximum connection allowed for frontend.
+        """Return the sum of configured maximum connection allowed for HAProxy.
 
         :rtype: integer
         """
@@ -1019,7 +1019,7 @@ class HAProxy(object):
         Usage::
           >>> from haproxyadmin import haproxy
           >>> hap = haproxy.HAProxy(socket_dir='/run/haproxy')
-          >>> hap.version()
+          >>> hap.version
           '1.5.8'
         """
         # If multiple version of HAProxy share the same socket directory
