@@ -96,7 +96,6 @@ METRICS_SUM = [
 ]
 
 METRICS_AVG = [
-    'Uptime_sec',
     'act',
     'bck',
     'check_duration',
