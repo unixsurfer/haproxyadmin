@@ -917,7 +917,7 @@ class HAProxy(object):
 
     @property
     def uptime(self):
-        """Return update of HAProxy process
+        """Return uptime of HAProxy process
 
         :rtype: string
 
