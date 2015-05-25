@@ -311,12 +311,16 @@ def isint(value):
 
 
 def converter(value):
-    """Converts a string to int or float.
+    """Convert a number or string to an integer
+
+    For floating point numbers, this truncates towards zero.
+
+    :param value: A value to convert to int
+    :type value: string
+    :rtype: integer or string if value can't be converted to int.
     """
-    if isint(value):
+    if isint(value) or isfloat(value):
         return int(value)
-    elif isfloat(value):
-        return float(value)
     else:
         return value
 
