@@ -4,11 +4,11 @@
 #
 """"
 haproxyadmin.internal
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
 
 This module provides classes that are used within haproxyadmin for creating
 objects to work with frontend, pool and pool member which associated with
-with a single HAProxy process/
+with a single HAProxy process.
 
 """
 
@@ -25,18 +25,13 @@ class _HAProxyProcess(object):
     It acts as a communication pipe between the caller and individual
     HAProxy process using UNIX stats socket.
 
-    Arguments:
-        socket_file (str): Full path of socket file.
-        retry (int, optional): Number of connect retries (defaults to 3).
-        retry_interval (int, optional): Interval time in seconds between retries
-        (defaults to 2).
-
-    Attributes:
-        instance (int): Instance number
-
-    Methods:
-        stats(): Return a dictionary with pool information.
-        pools([poolx]): Return a set of _Pool objects.
+    :param socket_file: Full path of socket file.
+    :type socket_file: string
+    :parm retry: (optional) Number of connect retries (defaults to 3)
+    :type retry: integer
+    :param retry_interval: (optional) Interval time in seconds between retries
+    (defaults to 2)
+    :type retry_interval: integer
     """
     SUCCESS_OUTPUT_STRINGS = ['Done.', '']
 
@@ -58,7 +53,6 @@ class _HAProxyProcess(object):
         :return: Output. Newline character is stripped off.
         :rtype: list
         """
-
         unix_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         # I haven't seen a case where a running process which holds a UNIX
         # socket will take more than few nanoseconds to accept a connection.
@@ -108,10 +102,7 @@ class _HAProxyProcess(object):
     def proc_info(self):
         """Return a dictionary containing information about HAProxy daemon.
 
-        Returns:
-            A dictionary, see info2dict() for details with the addition of
-            instance key.
-
+        :rtype: dictionary, see utils.info2dict() for details
         """
         raw_info = self.send_command('show info')
 
@@ -142,9 +133,9 @@ class _HAProxyProcess(object):
     def pools(self, name=None):
         """Build _Pool objects for each pool.
 
-        :param name:Arguments: (optional) pool name, defaults to None
+        :param name: (optional) pool name, defaults to None
         :type name: string
-        :return: a list of _Pool objects for each pool.
+        :return: a list of _Pool objects for each pool
         :rtype: list
         """
         pools = []
@@ -190,19 +181,9 @@ class _HAProxyProcess(object):
 class _Frontend(object):
     """Class for interacting with a frontend in one HAProxy process.
 
-    Arguments:
-        hap_process (obj): A _HAProxyProcess object.
-        name (str): Frontend name.
-
-    Methods:
-        stats(): Return a dictinary with all stats.
-        metric(str): Return the value of the metric from the stats
-
-    Attributes:
-        name (str) : Frontend name
-        process_nb (int): HAProxy process number in which frontend is
-        configured.
-
+    :param hap_process: A _HAProxyProcess object
+    :param name: Frontend name
+    :type name: string
     """
     def __init__(self, hap_process, name):
         self.hap_process = hap_process
@@ -225,26 +206,27 @@ class _Frontend(object):
         return dict(zip(keys, values))
 
     def metric(self, name):
+        """Return the value of a metric"""
         return converter(
             getattr(self.hap_process.frontends_stats()[self.name], name))
 
     def command(self, cmd):
+        """Run command to HAProxy
+
+        :param cmd: A valid command to execute
+        :type cmd: string
+        :return: 1st line of the output
+        :rtype: string
+        """
         return self.hap_process.run_command(cmd)
 
 
 class _Pool(object):
     """Class for interacting with a pool in one HAProxy process.
 
-    Arguments:
-        hap_process (obj): A _HAProxyProcess object.
-        name (str): Poolname.
-
-    Attributes:
-        name (str): Pool name.
-        process_nb (int): HAProxy instance.
-        requests(): Return an integer with requests for the pool.
-        statistics() Return a dictionary structure with all statistics.
-
+    :param hap_process: A _HAProxyProcess object
+    :param name: Pool name
+    :type name: string
     """
     def __init__(self, hap_process, name):
         self.hap_process = hap_process
