@@ -287,9 +287,9 @@ def calculate(name, metrics):
     # Remove empty values, for some metrics HAProxy returns '' instead of 0
     filtered = filter(None, metrics)
     if name in METRICS_SUM:
-        return sum(filtered)
+        return round(sum(filtered))
     elif name in METRICS_AVG:
-        return sum(filtered) / len(metrics)
+        return round(sum(filtered) / len(metrics))
     else:
         raise ValueError("Unknown type of calculation for {}".format(name))
 
