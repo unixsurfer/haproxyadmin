@@ -161,19 +161,23 @@ class _HAProxyProcess(object):
 
         return return_list
 
-    def get_frontends(self, frontendx=None):
-        """Return a list of _Frontend objects for each frontend.
+    def get_frontends(self, name=None):
+        """Build  _Frontend objects for each frontend.
 
+        :param name: (optional) pool name, defaults to None
+        :type name: string
+        :return: a list of _Pool objects for each pool
+        :rtype: list
         Arguments:
-            frontendx (str, optional): frontend name, defaults to None.
+            name (str, optional): frontend name, defaults to None.
 
         """
         frontends = []
         return_list = []
         frontends = self.frontends_stats()
-        if frontendx is not None:
-            if frontendx in frontends:
-                return_list.append(_Frontend(self, frontendx))
+        if name is not None:
+            if name in frontends:
+                return_list.append(_Frontend(self, name))
             else:
                 return return_list
         else:
