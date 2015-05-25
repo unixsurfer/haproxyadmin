@@ -1,6 +1,0 @@
-Things to be done before we publish it
-
-* Proper README file with instructions including haproxy example conf
-* setup.py
-* Test against hapee, haproxy-1.6dev1
-
