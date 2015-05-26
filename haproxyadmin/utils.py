@@ -349,6 +349,26 @@ class CSVLine(object):
 
     :param parts: A list with field values
     :type parts: list
+
+    Usage::
+
+      >>> from haproxyadmin import utils
+      >>> heads = ['pxname', 'type', 'lbtol']
+      >>> parts = ['foor', 'backend', '444']
+      >>> utils.CSVLine.heads = heads
+      >>> csvobj = utils.CSVLine(parts)
+      >>> csvobj.pxname
+      'foor'
+      >>> csvobj.type
+      'backend'
+      >>> csvobj.lbtol
+      '444'
+      >>> csvobj.bar
+      Traceback (most recent call last):
+      File "<stdin>", line 1, in <module>
+      File "/.../haproxyadmin/haproxyadmin/utils.py", line 341, in __getattr__
+          _index = self.heads.index(attr)
+      ValueError: 'bar' is not in list
     """
     # This holds the field names of the CSV
     heads = []
