@@ -263,9 +263,8 @@ class _Pool(object):
     def members(self, name=None):
         """Return a list of _PoolMember objects for each member of the pool.
 
-        Arguments:
-            name (str, optional): member, defaults to None.
-
+        :param name: (optional): Member name lookup, defaults to None.
+        :type name: string
         """
         members = []
         return_list = []
@@ -286,13 +285,9 @@ class _Pool(object):
 class _PoolMember(object):
     """Class for interacting with a member of a pool in one HAProxy.
 
-    Arguments:
-        pool (obj): An _Pool object on which this member belongs to.
-        membername (str): Membername.
-
-    Attributes:
-        process_nb (int): HAProxy process number
-
+    :param pool: A _Pool object in which member is part of
+    :param name: Pool member name
+    :type name: string
     """
     def __init__(self, pool, name):
         self.pool = pool
