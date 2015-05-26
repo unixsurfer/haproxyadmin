@@ -2,36 +2,25 @@
 #
 # pylint: disable=superfluous-parens
 #
+"""
+haproxyadmin.frontend
+~~~~~~~~~~~~~~~~~~~~~
+
+This module provides the :class:`Frontend <.Frontend>` class. This class can
+be used to run operations on a frontend and retrieve statistics.
+
+"""
 from .utils import (calculate, cmd_across_all_procs, compare_values,
                     check_command, should_die)
 
 
 class Frontend(object):
+    """Build a user-created :class:`Frontend` for a single frontend.
 
-    """A container for a frontend across several HAProxy processes.
+    :param frontend_per_proc: list of :class:`._Frontend` objects.
+    :type frontend_per_proc: ``list``
+    :rtype: a :class:`Frontend`.
 
-
-    Arguments:
-        frontend_per_proc (list): A list of _Frontend objects for the given
-        frontend.
-
-    Methods:
-        disable: Disable frontend
-        enable: Enable frontend
-        get_metrics: Return metric names
-        metric (str): Return value for the metric
-        maxconn(int): Set maximum number of connections
-        requests_per_process: Return requests per HAProxy process
-        shutdown: Shutdown frontend
-        stats_per_process: Return all stats per HAProx process
-        status(): Return status of frontend
-
-    Attributes
-        maxconn: Return maximum connections limit
-        name (str): Return name of the pool.
-        process_nb (list): Return a list of HAProxy process number in which
-        frontend is configured.
-        requests (int): Return number of HTTP requests served by frontend.
     """
     FRONTEND_METRICS = [
         'bin',
@@ -83,14 +72,15 @@ class Frontend(object):
     def disable(self):
         """Disable frontend.
 
-        :param die: If ``True`` raises CommandFailed or
-        MultipleCommandResults when something bad happens otherwise returns
-        ``False``.
-        :type die: bool
-        :return: ``True`` if frontend is disabled.
+        :param die: control the handling of errors.
+        :type die: ``bool``
+        :return: ``True`` if frontend is disabled otherwise ``False``.
         :rtype: bool
-        :raise: :class:``CommandFailed`` or :class:``MultipleCommandResults``
-        when ``die`` is ``True`` and something bad happens
+        :raise: If ``die`` is ``True``
+          :class:`haproxyadmin.exceptions.CommandFailed` or
+          :class:`haproxyadmin.exceptions.MultipleCommandResults` is raised
+          when something bad happens otherwise returns ``False``.
+
         """
         cmd = "disable frontend {}".format(self.name)
         results = cmd_across_all_procs(self._frontend_per_proc, 'command', cmd)
@@ -99,7 +89,17 @@ class Frontend(object):
 
     @should_die
     def enable(self):
-        """Enable frontend."""
+        """Enable frontend.
+
+        :param die: control the handling of errors.
+        :type die: ``bool``
+        :return: ``True`` if frontend is enabled otherwise ``False``.
+        :rtype: bool
+        :raise: If ``die`` is ``True``
+          :class:`haproxyadmin.exceptions.CommandFailed` or
+          :class:`haproxyadmin.exceptions.MultipleCommandResults` is raised
+          when something bad happens otherwise returns ``False``.
+        """
         cmd = "enable frontend {}".format(self.name)
         results = cmd_across_all_procs(self._frontend_per_proc, 'command', cmd)
 
@@ -110,12 +110,13 @@ class Frontend(object):
 
         Performs a calculation on the metric across all HAProxy processes.
         The type of calculation is either sum or avg and defined in
-        utils.METRICS_SUM and utils.METRICS_AVG.
+        :data:`haproxyadmin.utils.METRICS_SUM` and
+        :data:`haproxyadmin.utils.METRICS_AVG`.
 
-        :param name: Metric name to retrieve
-        :type name: Any of ``Frontend.Frontend_METRICS``
-        :return: Value of the metric
-        :rtype: number, integer or float
+        :param name: metric name to retrieve
+        :type name: any of :data:`haproxyadmin.haproxy.FRONTEND_METRICS`
+        :return: value of the metric
+        :rtype: ``integer``
         :raise: ``ValueError`` when a given metric is not found
         """
         if name not in Frontend.FRONTEND_METRICS:
@@ -129,7 +130,7 @@ class Frontend(object):
     def maxconn(self):
         """Return the configured maximum connection allowed for frontend.
 
-        :rtype: integer
+        :rtype: ``integer``
         """
         return self.metric('slim')
 
@@ -137,12 +138,16 @@ class Frontend(object):
     def setmaxconn(self, value):
         """Set maximum connection to the frontend.
 
-        :param value: Max connection value
-        :type value: integer
-        :return: ``True`` if value was set
-        :rtype: bool
-        :raise: :class:``CommandFailed`` or :class:``MultipleCommandResults``
-        when ``die`` is ``True`` and something bad happens
+        :param die: control the handling of errors.
+        :type die: ``bool``
+        :param value: max connection value.
+        :type value: ``integer``
+        :return: ``True`` if value was set.
+        :rtype: ``bool``
+        :raise: If ``die`` is ``True``
+          :class:`haproxyadmin.exceptions.CommandFailed` or
+          :class:`haproxyadmin.exceptions.MultipleCommandResults` is raised
+          when something bad happens otherwise returns ``False``.
         """
         if not isinstance(value, int):
             raise ValueError("Expected integer and got {}".format(type(value)))
@@ -156,7 +161,7 @@ class Frontend(object):
     def name(self):
         """Return the name of the frontend.
 
-        :rtype: string
+        :rtype: ``string``
         """
         return self._name
 
@@ -164,7 +169,7 @@ class Frontend(object):
     def process_nb(self):
         """Return a list of process number in which frontend is configured.
 
-        :rtype: list
+        :rtype: ``list``
         """
         process_numbers = []
         for frontend in self._frontend_per_proc:
@@ -176,15 +181,20 @@ class Frontend(object):
     def requests(self):
         """Return the number of requests.
 
-        :rtype: integer
+        :rtype: ``integer``
         """
         return self.metric('req_tot')
 
     def requests_per_process(self):
         """Return the number of requests for the frontend per process.
 
-        :rtype: A list of tuple, where 1st element is process number and 2nd
-        element is requests.
+        :return: a list of tuples with 2 elements
+
+          #. process number of HAProxy
+          #. requests
+
+        :rtype: ``list``
+
         """
         results = cmd_across_all_procs(self._frontend_per_proc, 'metric',
                                        'req_tot')
@@ -195,7 +205,10 @@ class Frontend(object):
     def shutdown(self):
         """Disable the frontend.
 
-        :rtype: bool
+        .. warning::
+           HAProxy removes from the running configuration a frontend, so
+           further operations on the frontend will return an error.
+        :rtype: ``bool``
         """
         cmd = "shutdown frontend {}".format(self.name)
         results = cmd_across_all_procs(self._frontend_per_proc, 'command', cmd)
@@ -205,9 +218,13 @@ class Frontend(object):
     def stats_per_process(self):
         """Return all stats of the frontend per process.
 
-        :return: A list of tuple, where 1st element is process number and 2nd
-        element is a dict
-        :rtype: list
+        :return: a list of tuples with 2 elements
+
+          #. process number
+          #. a dict with all stats
+
+        :rtype: ``list``
+
         """
         results = cmd_across_all_procs(self._frontend_per_proc, 'stats')
 
@@ -217,9 +234,10 @@ class Frontend(object):
     def status(self):
         """Return the status of the frontend.
 
-        :rtype: string
-        :raise: :class: `IncosistentData` exception if status is different
-        per process
+        :rtype: ``string``
+        :raise: :class:`IncosistentData` exception if status is different
+          per process
+
         """
         results = cmd_across_all_procs(self._frontend_per_proc, 'metric',
                                        'status')

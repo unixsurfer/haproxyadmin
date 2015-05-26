@@ -3,7 +3,7 @@
 
 """
 haproxyadmin.exceptions
-~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
 
 This module contains the set of haproxyadmin' exceptions.
 

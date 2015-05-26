@@ -2,23 +2,20 @@
 #
 # pylint: disable=superfluous-parens
 #
+"""
+haproxyadmin.pool
+~~~~~~~~~~~~~~~~~
+
+This module provides the :class:`Pool <.Pool>` class which allows to
+run operation for a pool.
+
+"""
 from .utils import (calculate, cmd_across_all_procs, compare_values)
 from .poolmember import PoolMember
 
 
 class Pool(object):
-    """A container for a pool across several HAProxy processes.
-
-    Arguments:
-        pool_per_proc (list): A list of _Pool objects for the given pool per
-        process.
-
-    Methods:
-        members([name]): Return a list with PoolMember objects.
-        status(): Return status of the pool.
-        requests(): Return requests for the pool.
-        member(name): Get single member of a pool
-    """
+    """A container for a pool across several HAProxy processes."""
     POOL_METRICS = [
         'act',
         'bck',
@@ -132,10 +129,10 @@ class Pool(object):
         utils.METRICS_SUM and utils.METRICS_AVG.
 
         :param name: Name of the metric, any of POOL_METRICS
-        :type name: string
+        :type name: ``string``
         :return: Value of the metric after the appropriate calculation
-        has been performed
-        :rtype: number, either integer or float
+          has been performed.
+        :rtype: number, either ``integer`` or ``float``.
         :raise: ValueError when a given metric is not found.
         """
         metrics = []
@@ -177,8 +174,13 @@ class Pool(object):
     def requests_per_process(self):
         """Return the number of requests for the pool per process.
 
-        :rtype: list of tuple, where 1st element is process number and 2nd
-        element is requests.
+        :return: a list of tuples with 2 elements
+
+          #. process number of HAProxy
+          #. requests
+
+        :rtype: ``list``
+
         """
         results = cmd_across_all_procs(self._pool_per_proc, 'metric', 'lbtot')
 
@@ -187,9 +189,13 @@ class Pool(object):
     def stats_per_process(self):
         """Return all stats of the pool per process.
 
-        :return: A list of tuple, where 1st element is process number and 2nd
-        element is a dict
-        :rtype: list
+        :return: a list of tuples with 2 elements
+
+          #. process number
+          #. a dict with all stats
+
+        :rtype: ``list``
+
         """
         values = cmd_across_all_procs(self._pool_per_proc, 'stats')
 
@@ -199,9 +205,10 @@ class Pool(object):
     def status(self):
         """Return the status of the pool.
 
-        :rtype: string
-        :raise: :class: `IncosistentData` exception if status is different
-        per process
+        :rtype: ``string``
+        :raise: :class:`IncosistentData` exception if status is different
+          per process.
+
         """
         results = cmd_across_all_procs(self._pool_per_proc, 'metric', 'status')
 

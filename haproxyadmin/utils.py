@@ -1,8 +1,8 @@
 # pylint: disable=superfluous-parens
 #
-""""
+"""
 haproxyadmin.utils
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~
 
 This module provides utility functions and classes that are used within
 haproxyadmin.
@@ -386,30 +386,36 @@ class CSVLine(object):
 def info2dict(raw_info):
     """Build a dictionary structure.
 
-    :param raw_info: Data returned by 'show info' UNIX socket command
-    :type raw_info: list
-    :return: A dictionary with the following key/value pairs:
-            Name: HAProxy
-            Version: 1.4.24
-            Release_date: 2013/06/17
-            Nbproc: 1
-            Process_num: 1
-            Pid: 1155
-            Uptime: 5d 4h42m16s
-            Uptime_sec: 448936
-            Memmax_MB: 0
-            Ulimit-n: 131902
-            Maxsock: 131902
-            Maxconn: 65536
-            Maxpipes: 0
-            CurrConns: 1
-            PipesUsed: 0
-            PipesFree: 0
-            Tasks: 819
-            Run_queue: 1
-            node: node1
-            description:
-    :rtype: dict
+    :param raw_info: data returned by 'show info' UNIX socket command
+    :type raw_info: ``list``
+    :return: A dictionary with the following keys/values(examples)::
+
+    .. code-block:: python
+
+       {
+           Name: HAProxy
+           Version: 1.4.24
+           Release_date: 2013/06/17
+           Nbproc: 1
+           Process_num: 1
+           Pid: 1155
+           Uptime: 5d 4h42m16s
+           Uptime_sec: 448936
+           Memmax_MB: 0
+           Ulimit-n: 131902
+           Maxsock: 131902
+           Maxconn: 65536
+           Maxpipes: 0
+           CurrConns: 1
+           PipesUsed: 0
+           PipesFree: 0
+           Tasks: 819
+           Run_queue: 1
+           node: node1
+           description:
+       }
+
+    :rtype: ``dict``
     """
     info = {}
     for line in raw_info:
@@ -424,10 +430,11 @@ def info2dict(raw_info):
 def stat2dict(csv_data):
     """Build a nested dictionary structure.
 
-    :param csv_data: Data returned by 'show stat' command in a CSV format
-    :type csv_data: list
-    :return: A nested dictionary with all counters/settings found in the input
-        Following is a sample of the structure::
+    :param csv_data: data returned by 'show stat' command in a CSV format.
+    :type csv_data: ``list``
+    :return: a nested dictionary with all counters/settings found in the input.
+      Following is a sample of the structure::
+
         {
             'pools': {
                 'acq-misc': {
@@ -446,7 +453,8 @@ def stat2dict(csv_data):
                 },
             ...
         }
-    :rtype: dict
+
+    :rtype: ``dict``
     """
     heads = []
     dicts = {

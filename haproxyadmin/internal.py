@@ -2,7 +2,7 @@
 #
 # pylint: disable=superfluous-parens
 #
-""""
+"""
 haproxyadmin.internal
 ~~~~~~~~~~~~~~~~~~~~~
 
@@ -27,10 +27,10 @@ class _HAProxyProcess(object):
 
     :param socket_file: Full path of socket file.
     :type socket_file: string
-    :parm retry: (optional) Number of connect retries (defaults to 3)
+    :param retry: (optional) Number of connect retries (defaults to 3)
     :type retry: integer
     :param retry_interval: (optional) Interval time in seconds between retries
-    (defaults to 2)
+                           (defaults to 2)
     :type retry_interval: integer
     """
     SUCCESS_OUTPUT_STRINGS = ['Done.', '']
@@ -87,7 +87,7 @@ class _HAProxyProcess(object):
         :param command: A valid command to execute
         :type command: string
         :param full_output: (optional) Return all output, by default
-        returns only the 1st line of the output
+          returns only the 1st line of the output
         :type full_output: bool
         :return: 1st line of the output or the whole output as a list
         :rtype: string or list if full_output is True
@@ -153,14 +153,12 @@ class _HAProxyProcess(object):
         return return_list
 
     def get_frontends(self, name=None):
-        """Build  _Frontend objects for each frontend.
+        """Build :class:`_Frontend` objects for each frontend.
 
-        :param name: (optional) pool name, defaults to None
-        :type name: string
-        :return: a list of _Pool objects for each pool
-        :rtype: list
-        Arguments:
-            name (str, optional): frontend name, defaults to None.
+        :param name: (optional) pool name, defaults to ``None``
+        :type name: ``string``
+        :return: a list of :class:`_Frontend` objects for each pool
+        :rtype: ``list``
 
         """
         frontends = []
@@ -181,9 +179,10 @@ class _HAProxyProcess(object):
 class _Frontend(object):
     """Class for interacting with a frontend in one HAProxy process.
 
-    :param hap_process: A _HAProxyProcess object
-    :param name: Frontend name
-    :type name: string
+    :param hap_process: a :class:`_HAProxyProcess` object.
+    :param name: frontend name.
+    :type name: ``string``
+
     """
     def __init__(self, hap_process, name):
         self.hap_process = hap_process
@@ -213,10 +212,10 @@ class _Frontend(object):
     def command(self, cmd):
         """Run command to HAProxy
 
-        :param cmd: A valid command to execute
-        :type cmd: string
-        :return: 1st line of the output
-        :rtype: string
+        :param cmd: a valid command to execute.
+        :type cmd: ``string``
+        :return: 1st line of the output.
+        :rtype: ``string``
         """
         return self.hap_process.run_command(cmd)
 
@@ -224,9 +223,9 @@ class _Frontend(object):
 class _Pool(object):
     """Class for interacting with a pool in one HAProxy process.
 
-    :param hap_process: A _HAProxyProcess object
-    :param name: Pool name
-    :type name: string
+    :param hap_process: a :class::`_HAProxyProcess` object.
+    :param name: pool name.
+    :type name: ``string``
     """
     def __init__(self, hap_process, name):
         self.hap_process = hap_process

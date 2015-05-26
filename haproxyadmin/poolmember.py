@@ -2,29 +2,20 @@
 #
 # pylint: disable=superfluous-parens
 #
+"""
+haproxyadmin.poolmember
+~~~~~~~~~~~~~~~~~~~~~~~
+
+This module provides the :class:`PoolMember <.PoolMember>` class which allows to
+run operation for a server.
+
+"""
 from .utils import (calculate, cmd_across_all_procs, compare_values,
                     should_die, check_command)
 
 
 class PoolMember(object):
-
-    """A container for a member across several HAProxy processes
-
-    It iterates over list of member objects for aggregating all operations.
-
-    Arguments:
-        member_per_proc (list): A list of _Pool objects of the pool for
-        each process
-        poolname (str): Pool name
-
-    Methods:
-        status(): Return status.
-        check_status(): Return check status code.
-        weight(): Return weight of pool member.
-        set_state(enabled): Enable/disable a pool member.
-        requests(): Return requests for pool member.
-
-    """
+    """A container for a member across several HAProxy processes."""
 
     STATE_ENABLE = 'enable'
     STATE_DISABLE = 'disable'
@@ -149,10 +140,11 @@ class PoolMember(object):
 
         Performs a calculation on the metric across all HAProxy processes.
         The type of calculation is either sum or avg and defined in
-        utils.METRICS_SUM and utils.METRICS_AVG.
+        :data:`haproxyadmin.utils.METRICS_SUM` and
+        :data:`haproxyadmin.utils.METRICS_AVG`.
 
         :param name: Metric name to retrieve
-        :type name: Any of ``PoolMember.SERVER_METRICS``
+        :type name: any of :data:`haproxyadmin.haproxy.SERVER_METRICS`
         :rtype: number, integer or float
         :raise: ``ValueError`` when a given metric is not found
         """
@@ -168,7 +160,8 @@ class PoolMember(object):
     def name(self):
         """Return the name of the member.
 
-        :rtype: string
+        :rtype: ``string``
+
         """
         return self._name
 
@@ -176,15 +169,17 @@ class PoolMember(object):
     def requests(self):
         """Return the number of requests.
 
-        :rtype: integer
+        :rtype: ``integer``
+
         """
         return self.metric('lbtot')
 
     def requests_per_process(self):
         """Return the number of requests for the member per process.
 
-        :rtype: list of tuple, where 1st element is process number and 2nd
-        element is requests.
+        :rtype: A list of tuple, where 1st element is process number and 2nd
+          element is requests.
+
         """
         results = cmd_across_all_procs(self._member_per_proc, 'metric', 'lbtot')
 
@@ -194,7 +189,9 @@ class PoolMember(object):
     def process_nb(self):
         """Return a list of process number in which pool member is configured.
 
-        :rtype: list
+        :return: a list of process numbers.
+        :rtype: ``list``
+
         """
         process_numbers = []
         for member in self._member_per_proc:
@@ -203,21 +200,26 @@ class PoolMember(object):
         return process_numbers
 
     @should_die
-    def setstate(self, value):
+    def setstate(self, state):
         """Set the state of a member in the pool.
 
-        The value should be any of the following
-        :param value: State to set
-        :type value: any of the following STATE_ constans
-        * STATE_ENABLE: Mark the member UP and checks are re-enabled
-        * STATE_DISABLE: Mark the member DOWN for maintenance and checks
-        disabled.
-        * STATE_READY: Put member in normal mode.
-        * STATE_DRAIN: Remove the member from load balancing.
-        * STATE_MAINT: Remove the member from load balancing and health checks
-        are disabled.
-        :return: True if command succeeds otherwise False
-        :rtype: bool
+        State can be any of the following
+
+          * :const:`haproxyadmin.haproxy.STATE_ENABLE`: Mark the member UP and
+            checks are re-enabled
+          * :const:`haproxyadmin.haproxy.STATE_DISABLE`: Mark the member DOWN
+            for maintenance and checks disabled.
+          * :const:`haproxyadmin.haproxy.STATE_READY`: Put member in normal
+            mode.
+          * :const:`haproxyadmin.haproxy.STATE_DRAIN`: Remove the member from
+            load balancing.
+          * :const:`haproxyadmin.haproxy.STATE_MAINT`: Remove the member from
+            load balancing and health checks are disabled.
+
+        :param state: state to set.
+        :type state: ``string``
+        :return: ``True`` if command succeeds otherwise ``False``.
+        :rtype: ``bool``
 
         Usage:
 
@@ -232,15 +234,16 @@ class PoolMember(object):
           True
           >>> member.status
           'no check'
+
         """
-        if value not in PoolMember.VALID_STATES:
-            values = ', '.join(PoolMember.VALID_STATES)
-            raise ValueError("Wrong value, allowed values {}".format(values))
-        if value == 'enable' or value == 'disable':
-            cmd = "{} server {}/{}".format(value, self.poolname, self.name)
+        if state not in PoolMember.VALID_STATES:
+            states = ', '.join(PoolMember.VALID_STATES)
+            raise ValueError("Wrong state, allowed states {}".format(states))
+        if state == 'enable' or state == 'disable':
+            cmd = "{} server {}/{}".format(state, self.poolname, self.name)
         else:
             cmd = "set server {}/{} state {}".format(
-                self.poolname, self.name, value
+                self.poolname, self.name, state
             )
 
         results = cmd_across_all_procs(self._member_per_proc, 'command', cmd)
@@ -250,9 +253,13 @@ class PoolMember(object):
     def stats_per_process(self):
         """Return all stats of the member per process.
 
-        :return: A list of tuple, where 1st element is process number and 2nd
-        element is a dict
-        :rtype: list
+        :return: A list of tuple 2 elements
+
+          #. process number
+          #. a dict with all stats
+
+        :rtype: ``list``
+
         """
         values = cmd_across_all_procs(self._member_per_proc, 'stats')
 
@@ -262,9 +269,10 @@ class PoolMember(object):
     def status(self):
         """Return the status of the member.
 
-        :rtype: string
-        :raise: :class: `IncosistentData` exception if status is different
-        per process
+        :rtype: ``string``
+        :raise: :class:`IncosistentData` exception if status is different
+          per process
+
         """
         values = cmd_across_all_procs(self._member_per_proc, 'metric', 'status')
 
@@ -276,7 +284,7 @@ class PoolMember(object):
 
         :rtype: integer
         :raise: :class:`IncosistentData` exception if weight is different
-        per process
+          per process
         """
         values = cmd_across_all_procs(self._member_per_proc, 'metric', 'weight')
 

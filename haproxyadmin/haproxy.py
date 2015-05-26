@@ -1,14 +1,12 @@
 # -*- coding: utf-8 -*- #
 # pylint: disable=superfluous-parens
 #
+
 """
 haproxyadmin.haproxy
-~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~
 
-This module implements the haproxyadmin API.
-
-:copyright: (c) 2015 by Pavlos Parissis.
-:license: Apache 2.0, see LICENSE for more details.
+This module implements the main haproxyadmin API.
 
 """
 import os
@@ -35,23 +33,26 @@ SERVER_METRICS = PoolMember.SERVER_METRICS
 
 
 class HAProxy(object):
-    """This class provides an interface to interact with HAProxy.
+    """Build a user-created :class:`HAProxy` object for HAProxy.
 
-    Methods:
-        frontends([name]): Return a list with Frontend objects.
-        frontend(name): Return a Frontend object.
-        get_info(): Return a list of dictionaries holding information about
-        pools([poolname]): Return a list with Pool objects.
-        requests(): Return total requests for all frontends.
-        each HAProxy process.
+    This is the main class to interact with HAProxy and provides methods
+    to create objects for managing frontends, pools and servers. It also
+    provides an interface to interact with HAProxy as a process to
+    retrieve settings/statistics but also change various settings.
 
-    Arguments:
-        socket_dir (str): Full path of directory of the socket file(s).
-        socket_file (str): Full path of a valid HAProxy socket file.
-        retry (int, optional): Number of connect retries (defaults to 2).
-        retry_interval (int, optional): Interval time in seconds between retries
-        (defaults to 2).
+    ACLs and MAPs are also managed by :class:`HAProxy` class.
 
+    :param socket_dir: a directory with HAProxy stats files.
+    :type socket_dir: ``string``
+    :param socket_file: absolute path of HAProxy stats file.
+    :type socket_file: ``string``
+    :param retry: number of times to retry to open a UNIX socket
+      connection after a failure occurred.
+    :type retry: ``integer``
+    :param retry_interval: sleep time between the retries.
+    :type retry_interval: ``integer``
+    :return: a user-created :class:`HAProxy` object.
+    :rtype: :class:`HAProxy`
     """
     HAPROXY_METRICS = [
         'SslFrontendMaxKeyRate',
@@ -123,12 +124,12 @@ class HAProxy(object):
     def add_acl(self, acl, pattern):
         """Add an entry into the acl.
 
-        :param acl: acl id or a file
-        :type acl: integer or a file
-        :param pattern: Entry to add
-        :type pattern: string
-        :return: True if command succeeds otherwise False
-        :rtype: bool
+        :param acl: acl id or a file.
+        :type acl: ``integer`` or a file path passed as ``string``
+        :param pattern: entry to add.
+        :type pattern: ``string``
+        :return: ``True`` if command succeeds otherwise ``False``
+        :rtype: ``bool``
 
         Usage::
 
@@ -157,14 +158,14 @@ class HAProxy(object):
     def add_map(self, mapid, key, value):
         """Add an entry into the map.
 
-        :param mapid: map id or a file
-        :type mapid: integer or a file
-        :param key: Key to add
-        :type key: string
-        :param value: Value assciated to the key
-        :type value: string
-        :return: True if command succeeds otherwise False
-        :rtype: bool
+        :param mapid: map id or a file.
+        :type mapid: ``integer`` or a file path passed as ``string``
+        :param key: key to add.
+        :type key: ``string``
+        :param value: Value assciated to the key.
+        :type value: ``string``
+        :return: ``True`` if command succeeds otherwise ``False``.
+        :rtype: ``bool``
 
         Usage::
 
@@ -193,8 +194,8 @@ class HAProxy(object):
     def clear_acl(self, acl):
         """Remove all entries from a acl.
 
-        :param acl: acl id or a file
-        :type acl: integer or a file
+        :param acl: acl id or a file.
+        :type acl: ``integer`` or a file path passed as ``string``
         :return: True if command succeeds otherwise False
         :rtype: bool
 
@@ -224,9 +225,9 @@ class HAProxy(object):
         """Remove all entries from a mapid.
 
         :param mapid: map id or a file
-        :type mapid: integer or a file
-        :return: True if command succeeds otherwise False
-        :rtype: bool
+        :type mapid: ``integer`` or a file path passed as ``string``
+        :return: ``True`` if command succeeds otherwise ``False``
+        :rtype: ``bool``
 
         Usage::
 
@@ -253,12 +254,13 @@ class HAProxy(object):
     def clearcounters(self, all=False):
         """Clear the max values of the statistics counters.
 
-        :param all: (optional) Clear all statistics counters in each proxy
-        (frontend & backend) and in each server. This has the same effect as
-        restarting.
-        :type all: bool
-        :return: True if command succeeds otherwise False
-        :rtype: bool
+        Clear all statistics counters in each proxy (frontend & backend) and
+        in each server. This has the same effect as restarting.
+
+        :param all: (optional) clear all statistics counters.
+        :type all: ``bool``
+        :return: ``True`` if command succeeds otherwise ``False``.
+        :rtype: ``bool``
         """
         if all:
             cmd = "clear counters all"
@@ -274,9 +276,12 @@ class HAProxy(object):
     def totalrequests(self):
         """Return total cumulative number of requests processed by all processes.
 
-        This counts requests processed by frontends and backends.
+        :rtype: ``integer``
 
-        :rtype: integer
+        .. note::
+           This is the total number of requests that are processed by HAProxy.
+           It counts requests for frontends and backends. Don't forget that
+           a single client request passes HAProxy twice.
 
         Usage::
 
@@ -291,7 +296,7 @@ class HAProxy(object):
     def processids(self):
         """Return the process IDs of each HAProxy process.
 
-        :rtype: list
+        :rtype: ``list``
 
         Usage::
 
@@ -307,11 +312,11 @@ class HAProxy(object):
         """Delete all the acl entries from the acl corresponding to the key.
 
         :param acl: acl id or a file
-        :type acl: integer or a file
-        :param key: Key to delete
-        :type key: string
-        :return: True if command succeeds otherwise False
-        :rtype: bool
+        :type acl: ``integer`` or a file path passed as ``string``
+        :param key: key to delete.
+        :type key: ``string``
+        :return: ``True`` if command succeeds otherwise ``False``.
+        :rtype: ``bool``
 
         Usage::
 
@@ -347,12 +352,12 @@ class HAProxy(object):
     def del_map(self, mapid, key):
         """Delete all the map entries from the map corresponding to the key.
 
-        :param mapid: map id or a file
-        :type mapid: integer or a file
-        :param key: Key to delete
-        :type key: string
-        :return: True if command succeeds otherwise False
-        :rtype: bool
+        :param mapid: map id or a file.
+        :type mapid: ``integer`` or a file path passed as ``string``.
+        :param key: key to delete
+        :type key: ``string``
+        :return: ``True`` if command succeeds otherwise ``False``.
+        :rtype: ``bool``
 
         Usage::
 
@@ -395,13 +400,14 @@ class HAProxy(object):
         If <iid> is specified, the limit the dump to errors concerning
         either frontend or backend whose ID is <iid>.
 
-        :param iid: (optional) ID of frontend or backend
+        :param iid: (optional) ID of frontend or backend.
         :type iid: integer
         :return: A list of tuples of errors per process.
-        1st element of tuple is process number and 2nd element of tuple
-        is a list of errors.
-        :rtype: list
 
+          #. process number
+          #. ``list`` of errors
+
+        :rtype: ``list``
         """
         if iid:
             cmd = "show errors {}".format(iid)
@@ -412,11 +418,12 @@ class HAProxy(object):
                                     cmd, True)
 
     def frontends(self, name=None):
-        """Return a list with Frontend objects.
+        """Build a list of :class:`Frontend <haproxyadmin.frontend.Frontend>`
 
-        Arguments:
-            name (str, optional): Name of frontend, defaults to None.
-
+        :param name: (optional) frontend name to look up.
+        :type name: ``string``
+        :return: list of :class:`Frontend <haproxyadmin.frontend.Frontend>`.
+        :rtype: ``list``
         """
         return_list = []
 
@@ -441,15 +448,12 @@ class HAProxy(object):
         return return_list
 
     def frontend(self, name):
-        """ Returns a Frontend object
+        """Build a :class:`Frontend <haproxyadmin.frontend.Frontend>` object.
 
-        Arguments:
-            name (str): Frontend name.
-
-        Raises:
-            ValueError: When frontend isn't found or more than 1 frontend
-            is found.
-
+        :param name: frontend name to look up.
+        :type name: ``string``
+        :raises: :class::`ValueError` when frontend isn't found or more than 1
+          frontend is found.
         """
         _frontend = self.frontends(name)
         if len(_frontend) == 1:
@@ -463,12 +467,12 @@ class HAProxy(object):
     def get_acl(self, acl, value):
         """Lookup the value in the ACL.
 
-        :param acl: acl id or a file
-        :type acl: integer or a file
-        :param value: Value to lookup
-        :type value: string
-        :return: Matching patterns associated with ACL
-        :rtype: string
+        :param acl: acl id or a file.
+        :type acl: ``integer`` or a file path passed as ``string``
+        :param value: value to lookup
+        :type value: ``string``
+        :return: matching patterns associated with ACL.
+        :rtype: ``string``
 
         Usage::
 
@@ -500,12 +504,12 @@ class HAProxy(object):
     def get_map(self, mapid, value):
         """Lookup the value in the map.
 
-        :param mapid: map id or a file
-        :type mapid: integer or a file
-        :param value: Value to lookup
-        :type value: string
-        :return: Matching patterns associated with map
-        :rtype: string
+        :param mapid: map id or a file.
+        :type mapid: ``integer`` or a file path passed as ``string``
+        :param value: value to lookup.
+        :type value: ``string``
+        :return: matching patterns associated with map.
+        :rtype: ``string``
 
         Usage::
 
@@ -536,8 +540,8 @@ class HAProxy(object):
     def info(self):
         """Dump info about haproxy status on current process.
 
-        :return: A list of dict for each process.
-        :rtype: list
+        :return: A list of ``dict`` for each process.
+        :rtype: ``list``
         """
         return_list = []
 
@@ -550,23 +554,24 @@ class HAProxy(object):
     def maxconn(self):
         """Return the sum of configured maximum connection allowed for HAProxy.
 
-        :rtype: integer
+        :rtype: ``integer``
         """
         return self.metric('Maxconn')
 
     def member(self, hostname, pool=None):
-        """Returns a list of PoolMember objects for the given member.
+        """Build :class:`PoolMember <haproxyadmin.poolmember.PoolMember>`
+        objects for the given member.
 
-        If <pool> specified then limit the lookup to the <pool>.
+        If ``pool`` specified then lookup is limited to that pool.
 
         :param hostname: Membername to look for
-        :type hostname: string
+        :type hostname: ``string``
         :param pool: (optional) Pool name to look in
-        :type pool: string
-        :return: A list of :class:`PoolMember <PoolMember>` objects
-        :rtype: list
+        :type pool: ``string``
+        :return: A list of :class:`PoolMember <haproxyadmin.poolmember.PoolMember>`
+          objects.
+        :rtype: ``list``
         """
-
         ret = []
         for pool in self.pools(pool):
             try:
@@ -582,16 +587,15 @@ class HAProxy(object):
         return ret
 
     def members(self, pool=None):
-        """Returns all available members as list of PoolMember objects.
+        """Build a list of :class:`PoolMember <haproxyadmin.poolmember.PoolMember>` objects.
 
-        If <pool> specified then limit the lookup to the <pool>.
+        If ``pool`` specified then lookup is limited to that pool.
 
-        :param pool: (optional) Pool name to look in
-        :type pool: string
+        :param pool: (optional) Pool name.
+        :type pool: ``string``
         :return: A list of :class:`PoolMember <PoolMember>` objects
         :rtype: list
         """
-
         ret = []
         for pool in self.pools(pool):
             _m = pool.members()
@@ -604,13 +608,14 @@ class HAProxy(object):
 
         Performs a calculation on the metric across all HAProxy processes.
         The type of calculation is either sum or avg and defined in
-        METRICS_SUM and METRICS_AVG.
+        :data:`haproxyadmin.utils.METRICS_SUM` and
+        :data:`haproxyadmin.utils.METRICS_AVG`.
 
-        Arguments:
-            name (str): Metric name to retrieve.
-
-        Raises:
-            ValueError: When a given metric is not found.
+        :param name: metric name to retrieve
+        :type name: any of :data:`haproxyadmin.haproxy.HAPROXY_METRICS`
+        :return: value of the metric
+        :rtype: ``integer``
+        :raise: ``ValueError`` when a given metric is not found
         """
         if name not in HAProxy.HAPROXY_METRICS:
             raise ValueError("{} is not valid metric".format(name))
@@ -620,11 +625,12 @@ class HAProxy(object):
         return calculate(name, metrics)
 
     def pools(self, name=None):
-        """Return a list with Pool objects.
+        """Build a list of :class:`Pool <haproxyadmin.Pool.Pool>`
 
-        Arguments:
-            name (str, optional): Name of the pool, defaults to None.
-
+        :param name: (optional) pool name to look up.
+        :type name: ``string``
+        :return: list of :class:`Pool <haproxyadmin.pool.Pool>`.
+        :rtype: ``list``
         """
         return_list = []
 
@@ -649,14 +655,12 @@ class HAProxy(object):
         return return_list
 
     def pool(self, name):
-        """ Returns a Pool object
+        """Build a :class:`Pool <haproxyadmin.pool.Pool>` object.
 
-        Arguments:
-            name (str): Pool name.
-
-        Raises:
-            ValueError: When pool isn't found or more than 1 pool is found.
-
+        :param name: pool name to look up.
+        :type name: ``string``
+        :raises: :class::`ValueError` when pool isn't found or more than 1
+          pool is found.
         """
         _pool = self.pools(name)
         if len(_pool) == 1:
@@ -685,7 +689,7 @@ class HAProxy(object):
     def requests(self):
         """Return total requests processed by all frontends.
 
-        :rtype: integer
+        :rtype: ``integer``
 
         Usage::
 
@@ -700,16 +704,17 @@ class HAProxy(object):
     def set_map(self, mapid, key, value):
         """Modify the value corresponding to each key in a map.
 
-        mapid is the #<id> or <file> returned by ``show_map``.
+        mapid is the #<id> or <file> returned by
+        :func:`show_map <haproxyadmin.haproxy.HAProxy.show_map>`.
 
-        :param mapid: map id or a file
-        :type mapid: integer or a file
+        :param mapid: map id or a file.
+        :type mapid: ``integer`` or a file path passed as ``string``
         :param key: Key to delete
-        :type key: string
-        :param value: Value to set for the key
-        :type value: string
-        :return: True if command succeeds otherwise False
-        :rtype: bool
+        :type key: ``string``
+        :param value: value to set for the key.
+        :type value: ``string``
+        :return: ``True`` if command succeeds otherwise ``False``.
+        :rtype: ``bool``
 
         Usage::
 
@@ -745,10 +750,10 @@ class HAProxy(object):
     def setmaxconn(self, value):
         """Set maximum connection to the frontend.
 
-        :param value: Value to set
-        :type value: integer
-        :return: True if command succeeds otherwise False
-        :rtype: bool
+        :param value: value to set.
+        :type value: ``integer``
+        :return: ``True`` if command succeeds otherwise ``False``.
+        :rtype: ``bool``
 
         Usage:
 
@@ -769,15 +774,11 @@ class HAProxy(object):
     def setratelimitconn(self, value):
         """Set process-wide connection rate limit.
 
-        Arguments:
-            value (int): Rate connection limit.
-
-        Raises:
-            ValueError if value isn't an integer.
-
-        Returns:
-            'OK' if limit was set successfully otherwise and list of 2-item
-            tuple containg error message received by each HAProxy process.
+        :param value: rate connection limit.
+        :type value: ``integer``
+        :return: ``True`` if command succeeds otherwise ``False``.
+        :rtype: ``bool``
+        :raises: ``ValueError`` if value is not an ``integer``.
         """
         if not isinstance(value, int):
             raise ValueError("Expected integer and got {}".format(type(value)))
@@ -791,15 +792,11 @@ class HAProxy(object):
     def setratelimitsess(self, value):
         """Set process-wide session rate limit.
 
-        Arguments:
-            value (int): Rate connection limit.
-
-        Raises:
-            ValueError if value isn't an integer.
-
-        Returns:
-            'OK' if limit was set successfully otherwise and list of 2-item
-            tuple containg error message received by each HAProxy process.
+        :param value: rate session limit.
+        :type value: ``integer``
+        :return: ``True`` if command succeeds otherwise ``False``.
+        :rtype: ``bool``
+        :raises: ``ValueError`` if value is not an ``integer``.
         """
         if not isinstance(value, int):
             raise ValueError("Expected integer and got {}".format(type(value)))
@@ -813,10 +810,11 @@ class HAProxy(object):
     def setratelimitsslsess(self, value):
         """Set process-wide ssl session rate limit.
 
-        :param value: Rate ssl session limit
-        :type value: integer
-        :return: True if command succeeds otherwise False
-        :rtype: bool
+        :param value: rate ssl session limit.
+        :type value: ``integer``
+        :return: ``True`` if command succeeds otherwise ``False``.
+        :rtype: ``bool``
+        :raises: ``ValueError`` if value is not an ``integer``.
         """
         if not isinstance(value, int):
             raise ValueError("Expected integer and got {}".format(type(value)))
@@ -834,9 +832,9 @@ class HAProxy(object):
         If a acl is specified, its contents are dumped.
 
         :param acl: (optional) acl id or a file
-        :type acl: integer or a file
-        :return: A list with the acls
-        :rtype: list
+        :type acl: ``integer`` or a file path passed as ``string``
+        :return: a list with the acls
+        :rtype: ``list``
 
         Usage::
 
@@ -879,10 +877,10 @@ class HAProxy(object):
         Without argument, the list of all available maps is returned.
         If a mapid is specified, its contents are dumped.
 
-        :param mapid: (optional) map id or a file
-        :type mapid: integer or a file
-        :return: A list with the maps
-        :rtype: list
+        :param mapid: (optional) map id or a file.
+        :type mapid: ``integer`` or a file path passed as ``string``
+        :return: a list with the maps.
+        :rtype: ``list``
 
         Usage::
 
@@ -938,7 +936,7 @@ class HAProxy(object):
     def description(self):
         """Return description of HAProxy
 
-        :rtype: string
+        :rtype: ``string``
 
         Usage::
 
@@ -956,7 +954,7 @@ class HAProxy(object):
     def nodename(self):
         """Return nodename of HAProxy
 
-        :rtype: string
+        :rtype: ``string``
 
         Usage::
 
@@ -974,7 +972,7 @@ class HAProxy(object):
     def uptimesec(self):
         """Return uptime of HAProxy process in seconds
 
-        :rtype: integer
+        :rtype: ``integer``
 
         Usage::
 
@@ -993,7 +991,7 @@ class HAProxy(object):
     def releasedate(self):
         """Return release date of HAProxy
 
-        :rtype: string
+        :rtype: ``string``
 
         Usage::
 
@@ -1011,7 +1009,7 @@ class HAProxy(object):
     def version(self):
         """Return version of HAProxy
 
-        :rtype: string
+        :rtype: ``string``
 
         Usage::
           >>> from haproxyadmin import haproxy
