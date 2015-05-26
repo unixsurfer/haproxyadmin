@@ -318,9 +318,25 @@ def converter(value):
     :param value: A value to convert to int
     :type value: string
     :rtype: integer or string if value can't be converted to int.
+
+    Usage::
+
+      >>> from haproxyadmin import utils
+      >>> utils.converter('5.0')
+      5
+      >>> utils.converter('5.0j')
+      '5.0j'
+      >>> utils.converter('5.0')
+      5
+      >>> utils.converter(5.0)
+      5
+      >>> utils.converter(5)
+      5
     """
-    if isint(value) or isfloat(value):
+    if isint(value):
         return int(value)
+    elif isfloat(value):
+        return int(float(value))
     else:
         return value
 
