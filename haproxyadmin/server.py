@@ -70,9 +70,9 @@ class Server(object):
         'ttime',
     ]
 
-    def __init__(self, server_per_proc, poolname):
+    def __init__(self, server_per_proc, backendname):
         self._server_per_proc = server_per_proc
-        self.poolname = poolname
+        self.backendname = backendname
         self._name = self._server_per_proc[0].name
 
     # built-in comparison operator is adjusted
@@ -187,7 +187,7 @@ class Server(object):
 
     @property
     def process_nb(self):
-        """Return a list of process number in which pool server is configured.
+        """Return a list of process number in which backend server is configured.
 
         :return: a list of process numbers.
         :rtype: ``list``
@@ -201,7 +201,7 @@ class Server(object):
 
     @should_die
     def setstate(self, state):
-        """Set the state of a server in the pool.
+        """Set the state of a server in the backend.
 
         State can be any of the following
 
@@ -225,7 +225,7 @@ class Server(object):
 
           >>> from haproxyadmin import haproxy
           >>> hap = haproxy.HAProxy(socket_dir='/run/haproxy')
-          >>> server = hap.server('member_bkall', pool='backend_proc1')[0]
+          >>> server = hap.server('member_bkall', backend='backend_proc1')[0]
           >>> server.setstate(haproxy.STATE_DISABLE)
           True
           >>> server.status
@@ -240,10 +240,10 @@ class Server(object):
             states = ', '.join(Server.VALID_STATES)
             raise ValueError("Wrong state, allowed states {}".format(states))
         if state == 'enable' or state == 'disable':
-            cmd = "{} server {}/{}".format(state, self.poolname, self.name)
+            cmd = "{} server {}/{}".format(state, self.backendname, self.name)
         else:
             cmd = "set server {}/{} state {}".format(
-                self.poolname, self.name, state
+                self.backendname, self.name, state
             )
 
         results = cmd_across_all_procs(self._server_per_proc, 'command', cmd)
@@ -307,7 +307,7 @@ class Server(object):
 
            >>> from haproxyadmin import haproxy
            >>> hap = haproxy.HAProxy(socket_dir='/run/haproxy')
-           >>> server = hap.server('member_bkall', pool='backend_proc1')[0]
+           >>> server = hap.server('member_bkall', backend='backend_proc1')[0]
            >>> server.weight
            100
            >>> server.setweight('20%')
@@ -327,7 +327,7 @@ class Server(object):
         )
         if isinstance(value, int) and 0 <= value < 256 or (
                 isinstance(value, str) and value.endswith('%')):
-            cmd = "set weight {}/{} {}".format(self.poolname,
+            cmd = "set weight {}/{} {}".format(self.backendname,
                                                self.name,
                                                value)
         else:
@@ -345,7 +345,7 @@ class Server(object):
         :rtype: bool
         """
 
-        cmd = "shutdown sessions server {}/{}".format(self.poolname, self.name)
+        cmd = "shutdown sessions server {}/{}".format(self.backendname, self.name)
         results = cmd_across_all_procs(self._server_per_proc, 'command', cmd)
 
         return check_command(results)

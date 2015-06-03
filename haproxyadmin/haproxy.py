@@ -13,7 +13,7 @@ import os
 import glob
 
 from .frontend import Frontend
-from .pool import Pool
+from .backend import Backend
 from .server import Server
 from .utils import (is_unix_socket, cmd_across_all_procs, calculate, isint,
                     should_die, check_command, check_output, compare_values)
@@ -28,7 +28,7 @@ STATE_READY = Server.STATE_READY
 STATE_DRAIN = Server.STATE_DRAIN
 STATE_MAINT = Server.STATE_MAINT
 FRONTEND_METRICS = Frontend.FRONTEND_METRICS
-POOL_METRICS = Pool.POOL_METRICS
+BACKEND_METRICS = Backend.BACKEND_METRICS
 SERVER_METRICS = Server.SERVER_METRICS
 
 
@@ -36,7 +36,7 @@ class HAProxy(object):
     """Build a user-created :class:`HAProxy` object for HAProxy.
 
     This is the main class to interact with HAProxy and provides methods
-    to create objects for managing frontends, pools and servers. It also
+    to create objects for managing frontends, backends and servers. It also
     provides an interface to interact with HAProxy as a process to
     retrieve settings/statistics but also change various settings.
 
@@ -558,27 +558,27 @@ class HAProxy(object):
         """
         return self.metric('Maxconn')
 
-    def server(self, hostname, pool=None):
+    def server(self, hostname, backend=None):
         """Build :class:`Server <haproxyadmin.server.Server>`
         objects for the given server.
 
-        If ``pool`` specified then lookup is limited to that pool.
+        If ``backend`` specified then lookup is limited to that backend.
 
         :param hostname: servername to look for.
         :type hostname: ``string``
-        :param pool: (optional) Pool name to look in.
-        :type pool: ``string``
+        :param backend: (optional) backend name to look in.
+        :type backend: ``string``
         :return: a list of :class:`Server <haproxyadmin.server.Server>`
           objects.
         :rtype: ``list``
         """
         ret = []
-        for pool in self.pools(pool):
+        for backend in self.backends(backend):
             try:
-                ret.append(pool.server(hostname))
+                ret.append(backend.server(hostname))
             except ValueError:
-                # lookup for an nonexistent server in pool raise VauleError
-                # catch and pass as we query all pools
+                # lookup for an nonexistent server in backend raise VauleError
+                # catch and pass as we query all backends
                 pass
 
         if not ret:
@@ -586,19 +586,19 @@ class HAProxy(object):
 
         return ret
 
-    def servers(self, pool=None):
+    def servers(self, backend=None):
         """Build a list of :class:`Server <haproxyadmin.server.Server>` objects.
 
-        If ``pool`` specified then lookup is limited to that pool.
+        If ``backend`` specified then lookup is limited to that backend.
 
-        :param pool: (optional) Pool name.
-        :type pool: ``string``
+        :param backend: (optional) backend name.
+        :type backend: ``string``
         :return: A list of :class:`Server <Server>` objects
         :rtype: list
         """
         ret = []
-        for pool in self.pools(pool):
-            _m = pool.servers()
+        for backend in self.backends(backend):
+            _m = backend.servers()
             ret += _m
 
         return ret
@@ -624,51 +624,51 @@ class HAProxy(object):
 
         return calculate(name, metrics)
 
-    def pools(self, name=None):
-        """Build a list of :class:`Pool <haproxyadmin.Pool.Pool>`
+    def backends(self, name=None):
+        """Build a list of :class:`Backend <haproxyadmin.backend.Backend>`
 
-        :param name: (optional) pool name to look up.
+        :param name: (optional) backend name to look up.
         :type name: ``string``
-        :return: list of :class:`Pool <haproxyadmin.pool.Pool>`.
+        :return: list of :class:`Backend <haproxyadmin.backend.Backend>`.
         :rtype: ``list``
         """
         return_list = []
 
-        # store _Pool objects for each pool as it is reported by each HAProxy
+        # store _Backend objects for each backend as it is reported by each HAProxy
         # process.
-        # key: name of the pool
-        # value: a list of _Pool object for the pool
-        pools_across_hap_processes = {}
+        # key: name of the backend
+        # value: a list of _Backend object for the backend
+        backends_across_hap_processes = {}
 
-        # loop over all HAProxy processes and get a set of pools
+        # loop over all HAProxy processes and get a set of backends
         for hap_process in self._hap_processes:
-            # Returns object _Pool
-            for pool in hap_process.pools(name):
-                if pool.name not in pools_across_hap_processes:
-                    pools_across_hap_processes[pool.name] = []
-                pools_across_hap_processes[pool.name].append(pool)
+            # Returns object _Backend
+            for backend in hap_process.backends(name):
+                if backend.name not in backends_across_hap_processes:
+                    backends_across_hap_processes[backend.name] = []
+                backends_across_hap_processes[backend.name].append(backend)
 
         # build the returned list
-        for pool_obj in pools_across_hap_processes.values():
-            return_list.append(Pool(pool_obj))
+        for backend_obj in backends_across_hap_processes.values():
+            return_list.append(Backend(backend_obj))
 
         return return_list
 
-    def pool(self, name):
-        """Build a :class:`Pool <haproxyadmin.pool.Pool>` object.
+    def backend(self, name):
+        """Build a :class:`Backend <haproxyadmin.backend.Backend>` object.
 
-        :param name: pool name to look up.
+        :param name: backend name to look up.
         :type name: ``string``
-        :raises: :class::`ValueError` when pool isn't found or more than 1
-          pool is found.
+        :raises: :class::`ValueError` when backend isn't found or more than 1
+          backend is found.
         """
-        _pool = self.pools(name)
-        if len(_pool) == 1:
-            return _pool[0]
-        elif len(_pool) == 0:
-            raise ValueError("Could not find pool")
+        _backend = self.backends(name)
+        if len(_backend) == 1:
+            return _backend[0]
+        elif len(_backend) == 0:
+            raise ValueError("Could not find backend")
         else:
-            raise ValueError("Found more than one pool!")
+            raise ValueError("Found more than one backend!")
 
     @property
     def ratelimitconn(self):

@@ -8,7 +8,7 @@ Welcome to haproxyadmin's documentation
    README_link.rst
    user/haproxy
    user/frontend
-   user/pool
+   user/backend
    user/server
    dev/api
 

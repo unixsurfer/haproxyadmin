@@ -6,7 +6,7 @@ Developer Interface
 This part of the documentation covers all the available interfaces of
 `haproxyadmin package`_. Public and internal interfaces are described.
 
-:class:`HAProxy <.HAProxy>`, :class:`Frontend <.Frontend>`, :class:`Pool <.Pool>`
+:class:`HAProxy <.HAProxy>`, :class:`Frontend <.Frontend>`, :class:`Backend <.Backend>`
 and :class:`server <.Server>` classes are the main 4 public interfaces.
 These classes provide methods to run various operations. `HAProxy`_ provides a
 several statistics which can be retrieved by callin ``metric()``, see
@@ -29,9 +29,9 @@ meant for external use.
 .. autoclass:: haproxyadmin.frontend.Frontend
    :members:
 
-.. automodule:: haproxyadmin.pool
+.. automodule:: haproxyadmin.backend
 
-.. autoclass:: Pool
+.. autoclass:: Backend
    :members:
 
 .. automodule:: haproxyadmin.server
@@ -66,7 +66,7 @@ Various stats field names for which a value can be retrieved by using
 
 .. autodata:: haproxyadmin.haproxy.FRONTEND_METRICS
 
-.. autodata:: haproxyadmin.haproxy.POOL_METRICS
+.. autodata:: haproxyadmin.haproxy.BACKEND_METRICS
 
 .. autodata:: haproxyadmin.haproxy.SERVER_METRICS
 

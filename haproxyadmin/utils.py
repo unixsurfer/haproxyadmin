@@ -436,7 +436,7 @@ def stat2dict(csv_data):
       Following is a sample of the structure::
 
         {
-            'pools': {
+            'backends': {
                 'acq-misc': {
                                 'stats': { _CSVLine object },
                                 'servers': {
@@ -458,7 +458,7 @@ def stat2dict(csv_data):
     """
     heads = []
     dicts = {
-        'pools': {},
+        'backends': {},
         'frontends': {}
     }
 
@@ -501,27 +501,27 @@ def stat2dict(csv_data):
             parts = line.split(',')
             # each line is a distinct object
             csvline = CSVLine(parts)
-            # parts[0] => pxname field, pool or frontend name
+            # parts[0] => pxname field, backend or frontend name
             # parts[1] => svname field, servername or BACKEND or FRONTEND
             if parts[1] == 'FRONTEND':
                 # This is a frontend line.
                 # Frontend definitions aren't spread across multiple lines.
                 dicts['frontends'][parts[0]] = csvline
-            elif (parts[1] == 'BACKEND' and parts[0] not in dicts['pools']):
+            elif (parts[1] == 'BACKEND' and parts[0] not in dicts['backends']):
                 # I see this backend information for 1st time.
-                dicts['pools'][parts[0]] = {}
-                dicts['pools'][parts[0]]['servers'] = {}
-                dicts['pools'][parts[0]]['stats'] = csvline
+                dicts['backends'][parts[0]] = {}
+                dicts['backends'][parts[0]]['servers'] = {}
+                dicts['backends'][parts[0]]['stats'] = csvline
             else:
-                if parts[0] not in dicts['pools']:
+                if parts[0] not in dicts['backends']:
                     # This line holds server information for a backend I haven't
                     # seen before, thus create the backend structure and store
                     # server details.
-                    dicts['pools'][parts[0]] = {}
-                    dicts['pools'][parts[0]]['servers'] = {}
+                    dicts['backends'][parts[0]] = {}
+                    dicts['backends'][parts[0]]['servers'] = {}
                 if parts[1] == 'BACKEND':
-                    dicts['pools'][parts[0]]['stats'] = csvline
+                    dicts['backends'][parts[0]]['stats'] = csvline
                 else:
-                    dicts['pools'][parts[0]]['servers'][parts[1]] = csvline
+                    dicts['backends'][parts[0]]['servers'][parts[1]] = csvline
 
     return dicts

@@ -3,20 +3,20 @@
 # pylint: disable=superfluous-parens
 #
 """
-haproxyadmin.pool
-~~~~~~~~~~~~~~~~~
+haproxyadmin.backend
+~~~~~~~~~~~~~~~~~~~~
 
-This module provides the :class:`Pool <.Pool>` class which allows to
-run operation for a pool.
+This module provides the :class:`Backend <.Backend>` class which allows to
+run operation for a backend.
 
 """
 from .utils import (calculate, cmd_across_all_procs, compare_values)
 from .server import Server
 
 
-class Pool(object):
-    """A container for a pool across several HAProxy processes."""
-    POOL_METRICS = [
+class Backend(object):
+    """A container for a backend across several HAProxy processes."""
+    BACKEND_METRICS = [
         'act',
         'bck',
         'bin',
@@ -60,13 +60,13 @@ class Pool(object):
         'wretr',
     ]
 
-    def __init__(self, pool_per_proc):
-        self._pool_per_proc = pool_per_proc
-        self._name = self._pool_per_proc[0].name
+    def __init__(self, backend_per_proc):
+        self._backend_per_proc = backend_per_proc
+        self._name = self._backend_per_proc[0].name
 
     # built-in comparison operator is adjusted
     def __eq__(self, other):
-        if isinstance(other, Pool):
+        if isinstance(other, Backend):
             return (self.name == other.name)
         elif isinstance(other, str):
             return (self.name == other)
@@ -93,8 +93,8 @@ class Pool(object):
         servers_across_hap_processes = {}
 
         # Get a list of servers (_Server objects) per process
-        for pool in self._pool_per_proc:
-            for server in pool.servers(name):
+        for backend in self._backend_per_proc:
+            for server in backend.servers(name):
                 if server.name not in servers_across_hap_processes:
                     servers_across_hap_processes[server.name] = []
                 servers_across_hap_processes[server.name].append(server)
@@ -128,7 +128,7 @@ class Pool(object):
         The type of calculation is either sum or avg and defined in
         utils.METRICS_SUM and utils.METRICS_AVG.
 
-        :param name: Name of the metric, any of POOL_METRICS
+        :param name: Name of the metric, any of BACKEND_METRICS
         :type name: ``string``
         :return: Value of the metric after the appropriate calculation
           has been performed.
@@ -136,16 +136,16 @@ class Pool(object):
         :raise: ValueError when a given metric is not found.
         """
         metrics = []
-        if name not in Pool.POOL_METRICS:
+        if name not in Backend.BACKEND_METRICS:
             raise ValueError("{} is not valid metric".format(name))
 
-        metrics = [x.metric(name) for x in self._pool_per_proc]
+        metrics = [x.metric(name) for x in self._backend_per_proc]
 
         return calculate(name, metrics)
 
     @property
     def name(self):
-        """Return the name of the pool.
+        """Return the name of the backend.
 
         :rtype: string
         """
@@ -153,13 +153,13 @@ class Pool(object):
 
     @property
     def process_nb(self):
-        """Return a list of process number in which pool is configured.
+        """Return a list of process number in which backend is configured.
 
         :rtype: list
         """
         process_numbers = []
-        for pool in self._pool_per_proc:
-            process_numbers.append(pool.process_nb)
+        for backend in self._backend_per_proc:
+            process_numbers.append(backend.process_nb)
 
         return process_numbers
 
@@ -172,7 +172,7 @@ class Pool(object):
         return self.metric('lbtot')
 
     def requests_per_process(self):
-        """Return the number of requests for the pool per process.
+        """Return the number of requests for the backend per process.
 
         :return: a list of tuples with 2 elements
 
@@ -182,12 +182,12 @@ class Pool(object):
         :rtype: ``list``
 
         """
-        results = cmd_across_all_procs(self._pool_per_proc, 'metric', 'lbtot')
+        results = cmd_across_all_procs(self._backend_per_proc, 'metric', 'lbtot')
 
         return results
 
     def stats_per_process(self):
-        """Return all stats of the pool per process.
+        """Return all stats of the backend per process.
 
         :return: a list of tuples with 2 elements
 
@@ -197,19 +197,19 @@ class Pool(object):
         :rtype: ``list``
 
         """
-        values = cmd_across_all_procs(self._pool_per_proc, 'stats')
+        values = cmd_across_all_procs(self._backend_per_proc, 'stats')
 
         return values
 
     @property
     def status(self):
-        """Return the status of the pool.
+        """Return the status of the backend.
 
         :rtype: ``string``
         :raise: :class:`IncosistentData` exception if status is different
           per process.
 
         """
-        results = cmd_across_all_procs(self._pool_per_proc, 'metric', 'status')
+        results = cmd_across_all_procs(self._backend_per_proc, 'metric', 'status')
 
         return compare_values(results)

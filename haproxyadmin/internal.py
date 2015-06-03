@@ -7,7 +7,7 @@ haproxyadmin.internal
 ~~~~~~~~~~~~~~~~~~~~~
 
 This module provides classes that are used within haproxyadmin for creating
-objects to work with frontend, pool and pool server which associated with
+objects to work with frontend, backend and server which associated with
 with a single HAProxy process.
 
 """
@@ -109,7 +109,7 @@ class _HAProxyProcess(object):
         return info2dict(raw_info)
 
     def stats(self):
-        """Return a nested dictionary containing pool information.
+        """Return a nested dictionary containing backend information.
 
         :rtype: dict, see ``utils.stat2dict`` for details on the structure
         """
@@ -121,43 +121,43 @@ class _HAProxyProcess(object):
     def metric(self, name):
         return converter(self.proc_info()[name])
 
-    def pools_stats(self):
-        return self.stats()['pools']
+    def backends_stats(self):
+        return self.stats()['backends']
 
     def frontends_stats(self):
         return self.stats()['frontends']
 
-    def servers_stats(self, pool):
-        return self.stats()['pools'][pool]['servers']
+    def servers_stats(self, backend):
+        return self.stats()['backends'][backend]['servers']
 
-    def pools(self, name=None):
-        """Build _Pool objects for each pool.
+    def backends(self, name=None):
+        """Build _backend objects for each backend.
 
-        :param name: (optional) pool name, defaults to None
+        :param name: (optional) backend name, defaults to None
         :type name: string
-        :return: a list of _Pool objects for each pool
+        :return: a list of _backend objects for each backend
         :rtype: list
         """
-        pools = []
+        backends = []
         return_list = []
-        pools = self.pools_stats()
+        backends = self.backends_stats()
         if name is not None:
-            if name in pools:
-                return_list.append(_Pool(self, name))
+            if name in backends:
+                return_list.append(_backend(self, name))
             else:
                 return return_list
         else:
-            for name in pools:
-                return_list.append(_Pool(self, name))
+            for name in backends:
+                return_list.append(_backend(self, name))
 
         return return_list
 
     def get_frontends(self, name=None):
         """Build :class:`_Frontend` objects for each frontend.
 
-        :param name: (optional) pool name, defaults to ``None``
+        :param name: (optional) backend name, defaults to ``None``
         :type name: ``string``
-        :return: a list of :class:`_Frontend` objects for each pool
+        :return: a list of :class:`_Frontend` objects for each backend
         :rtype: ``list``
 
         """
@@ -220,11 +220,11 @@ class _Frontend(object):
         return self.hap_process.run_command(cmd)
 
 
-class _Pool(object):
-    """Class for interacting with a pool in one HAProxy process.
+class _Backend(object):
+    """Class for interacting with a backend in one HAProxy process.
 
     :param hap_process: a :class::`_HAProxyProcess` object.
-    :param name: pool name.
+    :param name: backend name.
     :type name: ``string``
     """
     def __init__(self, hap_process, name):
@@ -234,7 +234,7 @@ class _Pool(object):
 
     @property
     def name(self):
-        """Return a string which is the name of the pool"""
+        """Return a string which is the name of the backend"""
         return self._name
 
     @property
@@ -247,20 +247,20 @@ class _Pool(object):
         :return: A dictionary with statistics
         :rtype: dict
         """
-        keys = self.hap_process.pools_stats()[self.name]['stats'].heads
-        values = self.hap_process.pools_stats()[self.name]['stats'].parts
+        keys = self.hap_process.backends_stats()[self.name]['stats'].heads
+        values = self.hap_process.backends_stats()[self.name]['stats'].parts
 
         return dict(zip(keys, values))
 
     def metric(self, name):
         return converter(
-            getattr(self.hap_process.pools_stats()[self.name]['stats'], name))
+            getattr(self.hap_process.backends_stats()[self.name]['stats'], name))
 
     def command(self, cmd):
         return self.hap_process.run_command(cmd)
 
     def servers(self, name=None):
-        """Return a list of _Server objects for each server of the pool.
+        """Return a list of _Server objects for each server of the backend.
 
         :param name: (optional): server name lookup, defaults to None.
         :type name: string
@@ -282,31 +282,31 @@ class _Pool(object):
 
 
 class _Server(object):
-    """Class for interacting with a server of a pool in one HAProxy.
+    """Class for interacting with a server of a backend in one HAProxy.
 
-    :param pool: A _Pool object in which server is part of.
+    :param backend: A _Backend object in which server is part of.
     :param name: server name.
     :type name: ``string``
     """
-    def __init__(self, pool, name):
-        self.pool = pool
+    def __init__(self, backend, name):
+        self.backend = backend
         self._name = name
-        self.process_nb = self.pool.process_nb
+        self.process_nb = self.backend.process_nb
 
     @property
     def name(self):
-        """Return the name of the pool server."""
+        """Return the name of the backend server."""
         return self._name
 
     def metric(self, name):
         return converter(getattr(
-            self.pool.hap_process.servers_stats(self.pool.name)[self.name], name))
+            self.backend.hap_process.servers_stats(self.backend.name)[self.name], name))
 
     def stats(self):
-        keys = self.pool.hap_process.servers_stats(self.pool.name)[self.name].heads
-        values = self.pool.hap_process.servers_stats(self.pool.name)[self.name].parts
+        keys = self.backend.hap_process.servers_stats(self.backend.name)[self.name].heads
+        values = self.backend.hap_process.servers_stats(self.backend.name)[self.name].parts
 
         return dict(zip(keys, values))
 
     def command(self, cmd):
-        return self.pool.hap_process.run_command(cmd)
+        return self.backend.hap_process.run_command(cmd)

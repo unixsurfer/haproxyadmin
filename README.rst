@@ -55,9 +55,9 @@ these 2 major versions of Python.
     frontend2_proc34 0 [4, 3]
     >>>
     >>>
-    >>> for pool in pools:
-    ...    print(pool.name, pool.requests, pool.process_nb)
-    ...    servers = pool.servers()
+    >>> for backend in backends:
+    ...    print(backend.name, backend.requests, backend.process_nb)
+    ...    servers = backend.servers()
     ...    for server in servers:
     ...       print(" ", server.name, server.requests)
     ...
@@ -88,7 +88,7 @@ Features
 - HAProxy in multi-process mode (nbproc >1)
 - UNIX stats socket, no support for querying HTTP statistics page
 - Frontend operations
-- Pool operations
+- Backend operations
 - Server operations
 - ACL operations
 - MAP operations
