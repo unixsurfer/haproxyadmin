@@ -143,12 +143,12 @@ class _HAProxyProcess(object):
         backends = self.backends_stats()
         if name is not None:
             if name in backends:
-                return_list.append(_backend(self, name))
+                return_list.append(_Backend(self, name))
             else:
                 return return_list
         else:
             for name in backends:
-                return_list.append(_backend(self, name))
+                return_list.append(_Backend(self, name))
 
         return return_list
 
