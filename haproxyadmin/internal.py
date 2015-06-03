@@ -7,7 +7,7 @@ haproxyadmin.internal
 ~~~~~~~~~~~~~~~~~~~~~
 
 This module provides classes that are used within haproxyadmin for creating
-objects to work with frontend, pool and pool member which associated with
+objects to work with frontend, pool and pool server which associated with
 with a single HAProxy process.
 
 """
@@ -127,8 +127,8 @@ class _HAProxyProcess(object):
     def frontends_stats(self):
         return self.stats()['frontends']
 
-    def members_stats(self, pool):
-        return self.stats()['pools'][pool]['members']
+    def servers_stats(self, pool):
+        return self.stats()['pools'][pool]['servers']
 
     def pools(self, name=None):
         """Build _Pool objects for each pool.
@@ -259,34 +259,34 @@ class _Pool(object):
     def command(self, cmd):
         return self.hap_process.run_command(cmd)
 
-    def members(self, name=None):
-        """Return a list of _PoolMember objects for each member of the pool.
+    def servers(self, name=None):
+        """Return a list of _Server objects for each server of the pool.
 
-        :param name: (optional): Member name lookup, defaults to None.
+        :param name: (optional): server name lookup, defaults to None.
         :type name: string
         """
-        members = []
+        servers = []
         return_list = []
 
-        members = self.hap_process.members_stats(self.name)
+        servers = self.hap_process.servers_stats(self.name)
         if name is not None:
-            if name in members:
-                return_list.append(_PoolMember(self, name))
+            if name in servers:
+                return_list.append(_Server(self, name))
             else:
                 return []
         else:
-            for membername in members:
-                return_list.append(_PoolMember(self, membername))
+            for servername in servers:
+                return_list.append(_Server(self, servername))
 
         return return_list
 
 
-class _PoolMember(object):
-    """Class for interacting with a member of a pool in one HAProxy.
+class _Server(object):
+    """Class for interacting with a server of a pool in one HAProxy.
 
-    :param pool: A _Pool object in which member is part of
-    :param name: Pool member name
-    :type name: string
+    :param pool: A _Pool object in which server is part of.
+    :param name: server name.
+    :type name: ``string``
     """
     def __init__(self, pool, name):
         self.pool = pool
@@ -295,16 +295,16 @@ class _PoolMember(object):
 
     @property
     def name(self):
-        """Return the name of the pool member."""
+        """Return the name of the pool server."""
         return self._name
 
     def metric(self, name):
         return converter(getattr(
-            self.pool.hap_process.members_stats(self.pool.name)[self.name], name))
+            self.pool.hap_process.servers_stats(self.pool.name)[self.name], name))
 
     def stats(self):
-        keys = self.pool.hap_process.members_stats(self.pool.name)[self.name].heads
-        values = self.pool.hap_process.members_stats(self.pool.name)[self.name].parts
+        keys = self.pool.hap_process.servers_stats(self.pool.name)[self.name].heads
+        values = self.pool.hap_process.servers_stats(self.pool.name)[self.name].parts
 
         return dict(zip(keys, values))
 

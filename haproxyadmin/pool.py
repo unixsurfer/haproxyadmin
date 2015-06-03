@@ -11,7 +11,7 @@ run operation for a pool.
 
 """
 from .utils import (calculate, cmd_across_all_procs, compare_values)
-from .poolmember import PoolMember
+from .server import Server
 
 
 class Pool(object):
@@ -76,50 +76,50 @@ class Pool(object):
     def __ne__(self, other):
         return (not self.__eq__(other))
 
-    def members(self, name=None):
-        """Return PoolMember object for each member.
+    def servers(self, name=None):
+        """Return Server object for each server.
 
-        :param name: (optional) Membername to look for. Defaults to None.
+        :param name: (optional) servername to look for. Defaults to None.
         :type name: string
-        :return: A list of :class:`PoolMember <PoolMember>` objects
+        :return: A list of :class:`Server <Server>` objects
         :rtype: list
         """
         return_list = []
 
-        # store _PoolMember objects for each member as it is reported by each
+        # store _Server objects for each server as it is reported by each
         # process.
-        # key: name of the member
-        # value: a list of _PoolMember object
-        members_across_hap_processes = {}
+        # key: name of the server
+        # value: a list of _Server object
+        servers_across_hap_processes = {}
 
-        # Get a list of members (_PoolMember objects) per process
+        # Get a list of servers (_Server objects) per process
         for pool in self._pool_per_proc:
-            for member in pool.members(name):
-                if member.name not in members_across_hap_processes:
-                    members_across_hap_processes[member.name] = []
-                members_across_hap_processes[member.name].append(member)
+            for server in pool.servers(name):
+                if server.name not in servers_across_hap_processes:
+                    servers_across_hap_processes[server.name] = []
+                servers_across_hap_processes[server.name].append(server)
 
-        # For each member build a PoolMember object
-        for member_per_proc in members_across_hap_processes.values():
-            return_list.append(PoolMember(member_per_proc, self.name))
+        # For each server build a Server object
+        for server_per_proc in servers_across_hap_processes.values():
+            return_list.append(Server(server_per_proc, self.name))
 
         return return_list
 
-    def member(self, name):
-        """Return a PoolMember object
+    def server(self, name):
+        """Return a Server object
 
-        :param name: Name of the member
+        :param name: Name of the server
         :type name: string
-        :return: :class:`PoolMember <PoolMember>` object
-        :rtype: haproxyadmin.PoolMember
+        :return: :class:`Server <Server>` object
+        :rtype: haproxyadmin.Server
         """
-        member = self.members(name)
-        if len(member) == 1:
-            return member[0]
-        elif len(member) == 0:
-            raise ValueError("Could not find member")
+        server = self.servers(name)
+        if len(server) == 1:
+            return server[0]
+        elif len(server) == 0:
+            raise ValueError("Could not find server")
         else:
-            raise ValueError("Found more than one member, this is a bug!")
+            raise ValueError("Found more than one server, this is a bug!")
 
     def metric(self, name):
         """Return the value of a metric.

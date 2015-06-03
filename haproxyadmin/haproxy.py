@@ -14,22 +14,22 @@ import glob
 
 from .frontend import Frontend
 from .pool import Pool
-from .poolmember import PoolMember
+from .server import Server
 from .utils import (is_unix_socket, cmd_across_all_procs, calculate, isint,
                     should_die, check_command, check_output, compare_values)
 
 from .internal import _HAProxyProcess
 
 
-VALID_STATES = PoolMember.VALID_STATES
-STATE_ENABLE = PoolMember.STATE_ENABLE
-STATE_DISABLE = PoolMember.STATE_DISABLE
-STATE_READY = PoolMember.STATE_READY
-STATE_DRAIN = PoolMember.STATE_DRAIN
-STATE_MAINT = PoolMember.STATE_MAINT
+VALID_STATES = Server.VALID_STATES
+STATE_ENABLE = Server.STATE_ENABLE
+STATE_DISABLE = Server.STATE_DISABLE
+STATE_READY = Server.STATE_READY
+STATE_DRAIN = Server.STATE_DRAIN
+STATE_MAINT = Server.STATE_MAINT
 FRONTEND_METRICS = Frontend.FRONTEND_METRICS
 POOL_METRICS = Pool.POOL_METRICS
-SERVER_METRICS = PoolMember.SERVER_METRICS
+SERVER_METRICS = Server.SERVER_METRICS
 
 
 class HAProxy(object):
@@ -558,47 +558,47 @@ class HAProxy(object):
         """
         return self.metric('Maxconn')
 
-    def member(self, hostname, pool=None):
-        """Build :class:`PoolMember <haproxyadmin.poolmember.PoolMember>`
-        objects for the given member.
+    def server(self, hostname, pool=None):
+        """Build :class:`Server <haproxyadmin.server.Server>`
+        objects for the given server.
 
         If ``pool`` specified then lookup is limited to that pool.
 
-        :param hostname: Membername to look for
+        :param hostname: servername to look for.
         :type hostname: ``string``
-        :param pool: (optional) Pool name to look in
+        :param pool: (optional) Pool name to look in.
         :type pool: ``string``
-        :return: A list of :class:`PoolMember <haproxyadmin.poolmember.PoolMember>`
+        :return: a list of :class:`Server <haproxyadmin.server.Server>`
           objects.
         :rtype: ``list``
         """
         ret = []
         for pool in self.pools(pool):
             try:
-                ret.append(pool.member(hostname))
+                ret.append(pool.server(hostname))
             except ValueError:
-                # lookup for an nonexistent member in pool raise VauleError
+                # lookup for an nonexistent server in pool raise VauleError
                 # catch and pass as we query all pools
                 pass
 
         if not ret:
-            raise ValueError("Could not find member")
+            raise ValueError("Could not find server")
 
         return ret
 
-    def members(self, pool=None):
-        """Build a list of :class:`PoolMember <haproxyadmin.poolmember.PoolMember>` objects.
+    def servers(self, pool=None):
+        """Build a list of :class:`Server <haproxyadmin.server.Server>` objects.
 
         If ``pool`` specified then lookup is limited to that pool.
 
         :param pool: (optional) Pool name.
         :type pool: ``string``
-        :return: A list of :class:`PoolMember <PoolMember>` objects
+        :return: A list of :class:`Server <Server>` objects
         :rtype: list
         """
         ret = []
         for pool in self.pools(pool):
-            _m = pool.members()
+            _m = pool.servers()
             ret += _m
 
         return ret

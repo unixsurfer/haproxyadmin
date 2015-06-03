@@ -7,7 +7,7 @@ This part of the documentation covers all the available interfaces of
 `haproxyadmin package`_. Public and internal interfaces are described.
 
 :class:`HAProxy <.HAProxy>`, :class:`Frontend <.Frontend>`, :class:`Pool <.Pool>`
-and :class:`PoolMember <.PoolMember>` classes are the main 4 public interfaces.
+and :class:`server <.Server>` classes are the main 4 public interfaces.
 These classes provide methods to run various operations. `HAProxy`_ provides a
 several statistics which can be retrieved by callin ``metric()``, see
 `HAProxy statistics`_ for the full list of statistics.
@@ -34,9 +34,9 @@ meant for external use.
 .. autoclass:: Pool
    :members:
 
-.. automodule:: haproxyadmin.poolmember
+.. automodule:: haproxyadmin.server
 
-.. autoclass:: PoolMember
+.. autoclass:: Server
    :members:
 
 .. automodule:: haproxyadmin.internal
@@ -84,7 +84,7 @@ average, which is performed for values returned by all HAProxy processes.
 Valid server states
 ^^^^^^^^^^^^^^^^^^^
 
-A list of constants to use in ``setstate`` of :class:`.PoolMember` to change
+A list of constants to use in ``setstate`` of :class:`.Server` to change
 the state of a server.
 
 .. autodata:: haproxyadmin.haproxy.STATE_ENABLE

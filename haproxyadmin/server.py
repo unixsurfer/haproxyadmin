@@ -3,10 +3,10 @@
 # pylint: disable=superfluous-parens
 #
 """
-haproxyadmin.poolmember
+haproxyadmin.server
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-This module provides the :class:`PoolMember <.PoolMember>` class which allows to
+This module provides the :class:`Server <.Server>` class which allows to
 run operation for a server.
 
 """
@@ -14,8 +14,8 @@ from .utils import (calculate, cmd_across_all_procs, compare_values,
                     should_die, check_command)
 
 
-class PoolMember(object):
-    """A container for a member across several HAProxy processes."""
+class Server(object):
+    """A container for a server across several HAProxy processes."""
 
     STATE_ENABLE = 'enable'
     STATE_DISABLE = 'disable'
@@ -70,14 +70,14 @@ class PoolMember(object):
         'ttime',
     ]
 
-    def __init__(self, member_per_proc, poolname):
-        self._member_per_proc = member_per_proc
+    def __init__(self, server_per_proc, poolname):
+        self._server_per_proc = server_per_proc
         self.poolname = poolname
-        self._name = self._member_per_proc[0].name
+        self._name = self._server_per_proc[0].name
 
     # built-in comparison operator is adjusted
     def __eq__(self, other):
-        if isinstance(other, PoolMember):
+        if isinstance(other, Server):
             return (self.name == other.name)
         elif isinstance(other, str):
             return (self.name == other)
@@ -94,7 +94,7 @@ class PoolMember(object):
         :rtype: integer
         """
         values = cmd_across_all_procs(
-            self._member_per_proc, 'metric', 'check_code'
+            self._server_per_proc, 'metric', 'check_code'
         )
 
         return compare_values(values)
@@ -106,7 +106,7 @@ class PoolMember(object):
         :rtype: string
         """
         values = cmd_across_all_procs(
-            self._member_per_proc, 'metric', 'check_status'
+            self._server_per_proc, 'metric', 'check_status'
         )
 
         return compare_values(values)
@@ -118,7 +118,7 @@ class PoolMember(object):
         :rtype: string
         """
         values = cmd_across_all_procs(
-            self._member_per_proc, 'metric', 'last_chk'
+            self._server_per_proc, 'metric', 'last_chk'
         )
 
         return compare_values(values)
@@ -130,7 +130,7 @@ class PoolMember(object):
         :rtype: string
         """
         values = cmd_across_all_procs(
-            self._member_per_proc, 'metric', 'last_agt'
+            self._server_per_proc, 'metric', 'last_agt'
         )
 
         return compare_values(values)
@@ -149,16 +149,16 @@ class PoolMember(object):
         :raise: ``ValueError`` when a given metric is not found
         """
         metrics = []
-        if name not in PoolMember.SERVER_METRICS:
+        if name not in Server.SERVER_METRICS:
             raise ValueError("{} is not valid metric".format(name))
 
-        metrics = [x.metric(name) for x in self._member_per_proc]
+        metrics = [x.metric(name) for x in self._server_per_proc]
 
         return calculate(name, metrics)
 
     @property
     def name(self):
-        """Return the name of the member.
+        """Return the name of the server.
 
         :rtype: ``string``
 
@@ -175,45 +175,45 @@ class PoolMember(object):
         return self.metric('lbtot')
 
     def requests_per_process(self):
-        """Return the number of requests for the member per process.
+        """Return the number of requests for the server per process.
 
         :rtype: A list of tuple, where 1st element is process number and 2nd
           element is requests.
 
         """
-        results = cmd_across_all_procs(self._member_per_proc, 'metric', 'lbtot')
+        results = cmd_across_all_procs(self._server_per_proc, 'metric', 'lbtot')
 
         return results
 
     @property
     def process_nb(self):
-        """Return a list of process number in which pool member is configured.
+        """Return a list of process number in which pool server is configured.
 
         :return: a list of process numbers.
         :rtype: ``list``
 
         """
         process_numbers = []
-        for member in self._member_per_proc:
-            process_numbers.append(member.process_nb)
+        for server in self._server_per_proc:
+            process_numbers.append(server.process_nb)
 
         return process_numbers
 
     @should_die
     def setstate(self, state):
-        """Set the state of a member in the pool.
+        """Set the state of a server in the pool.
 
         State can be any of the following
 
-          * :const:`haproxyadmin.haproxy.STATE_ENABLE`: Mark the member UP and
+          * :const:`haproxyadmin.haproxy.STATE_ENABLE`: Mark the server UP and
             checks are re-enabled
-          * :const:`haproxyadmin.haproxy.STATE_DISABLE`: Mark the member DOWN
+          * :const:`haproxyadmin.haproxy.STATE_DISABLE`: Mark the server DOWN
             for maintenance and checks disabled.
-          * :const:`haproxyadmin.haproxy.STATE_READY`: Put member in normal
+          * :const:`haproxyadmin.haproxy.STATE_READY`: Put server in normal
             mode.
-          * :const:`haproxyadmin.haproxy.STATE_DRAIN`: Remove the member from
+          * :const:`haproxyadmin.haproxy.STATE_DRAIN`: Remove the server from
             load balancing.
-          * :const:`haproxyadmin.haproxy.STATE_MAINT`: Remove the member from
+          * :const:`haproxyadmin.haproxy.STATE_MAINT`: Remove the server from
             load balancing and health checks are disabled.
 
         :param state: state to set.
@@ -225,19 +225,19 @@ class PoolMember(object):
 
           >>> from haproxyadmin import haproxy
           >>> hap = haproxy.HAProxy(socket_dir='/run/haproxy')
-          >>> member = hap.member('member_bkall', pool='backend_proc1')[0]
-          >>> member.setstate(haproxy.STATE_DISABLE)
+          >>> server = hap.server('member_bkall', pool='backend_proc1')[0]
+          >>> server.setstate(haproxy.STATE_DISABLE)
           True
-          >>> member.status
+          >>> server.status
           'MAINT'
-          >>> member.setstate(haproxy.STATE_ENABLE)
+          >>> server.setstate(haproxy.STATE_ENABLE)
           True
-          >>> member.status
+          >>> server.status
           'no check'
 
         """
-        if state not in PoolMember.VALID_STATES:
-            states = ', '.join(PoolMember.VALID_STATES)
+        if state not in Server.VALID_STATES:
+            states = ', '.join(Server.VALID_STATES)
             raise ValueError("Wrong state, allowed states {}".format(states))
         if state == 'enable' or state == 'disable':
             cmd = "{} server {}/{}".format(state, self.poolname, self.name)
@@ -246,12 +246,12 @@ class PoolMember(object):
                 self.poolname, self.name, state
             )
 
-        results = cmd_across_all_procs(self._member_per_proc, 'command', cmd)
+        results = cmd_across_all_procs(self._server_per_proc, 'command', cmd)
 
         return check_command(results)
 
     def stats_per_process(self):
-        """Return all stats of the member per process.
+        """Return all stats of the server per process.
 
         :return: A list of tuple 2 elements
 
@@ -261,20 +261,20 @@ class PoolMember(object):
         :rtype: ``list``
 
         """
-        values = cmd_across_all_procs(self._member_per_proc, 'stats')
+        values = cmd_across_all_procs(self._server_per_proc, 'stats')
 
         return values
 
     @property
     def status(self):
-        """Return the status of the member.
+        """Return the status of the server.
 
         :rtype: ``string``
         :raise: :class:`IncosistentData` exception if status is different
           per process
 
         """
-        values = cmd_across_all_procs(self._member_per_proc, 'metric', 'status')
+        values = cmd_across_all_procs(self._server_per_proc, 'metric', 'status')
 
         return compare_values(values)
 
@@ -286,7 +286,7 @@ class PoolMember(object):
         :raise: :class:`IncosistentData` exception if weight is different
           per process
         """
-        values = cmd_across_all_procs(self._member_per_proc, 'metric', 'weight')
+        values = cmd_across_all_procs(self._server_per_proc, 'metric', 'weight')
 
         return compare_values(values)
 
@@ -307,16 +307,16 @@ class PoolMember(object):
 
            >>> from haproxyadmin import haproxy
            >>> hap = haproxy.HAProxy(socket_dir='/run/haproxy')
-           >>> member = hap.member('member_bkall', pool='backend_proc1')[0]
-           >>> member.weight
+           >>> server = hap.server('member_bkall', pool='backend_proc1')[0]
+           >>> server.weight
            100
-           >>> member.setweight('20%')
+           >>> server.setweight('20%')
            True
-           >>> member.weight
+           >>> server.weight
            20
-           >>> member.setweight(58)
+           >>> server.setweight(58)
            True
-           >>> member.weight
+           >>> server.weight
            58
         """
         msg = (
@@ -333,7 +333,7 @@ class PoolMember(object):
         else:
             raise ValueError(msg)
 
-        results = cmd_across_all_procs(self._member_per_proc, 'command', cmd)
+        results = cmd_across_all_procs(self._server_per_proc, 'command', cmd)
 
         return check_command(results)
 
@@ -346,6 +346,6 @@ class PoolMember(object):
         """
 
         cmd = "shutdown sessions server {}/{}".format(self.poolname, self.name)
-        results = cmd_across_all_procs(self._member_per_proc, 'command', cmd)
+        results = cmd_across_all_procs(self._server_per_proc, 'command', cmd)
 
         return check_command(results)

@@ -57,9 +57,9 @@ these 2 major versions of Python.
     >>>
     >>> for pool in pools:
     ...    print(pool.name, pool.requests, pool.process_nb)
-    ...    members = pool.members()
-    ...    for member in members:
-    ...       print(" ", member.name, member.requests)
+    ...    servers = pool.servers()
+    ...    for server in servers:
+    ...       print(" ", server.name, server.requests)
     ...
     backend_proc2 100 [2]
       bck_proc2_srv4_proc2 25

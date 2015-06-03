@@ -439,7 +439,7 @@ def stat2dict(csv_data):
             'pools': {
                 'acq-misc': {
                                 'stats': { _CSVLine object },
-                                'members': {
+                                'servers': {
                                     'acqrdb-01': { _CSVLine object },
                                     'acqrdb-02': { _CSVLine object },
                                     ...
@@ -488,12 +488,12 @@ def stat2dict(csv_data):
 
     # A line which holds frontend definition:
     #     <frontent_name>,FRONTEND,....
-    # A line holds member definition:
-    #     <backend_name>,<membername>,....
+    # A line holds server definition:
+    #     <backend_name>,<servername>,....
     # A line which holds backend definition:
     #     <backend_name>,BACKEND,....
     # NOTE: we can have a single line for a backend definition without any
-    # lines for members associated with for that backend
+    # lines for servers associated with for that backend
     for line in csv_data:
         line = line.strip()
         if line:
@@ -502,7 +502,7 @@ def stat2dict(csv_data):
             # each line is a distinct object
             csvline = CSVLine(parts)
             # parts[0] => pxname field, pool or frontend name
-            # parts[1] => svname field, membername or BACKEND or FRONTEND
+            # parts[1] => svname field, servername or BACKEND or FRONTEND
             if parts[1] == 'FRONTEND':
                 # This is a frontend line.
                 # Frontend definitions aren't spread across multiple lines.
@@ -510,18 +510,18 @@ def stat2dict(csv_data):
             elif (parts[1] == 'BACKEND' and parts[0] not in dicts['pools']):
                 # I see this backend information for 1st time.
                 dicts['pools'][parts[0]] = {}
-                dicts['pools'][parts[0]]['members'] = {}
+                dicts['pools'][parts[0]]['servers'] = {}
                 dicts['pools'][parts[0]]['stats'] = csvline
             else:
                 if parts[0] not in dicts['pools']:
-                    # This line holds member information for a backend I haven't
+                    # This line holds server information for a backend I haven't
                     # seen before, thus create the backend structure and store
-                    # member details.
+                    # server details.
                     dicts['pools'][parts[0]] = {}
-                    dicts['pools'][parts[0]]['members'] = {}
+                    dicts['pools'][parts[0]]['servers'] = {}
                 if parts[1] == 'BACKEND':
                     dicts['pools'][parts[0]]['stats'] = csvline
                 else:
-                    dicts['pools'][parts[0]]['members'][parts[1]] = csvline
+                    dicts['pools'][parts[0]]['servers'][parts[1]] = csvline
 
     return dicts
