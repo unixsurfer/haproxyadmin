@@ -17,7 +17,7 @@ Introduction
 load balancer to perform operations such as enabling/disabling servers.
 It does that by issuing the appropriate commands over the `stats socket`_
 provided by HAProxy. It also uses that stats socket for retrieving
-statistics and  change settings.
+statistics and changing settings.
 
 HAProxy is a multi-process daemon and each process can only be accessed by a
 distinct stats socket. There isn't any shared memory for all these processes.
@@ -43,7 +43,6 @@ these 2 major versions of Python.
 
     >>> from haproxyadmin import haproxy
     >>> hap = haproxy.HAProxy(socket_dir='/run/haproxy')
-    >>> f = hap.frontends()
     >>> frontends = hap.frontends()
     >>> for frontend in frontends:
     ...     print(frontend.name, frontend.requests, frontend.process_nb)
@@ -82,6 +81,9 @@ these 2 major versions of Python.
     >>>
 
 
+The documentation of the library is available at http://haproxyadmin.readthedocs.org
+
+
 Features
 --------
 
@@ -94,12 +96,6 @@ Features
 - MAP operations
 - Aggregation on various statistics
 - Change global options for HAProxy
-
-
-Documentation
--------------
-
-Documentation is available at http://haproxyadmin.readthedocs.org
 
 
 Installation
