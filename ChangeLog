@@ -1,0 +1,44 @@
+CHANGES
+=======
+
+0.0.2
+-----
+
+* README: merged TODO into README
+* README: documention reference doesn't need to be a section
+* internal.py: wrong refactoring for _Backend class
+* refactor Pool to backend
+* refactor PoolMember to Server
+* major updates on docstrings to allow sphinx integration
+* add sphinx doc build
+* utils.py: update docstrings
+* utils.py: converter didn't actually truncate towards zero for floating numbers
+* utils.py update docstrings
+* TODO: work in progress for updating docstrings
+* internal.py: update docstrings
+* internal.py: change parameter name to name for get_frontends
+* merged NOTES into TODO
+* NOTES: tiny fix
+* add some notes
+* NOTES: use reStructuredText Markup and update it accordingly
+* utils.py round the results of calculations as we don't use floating numbers
+* utils.py: convert number/string only to integer
+* haproxy.py: fix typo
+* We don't need it anymore and it was a bad idea
+* add haproxy.cfg which we use
+* utils.py: we don't perform any calculation for Uptime_sec field
+* haproxy.py: docstring fix
+* haproxy.py: add a bunch of properties for HAProxy process
+* utils.py don't remove trailing whitespace when parse 'show info' output
+* haproxy.py: perform calculation in metric() if the caller wants it
+* internal.py remove unused function run_commandold
+* change license to Apache 2.0
+* README.rst: add acknowledgement section
+* switch to README.rst by removing README.md
+* add more text in README.rst
+
+0.0.1
+-----
+
+* Initial commit of the library in functional state
+* Initial commit
