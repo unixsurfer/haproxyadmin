@@ -1,3 +1,5 @@
+.. _guide:
+
 User Guide
 ==========
 
@@ -17,5 +19,15 @@ created first.
     >>>
 
 .. warning:: Make sure you have appropriate privillage to write in the socket files.
+
+
+.. toctree::
+   :maxdepth: 2
+
+   haproxy
+   frontend
+   backend
+   server
+
 
 .. _HAProxy configuration: https://raw.githubusercontent.com/unixsurfer/haproxyadmin/master/tools/haproxy.cfg

@@ -7,10 +7,6 @@ Welcome to haproxyadmin's documentation
 
    README_link.rst
    user/guide
-   user/haproxy
-   user/frontend
-   user/backend
-   user/server
    dev/api
    changelog
    TODO.rst
