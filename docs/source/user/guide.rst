@@ -9,8 +9,8 @@ to HAProxy process and then focus on providing the most frequent operations
 for frontends, backends and servers. In all examples HAProxy is configured
 with 4 processes, see example `HAProxy configuration`_.
 
-A ``hap`` object used in the examples of the following sections needs to be
-created first like this:
+A :class:`HAProxy <.HAProxy>` object with the name ``hap`` needs to be created
+prior running the code mentioned in the following sections:
 
 .. code:: python
 
