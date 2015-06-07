@@ -11,6 +11,7 @@ Welcome to haproxyadmin's documentation
    user/backend
    user/server
    dev/api
+   changelog
 
 
 Indices and tables
