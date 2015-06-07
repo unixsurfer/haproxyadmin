@@ -1,10 +1,9 @@
 .. _haproxy:
 
 HAProxy Operations
-==================
+-----------------
 
 Get some information about the running processes
-------------------------------------------------
 
 .. code:: python
 
@@ -36,9 +35,6 @@ Get some information about the running processes
     This is the total number of requests that are processed by HAProxy.
     It counts requests for frontends and backends. Don't forget that
     a single client request passes HAProxy twice.
-
-Change global settings
-----------------------
 
 Dynamically change the specified global maxconn setting.
 
