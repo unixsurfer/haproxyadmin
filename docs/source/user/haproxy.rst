@@ -95,3 +95,41 @@ Get a :class:`Backend <.Backend>` object for a single backend
     >>> backend1 = hap.backend('backend1_proc34')
     >>> backend1.name, backend1.process_nb
     ('backend1_proc34', [4, 3])
+
+Get a list of :class:`Server <.Server>` objects for each server
+
+.. code:: python
+
+    >>> servers = hap.servers()
+    >>> for s in servers:
+    ...    print(s.name, s.backendname)
+    ...
+    bck1_proc34_srv1 backend1_proc34
+    bck1_proc34_srv2 backend1_proc34
+    bck_all_srv1 backend1_proc34
+    bck_proc2_srv3_proc2 backend_proc2
+    bck_proc2_srv1_proc2 backend_proc2
+    bck_proc2_srv4_proc2 backend_proc2
+    bck_proc2_srv2_proc2 backend_proc2
+    member1_proc1 backend_proc1
+    bck_all_srv1 backend_proc1
+    member2_proc1 backend_proc1
+    bck2_proc34_srv1 backend2_proc34
+    bck_all_srv1 backend2_proc34
+    bck2_proc34_srv2 backend2_proc34
+
+.. note::
+     if a server is member of more than 1 backends then muliple
+     :class:`Server <.Server>` objects for the server is returned
+
+Limit the list of server for a specific pool
+
+.. code:: python
+
+    >>> servers = hap.servers(backend='backend1_proc34')
+    >>> for s in servers:
+    ...    print(s.name, s.backendname)
+    ...
+    bck1_proc34_srv1 backend1_proc34
+    bck1_proc34_srv2 backend1_proc34
+    bck_all_srv1 backend1_proc34
