@@ -12,6 +12,7 @@ Welcome to haproxyadmin's documentation
    user/server
    dev/api
    changelog
+   TODO.rst
 
 
 Indices and tables
