@@ -1,23 +1,5 @@
 .. _api:
 
-Developer Interface
-===================
-
-This part of the documentation covers all the available interfaces of
-`haproxyadmin package`_. Public and internal interfaces are described.
-
-:class:`HAProxy <.HAProxy>`, :class:`Frontend <.Frontend>`, :class:`Backend <.Backend>`
-and :class:`server <.Server>` classes are the main 4 public interfaces.
-These classes provide methods to run various operations. `HAProxy`_ provides a
-several statistics which can be retrieved by callin ``metric()``, see
-`HAProxy statistics`_ for the full list of statistics.
-
-:py:mod:`haproxyadmin.internal` module provides a set of classes that are not
-meant for external use.
-
-
-.. contents::
-
 .. automodule:: haproxyadmin.haproxy
 
 .. autoclass:: HAProxy
