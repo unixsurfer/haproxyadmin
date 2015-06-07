@@ -127,12 +127,6 @@ Create the source distribution archive (the archive will be placed in the **dist
    python setup.py sdist
 
 
-Changelog
----------
-
-12-05-2015 0.0.1 Initial functional version of the library
-
-
 Development
 -----------
 I would love to hear what other people think about **haproxyadmin** and provide
