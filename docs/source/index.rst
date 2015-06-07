@@ -5,7 +5,7 @@ Welcome to haproxyadmin's documentation
 .. toctree::
    :maxdepth: 2
 
-   README_link.rst
+   introduction
    user/guide
    dev/api
    changelog
