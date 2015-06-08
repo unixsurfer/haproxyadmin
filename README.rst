@@ -54,6 +54,7 @@ these 2 major versions of Python.
     frontend2_proc34 0 [4, 3]
     >>>
     >>>
+    >>> backends = hap.backends()
     >>> for backend in backends:
     ...    print(backend.name, backend.requests, backend.process_nb)
     ...    servers = backend.servers()
