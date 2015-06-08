@@ -138,6 +138,7 @@ Work on specific server across all backends
 
 .. code:: python
 
+    >>> s1 = hap.server(hostname='bck_all_srv1')
     >>> for x in s1:
     ...    print(x.name, x.backendname, x.status)
     ...    x.setstate(haproxy.STATE_DISABLE)
