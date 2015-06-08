@@ -96,6 +96,13 @@ Shutdown a frontend
 
     >>> frontend.shutdown()
     True
+
+.. warning::
+    HAProxy removes from the running configuration the frontend, so
+    further operations on the frontend will return an error.
+
+.. code:: python
+
     >>> frontend.status
     Traceback (most recent call last):
     File "<stdin>", line 1, in <module>
@@ -107,9 +114,6 @@ Shutdown a frontend
         getattr(self.hap_process.frontends_stats()[self.name], name))
     KeyError: 'frontend1_proc34'
 
-    .. warning::
-       HAProxy removes from the running configuration a frontend, so
-       further operations on the frontend will return an error.
 
 Retrieve various statistics
 
@@ -119,8 +123,8 @@ Retrieve various statistics
     >>> for m in haproxy.FRONTEND_METRICS:
     ...    print("name {} value {}".format(m, frontend.metric(m)))
     ...
-    name bin value 0
-    name bout value 0
+    name bin value 380
+    name bout value 1065
     name comp_byp value 0
     name comp_in value 0
     name comp_out value 0
@@ -132,21 +136,23 @@ Retrieve various statistics
     name hrsp_2xx value 0
     name hrsp_3xx value 0
     name hrsp_4xx value 0
-    name hrsp_5xx value 0
+    name hrsp_5xx value 5
     name hrsp_other value 0
     name rate value 0
     name rate_lim value 200000
-    name rate_max value 0
+    name rate_max value 2
     name req_rate value 0
-    name req_rate_max value 0
-    name req_tot value 0
+    name req_rate_max value 2
+    name req_tot value 5
     name scur value 0
     name slim value 20000
-    name smax value 0
-    name stot value 0
-    >>>
+    name smax value 3
+    name stot value 5
     >>>
     >>> frontend.process_nb
     [4, 3]
     >>> frontend.requests_per_process()
     [(4, 2), (3, 3)]
+    >>> frontend.requests
+    5
+    >>>
