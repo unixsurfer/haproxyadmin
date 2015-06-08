@@ -52,7 +52,6 @@ class Backend(object):
         'slim',
         'smax',
         'srv_abrt',
-        'status',
         'stot',
         'ttime',
         'weight',
