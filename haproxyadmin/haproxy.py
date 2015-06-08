@@ -594,14 +594,14 @@ class HAProxy(object):
         :param backend: (optional) backend name.
         :type backend: ``string``
         :return: A list of :class:`Server <Server>` objects
-        :rtype: list
+        :rtype: ``list``.
         """
-        ret = []
+        return_list = []
         for backend in self.backends(backend):
-            _m = backend.servers()
-            ret += _m
+            servers = backend.servers()
+            return_list += servers
 
-        return ret
+        return return_list
 
     def metric(self, name):
         """Return the value of a metric.
