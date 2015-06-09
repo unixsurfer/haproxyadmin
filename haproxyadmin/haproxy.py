@@ -254,8 +254,9 @@ class HAProxy(object):
     def clearcounters(self, all=False):
         """Clear the max values of the statistics counters.
 
-        Clear all statistics counters in each proxy (frontend & backend) and
-        in each server. This has the same effect as restarting.
+        When ``all`` is set to ``True`` clears all statistics counters in
+        each proxy (frontend & backend) and in each server. This has the same
+        effect as restarting.
 
         :param all: (optional) clear all statistics counters.
         :type all: ``bool``
@@ -559,10 +560,14 @@ class HAProxy(object):
         return self.metric('Maxconn')
 
     def server(self, hostname, backend=None):
-        """Build :class:`Server <haproxyadmin.server.Server>`
+        """Build :class:`Server <haproxyadmin.server.Server> for a server.`
         objects for the given server.
 
         If ``backend`` specified then lookup is limited to that backend.
+
+        .. note::
+            If a server is member of more than 1 backends then muliple
+            objects for the same server is returned.
 
         :param hostname: servername to look for.
         :type hostname: ``string``
@@ -587,7 +592,7 @@ class HAProxy(object):
         return ret
 
     def servers(self, backend=None):
-        """Build a list of :class:`Server <haproxyadmin.server.Server>` objects.
+        """Build :class:`Server <haproxyadmin.server.Server>` for each server.
 
         If ``backend`` specified then lookup is limited to that backend.
 

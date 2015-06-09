@@ -113,6 +113,16 @@ METRICS_AVG = [
 
 
 def should_die(old_implementation):
+    """Build a decorator to control exceptions.
+
+    When a function raises an exception in some cases we don't care for the
+    reason but only if the function run successfully or not. We add an extra
+    argument to the decorating function with the name ``die`` to control this
+    behavior. When it is set to ``True``, which is the default value, it
+    raises any exception raised by the decorating function. When it is set to
+    ``False`` it returns ``True`` if decorating function run successfully or
+    ``False`` if an exception was raised.
+    """
     @wraps(old_implementation)
     def new_implementation(*args, **kwargs):
         try:
@@ -137,8 +147,8 @@ def is_unix_socket(path):
     """Return true if path is a valid UNIX socket otherwise False.
 
     :param path: file name path
-    :type path: string
-    :rtype: bool
+    :type path: ``string``
+    :rtype: ``bool``
     """
     mode = os.stat(path).st_mode
 
@@ -148,19 +158,21 @@ def is_unix_socket(path):
 def cmd_across_all_procs(hap_objects, method, *arg):
     """Return the result of a command executed in all HAProxy process.
 
-    Arguments:
-        objects (list): A list of objects
-        method (str): A valid method for each passed object
-        arg: Optional argument on the method
-
-    Note:
+    .. note::
         Objects must have a property with the name 'process_nb' which
         returns the HAProxy process number.
 
-    Returns:
-        A list of 2-item tuple where
-        1st element is HAProxy process number
-        2nd element is what the method returned
+    :param hap_objects: a list of objects.
+    :type hap_objects: ``list``
+    :param method: a valid method for the objects.
+    :param arg: (optional) argument on the method
+    :type arg: whatever is acceptable for the method
+    :return: list of 2-item tuple
+
+      #. HAProxy process number
+      #. what the method returned
+
+    :rtype: ``list``
     """
     results = []
     for obj in hap_objects:
@@ -174,9 +186,9 @@ def cmd_across_all_procs(hap_objects, method, *arg):
 def elements_of_list_same(iterator):
     """Check is all elements of an iterator are equal.
 
-    :param iterator: A iterator
-    :type iterator: list
-    :rtype: bool
+    :param iterator: a iterator
+    :type iterator: ``list``
+    :rtype: ``bool``
 
     Usage::
 
@@ -207,15 +219,17 @@ def compare_values(values):
     It is possible that not all processes return the same value for certain
     keys(status, weight etc) due to various reasons. We must detect these cases
     and either return the value which is the same across all processes or
-    raise IncosistentData.
+    raise :class:`<IncosistentData>`.
 
-    :param values: A list of values returned by each HAProxy process.
-    Each a element of the list is a tuple
-    1st element is the process number of HAProxy process returned the data
-    2nd element value returned by HAProxy process.
-    :type values: list
-    :return: Value
-    :rtype: string
+    :param values: a list of tuples with 2 elements.
+
+        #. process number of HAProxy process returned the data
+        #. value returned by HAProxy process.
+
+    :type values: ``list``
+    :return: value
+    :rtype: ``string``
+    :raise: class:`<IncosistentData>`.
     """
     if elements_of_list_same([msg[1] for msg in values]):
         return values[0][1]
@@ -228,13 +242,14 @@ def check_output(output):
 
     Several commands return output which we need to return back to the caller.
     But, before we return anything back we want to perform a sanity check on
-    on the output it in order to catch wrong input as it is impossible to
-    perform any sanitization on values/patterns which are passed to us.
+    on the output in order to catch wrong input as it is impossible to
+    perform any sanitization on values/patterns which are passed as input to
+    the command.
 
-    :param output: The output of the command
-    :type output: list
-    :return: True if no errors found in output otherwise False
-    :rtype: bool
+    :param output: output of the command.
+    :type output: ``list``
+    :return: ``True`` if no errors found in output otherwise ``False``.
+    :rtype: ``bool``
     """
     # We only care about the 1st line as that one contains possible error
     # message
@@ -249,17 +264,20 @@ def check_command(results):
     """Check if command was successfully executed.
 
     After a command is executed. We care about the following cases:
+
         * The same output is returned by all processes
         * If output matches to a list of outputs which indicate that
         command was valid
 
-    :param results: A list of messages returned by each HAProxy process.
-    Each a element of the list is a tuple where
-    * 1st element is the process number of HAProxy returned the message
-    * 2nd element contains the message returned by HAProxy
-    :type results: list
-    :return: True if command was successfully executed otherwise False
-    :rtype: bool
+    :param results: a list of tuples with 2 elements.
+
+          #. process number of HAProxy
+          #. message returned by HAProxy
+
+    :type results: ``list``
+    :return: ``True`` if command was successfully executed otherwise ``False``.
+    :rtype: ``bool``
+    :raise: :class:`<MultipleCommandResults>` when output differers.
     """
     if elements_of_list_same([msg[1] for msg in results]):
         msg = results[0][1]
@@ -272,17 +290,17 @@ def check_command(results):
 
 
 def calculate(name, metrics):
-    """Performs the appropriate calculation across a list of metrics.
+    """Perform the appropriate calculation across a list of metrics.
 
-    :param name: The name of the metric
-    :type name: string
-    :param metrics: A list of metrics. Elements need to be either int
-    or float type
-    :type metrics: A list of numbers
-    :return: Either the sum or the average of metrics
-    :rtype: number, integer or float
+    :param name: name of the metric.
+    :type name: ``string``
+    :param metrics: a list of metrics. Elements need to be either ``int``
+      or ``float`` type number.
+    :type metrics: ``list``
+    :return: either the sum or the average of metrics.
+    :rtype: ``integer``
     :raise: :class:`ValueError` when matric name has unknown type of
-    calculation.
+      calculation.
     """
     # Remove empty values, for some metrics HAProxy returns '' instead of 0
     filtered = filter(None, metrics)
@@ -315,9 +333,9 @@ def converter(value):
 
     For floating point numbers, this truncates towards zero.
 
-    :param value: A value to convert to int
-    :type value: string
-    :rtype: integer or string if value can't be converted to int.
+    :param value: a value to convert to int.
+    :type value: ``string``
+    :rtype: ``integer or ``string`` if value can't be converted to int.
 
     Usage::
 

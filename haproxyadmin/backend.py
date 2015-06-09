@@ -15,7 +15,12 @@ from .server import Server
 
 
 class Backend(object):
-    """A container for a backend across several HAProxy processes."""
+    """Build a user-created :class:`Backend` for a single backend.
+
+    :param backend_per_proc: list of :class:`._Backend` objects.
+    :type backend_per_proc: ``list``
+    :rtype: a :class:`Backend`.
+    """
     BACKEND_METRICS = [
         'act',
         'bck',

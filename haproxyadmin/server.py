@@ -15,8 +15,12 @@ from .utils import (calculate, cmd_across_all_procs, compare_values,
 
 
 class Server(object):
-    """A container for a server across several HAProxy processes."""
+    """Build a user-created :class:`Server` for a single server.
 
+    :param _server_per_proc: list of :class:`._Server` objects.
+    :type _server_per_proc: ``list``
+    :rtype: a :class:`Server`.
+    """
     STATE_ENABLE = 'enable'
     STATE_DISABLE = 'disable'
     STATE_READY = 'ready'
@@ -91,7 +95,7 @@ class Server(object):
     def check_code(self):
         """Return the check code.
 
-        :rtype: integer
+        :rtype: ``integer``
         """
         values = cmd_across_all_procs(
             self._server_per_proc, 'metric', 'check_code'
@@ -103,7 +107,7 @@ class Server(object):
     def check_status(self):
         """Return the check status.
 
-        :rtype: string
+        :rtype: ``string``
         """
         values = cmd_across_all_procs(
             self._server_per_proc, 'metric', 'check_status'
@@ -115,7 +119,7 @@ class Server(object):
     def last_status(self):
         """Return the last health check contents or textual error.
 
-        :rtype: string
+        :rtype: ``string``
         """
         values = cmd_across_all_procs(
             self._server_per_proc, 'metric', 'last_chk'
@@ -127,7 +131,7 @@ class Server(object):
     def last_agent_check(self):
         """Return the last agent check contents or textual error.
 
-        :rtype: string
+        :rtype: ``string``
         """
         values = cmd_across_all_procs(
             self._server_per_proc, 'metric', 'last_agt'
@@ -282,7 +286,7 @@ class Server(object):
     def weight(self):
         """Return the weight.
 
-        :rtype: integer
+        :rtype: ``integer``
         :raise: :class:`IncosistentData` exception if weight is different
           per process
         """
@@ -300,8 +304,8 @@ class Server(object):
 
         :param value: Weight to set
         :type value: integer or string with '%' sign
-        :return: True if command succeeds otherwise False
-        :rtype: bool
+        :return: ``True`` if command succeeds otherwise ``False``.
+        :rtype: ``bool``
 
         Usage:
 
@@ -341,8 +345,8 @@ class Server(object):
     def shutdown(self):
         """Terminate all the sessions attached to the specified server.
 
-        :return: True if command succeeds otherwise False
-        :rtype: bool
+        :return: ``True`` if command succeeds otherwise ``False``.
+        :rtype: ``bool``
         """
 
         cmd = "shutdown sessions server {}/{}".format(self.backendname, self.name)

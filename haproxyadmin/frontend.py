@@ -20,7 +20,6 @@ class Frontend(object):
     :param frontend_per_proc: list of :class:`._Frontend` objects.
     :type frontend_per_proc: ``list``
     :rtype: a :class:`Frontend`.
-
     """
     FRONTEND_METRICS = [
         'bin',
@@ -148,6 +147,17 @@ class Frontend(object):
           :class:`haproxyadmin.exceptions.CommandFailed` or
           :class:`haproxyadmin.exceptions.MultipleCommandResults` is raised
           when something bad happens otherwise returns ``False``.
+
+        Usage::
+
+          >>> from haproxyadmin import haproxy
+          >>> hap = haproxy.HAProxy(socket_dir='/run/haproxy')
+          >>> frontend = hap.frontend('frontend1_proc34')
+          >>> frontend.maxconn
+          >>> frontend.setmaxconn(50000)
+          True
+          >>> frontend.maxconn
+          100000
         """
         if not isinstance(value, int):
             raise ValueError("Expected integer and got {}".format(type(value)))
@@ -170,6 +180,14 @@ class Frontend(object):
         """Return a list of process number in which frontend is configured.
 
         :rtype: ``list``
+
+        Usage::
+
+          >>> from haproxyadmin import haproxy
+          >>> hap = haproxy.HAProxy(socket_dir='/run/haproxy')
+          >>> frontend = hap.frontend('frontend2_proc34')
+          >>> frontend.process_nb
+          [4, 3]
         """
         process_numbers = []
         for frontend in self._frontend_per_proc:
@@ -182,6 +200,14 @@ class Frontend(object):
         """Return the number of requests.
 
         :rtype: ``integer``
+
+        Usage::
+
+          >>> from haproxyadmin import haproxy
+          >>> hap = haproxy.HAProxy(socket_dir='/run/haproxy')
+          >>> frontend = hap.frontend('frontend2_proc34')
+          >>> frontend.requests
+          5
         """
         return self.metric('req_tot')
 
@@ -195,6 +221,13 @@ class Frontend(object):
 
         :rtype: ``list``
 
+        Usage::
+
+          >>> from haproxyadmin import haproxy
+          >>> hap = haproxy.HAProxy(socket_dir='/run/haproxy')
+          >>> frontend = hap.frontend('frontend2_proc34')
+          >>> frontend.requests_per_process()
+          [(4, 2), (3, 3)]
         """
         results = cmd_across_all_procs(self._frontend_per_proc, 'metric',
                                        'req_tot')
@@ -238,6 +271,13 @@ class Frontend(object):
         :raise: :class:`IncosistentData` exception if status is different
           per process
 
+        Usage::
+
+          >>> from haproxyadmin import haproxy
+          >>> hap = haproxy.HAProxy(socket_dir='/run/haproxy')
+          >>> frontend = hap.frontend('frontend2_proc34')
+          >>> frontend.status
+          'OPEN'
         """
         results = cmd_across_all_procs(self._frontend_per_proc, 'metric',
                                        'status')
