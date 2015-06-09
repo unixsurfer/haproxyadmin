@@ -126,3 +126,5 @@ Get a specific server from a backend
     >>> s1 = backend.server('bck1_proc34_srv2')
     >>> s1.name, s1.backendname, s1.status, s1.requests, s1.weight
     ('bck1_proc34_srv2', 'backend1_proc34', 'UP', 9, 1)
+
+Read :class:`Backend <.Backend>` class for more information.
