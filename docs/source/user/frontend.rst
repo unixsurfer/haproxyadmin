@@ -156,3 +156,5 @@ Retrieve various statistics
     >>> frontend.requests
     5
     >>>
+
+Read :class:`Frontend <.Frontend>` class for more information.
