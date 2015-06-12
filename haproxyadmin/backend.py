@@ -80,6 +80,18 @@ class Backend(object):
     def __ne__(self, other):
         return (not self.__eq__(other))
 
+    @property
+    def iid(self):
+        """Return the unique proxy ID of the backend.
+
+        .. note::
+            Because proxy ID is the same across all processes,
+            we return the proxy ID from the 1st process.
+
+        :rtype: ``int``
+        """
+        return int(self._backend_per_proc[0].iid)
+
     def servers(self, name=None):
         """Return Server object for each server.
 

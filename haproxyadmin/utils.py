@@ -484,7 +484,6 @@ def stat2dict(csv_data):
     headers = csv_data.pop(0)
     # make a shiny list of heads
     heads = headers[2:].strip().split(',')
-
     # set for all _CSVLine object the header fields
     CSVLine.heads = heads
 

@@ -92,6 +92,18 @@ class Server(object):
         return (not self.__eq__(other))
 
     @property
+    def sid(self):
+        """Return the unique proxy server ID of the server.
+
+        .. note::
+            Because server ID is the same across all processes,
+            we return the proxy ID from the 1st process.
+
+        :rtype: ``int``
+        """
+        return int(self._server_per_proc[0].sid)
+
+    @property
     def check_code(self):
         """Return the check code.
 
