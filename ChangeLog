@@ -1,9 +1,44 @@
 CHANGES
 =======
 
+0.0.3
+-----
+
+* DOC: another set of updates
+* rename get_frontends to frontends
+* Performance improvements due to the way we interact with stats socket
+* update haproxy.cfg, give a unique name for each listen directive
+* Update TODO.rst
+* TODO: add and remove items
+* update docstrings in few classes and functions
+* DOC: add examples for server in User Guide
+* DOC: add a reference to Frontend class in User Guide
+* DOC: add examples for backends in User Guide
+* haproxy.py: use long variable names in order to be consistent with rest of code
+* DOC: add remaining examples for frontends in User Guide
+* README: add missing variable
+* DOC: add examples for backends in User Guide
+* backend.py: remove status from BACKEND_METRICS
+* DOC: add a bunch of examples for frontends in User Guide
+* DOC: add missing example code
+* DOC: add more examples for HAProxy operations in the User Guide
+* DOC: add examples in HAProxy section of User Guide for backends/servers
+* DOC: create a reference to HAProxy class
+* DOC: add a bunch of examples in HAProxy section of User Guide for Frontends
+* DOC: name the 1st section properly
+* DOC: Another restructure for User Guide
+* DOC: restructure the section leves for User Guide
+* DOC: add User Guide sections and few examples for HAProxy
+* TODO: remove items which are completed
+* move TODO subsection out of README and make it a section in the documentation
+* bump release in the docs
+* README: remove changelog section as we have it in the documentation
+* docs: Add Changes section
+
 0.0.2
 -----
 
+* RELEASE 0.0.2 version
 * README: merged TODO into README
 * README: documention reference doesn't need to be a section
 * internal.py: wrong refactoring for _Backend class
