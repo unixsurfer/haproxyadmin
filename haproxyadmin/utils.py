@@ -267,7 +267,7 @@ def check_command(results):
 
         * The same output is returned by all processes
         * If output matches to a list of outputs which indicate that
-        command was valid
+          command was valid
 
     :param results: a list of tuples with 2 elements.
 
@@ -406,7 +406,7 @@ def info2dict(raw_info):
 
     :param raw_info: data returned by 'show info' UNIX socket command
     :type raw_info: ``list``
-    :return: A dictionary with the following keys/values(examples)::
+    :return: A dictionary with the following keys/values(examples)
 
     .. code-block:: python
 

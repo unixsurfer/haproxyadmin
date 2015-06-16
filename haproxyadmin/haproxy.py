@@ -295,7 +295,7 @@ class HAProxy(object):
 
     @property
     def processids(self):
-        """Return the process IDs of each HAProxy process.
+        """Return the process IDs of all HAProxy processes.
 
         :rtype: ``list``
 

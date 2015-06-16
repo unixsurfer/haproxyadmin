@@ -65,11 +65,17 @@ Metric names
 Various stats field names for which a value can be retrieved by using
 ``metric`` method available in all public and internal interfaces.
 
-.. autodata:: haproxyadmin.haproxy.FRONTEND_METRICS
+.. data:: haproxyadmin.haproxy.FRONTEND_METRICS
+   :annotation: = a list of metric names for retrieving varius statistics for
+     frontends
 
-.. autodata:: haproxyadmin.haproxy.BACKEND_METRICS
+.. data:: haproxyadmin.haproxy.BACKEND_METRICS
+   :annotation: = a list of metric names for retrieving varius statistics for
+     backends
 
-.. autodata:: haproxyadmin.haproxy.SERVER_METRICS
+.. data:: haproxyadmin.haproxy.SERVER_METRICS
+   :annotation: = a list of metric names for retrieving varius statistics for
+     servers
 
 Aggregation rules
 ^^^^^^^^^^^^^^^^^

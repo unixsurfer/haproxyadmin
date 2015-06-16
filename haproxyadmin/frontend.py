@@ -253,6 +253,7 @@ class Frontend(object):
         .. warning::
            HAProxy removes from the running configuration a frontend, so
            further operations on the frontend will return an error.
+
         :rtype: ``bool``
         """
         cmd = "shutdown frontend {}".format(self.name)

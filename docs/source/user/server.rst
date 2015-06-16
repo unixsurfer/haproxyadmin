@@ -167,7 +167,7 @@ Change weight of server in a backend
     >>> server.weight
     58
 
-.. info::
+.. note::
     If the value ends with the '%' sign, then the new weight will be relative
     to the initially configured weight. Absolute weights are permitted between
     0 and 256.
