@@ -211,7 +211,7 @@ class _HAProxyProcess(object):
 
         return return_list
 
-    def get_frontends(self, name=None):
+    def frontends(self, name=None):
         """Build :class:`_Frontend` objects for each frontend.
 
         :param name: (optional) backend name, defaults to ``None``

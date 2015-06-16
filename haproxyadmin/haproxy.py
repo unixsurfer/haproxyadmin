@@ -437,7 +437,7 @@ class HAProxy(object):
 
         # loop over all HAProxy processes and get a list of frontend objects
         for haproxy in self._hap_processes:
-            for frontend in haproxy.get_frontends(name):
+            for frontend in haproxy.frontends(name):
                 if frontend.name not in frontends_across_hap_processes:
                     frontends_across_hap_processes[frontend.name] = []
                 frontends_across_hap_processes[frontend.name].append(frontend)
