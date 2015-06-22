@@ -160,8 +160,9 @@ def is_unix_socket(path):
 def connected_socket(path):
     """Return ``True`` if socket is connected to HAProxy.
 
-    We send a 'show info' command to the socket to confirm that there is
-    a process connected to it.
+    We send a 'show info' command to the socket, build a dictinary structure
+    and check if 'Name' key is present in the dictionary to confirm that
+    there is a HAProxy process connected to it.
 
     :param path: file name path
     :type path: ``string``
@@ -172,7 +173,13 @@ def connected_socket(path):
         unix_socket.settimeout(0.1)
         unix_socket.connect(path)
         unix_socket.send(six.b('show info' + '\n'))
-        return True
+        file_handle = unix_socket.makefile()
+        data = file_handle.read().splitlines()
+        hap_info = info2dict(data)
+        if hap_info['Name'] == 'HAProxy':
+            return True
+        else:
+            return False
     except:
         return False
 
