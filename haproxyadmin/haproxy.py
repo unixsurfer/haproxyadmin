@@ -16,7 +16,8 @@ from .frontend import Frontend
 from .backend import Backend
 from .server import Server
 from .utils import (is_unix_socket, cmd_across_all_procs, calculate, isint,
-                    should_die, check_command, check_output, compare_values)
+                    should_die, check_command, check_output, compare_values,
+                    connected_socket)
 
 from .internal import _HAProxyProcess
 
@@ -107,13 +108,18 @@ class HAProxy(object):
 
         if socket_dir and os.path.isdir(socket_dir):
             for _file in glob.glob(os.path.join(socket_dir, '*')):
-                if is_unix_socket(_file):
+                if is_unix_socket(_file) and connected_socket(_file):
                     socket_files.append(_file)
-
-        if socket_file and is_unix_socket(socket_file):
+        elif (socket_file and is_unix_socket(socket_file) and
+              connected_socket(socket_file)):
             socket_files.append(os.path.realpath(socket_file))
+        else:
+            raise ValueError("UNIX socket file was not set")
+
         if not socket_files:
-            raise ValueError("Wrong value for socket")
+            raise ValueError("No valid and/or open UNIX socket file was found, "
+                             "directory: {} file: {}".format(socket_dir,
+                                                             socket_file))
 
         for so_file in socket_files:
             self._hap_processes.append(
