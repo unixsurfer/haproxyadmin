@@ -9,6 +9,8 @@ haproxyadmin.
 
 """
 
+import socket
+import six
 from six.moves import filter
 import os
 import stat
@@ -144,7 +146,7 @@ def should_die(old_implementation):
 
 
 def is_unix_socket(path):
-    """Return true if path is a valid UNIX socket otherwise False.
+    """Return ``True`` if path is a valid UNIX socket otherwise False.
 
     :param path: file name path
     :type path: ``string``
@@ -153,6 +155,26 @@ def is_unix_socket(path):
     mode = os.stat(path).st_mode
 
     return stat.S_ISSOCK(mode)
+
+
+def connected_socket(path):
+    """Return ``True`` if socket is connected to HAProxy.
+
+    We send a 'show info' command to the socket to confirm that there is
+    a process connected to it.
+
+    :param path: file name path
+    :type path: ``string``
+    :rtype: ``bool``
+    """
+    try:
+        unix_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        unix_socket.settimeout(0.1)
+        unix_socket.connect(path)
+        unix_socket.send(six.b('show info' + '\n'))
+        return True
+    except:
+        return False
 
 
 def cmd_across_all_procs(hap_objects, method, *arg):
