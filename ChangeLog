@@ -1,9 +1,25 @@
 CHANGES
 =======
 
+0.0.4
+-----
+
+* RELEASE 0.0.4 version
+* update TODO
+* haproxy.py: fix a bug in add map where we forgot to set value
+* haproxy.py: ignore socket files not bound to a process
+* utils.py: add connected_socket to check if a socket is bound to a process
+* include six and not docopt in requirements.txt
+* add requirements file for pip installations
+* bump version on docs as well
+* use stot metric name for fetching requests for backends/servers
+* Update TODO.rst
+* remove tune.rst as we don't need it anymore
+
 0.0.3
 -----
 
+* RELEASE 0.0.3 version
 * DOC: another set of updates
 * rename get_frontends to frontends
 * Performance improvements due to the way we interact with stats socket
