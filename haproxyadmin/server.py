@@ -188,7 +188,7 @@ class Server(object):
         :rtype: ``integer``
 
         """
-        return self.metric('lbtot')
+        return self.metric('stot')
 
     def requests_per_process(self):
         """Return the number of requests for the server per process.
@@ -197,7 +197,7 @@ class Server(object):
           element is requests.
 
         """
-        results = cmd_across_all_procs(self._server_per_proc, 'metric', 'lbtot')
+        results = cmd_across_all_procs(self._server_per_proc, 'metric', 'stot')
 
         return results
 

@@ -185,7 +185,7 @@ class Backend(object):
 
         :rtype: integer
         """
-        return self.metric('lbtot')
+        return self.metric('stot')
 
     def requests_per_process(self):
         """Return the number of requests for the backend per process.
@@ -198,7 +198,7 @@ class Backend(object):
         :rtype: ``list``
 
         """
-        results = cmd_across_all_procs(self._backend_per_proc, 'metric', 'lbtot')
+        results = cmd_across_all_procs(self._backend_per_proc, 'metric', 'stot')
 
         return results
 
