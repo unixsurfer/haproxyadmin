@@ -187,7 +187,7 @@ class HAProxy(object):
         if isint(mapid):
             cmd = "add map #{} {} {}".format(mapid, key, value)
         elif os.path.isfile(mapid):
-            cmd = "add map {} {}".format(mapid, key, value)
+            cmd = "add map {} {} {}".format(mapid, key, value)
         else:
             raise ValueError("Invalid input")
 
