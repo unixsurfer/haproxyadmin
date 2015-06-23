@@ -16,7 +16,8 @@ import os
 import stat
 from functools import wraps
 from .exceptions import (CommandFailed, MultipleCommandResults,
-                         IncosistentData)
+                         IncosistentData, SocketPermissionError,
+                         SocketConnectionError, SocketApplicationError)
 from .command_status import ERROR_OUTPUT_STRINGS, SUCCESS_OUTPUT_STRINGS
 
 METRICS_SUM = [
@@ -158,7 +159,7 @@ def is_unix_socket(path):
 
 
 def connected_socket(path):
-    """Return ``True`` if socket is connected to HAProxy.
+    """Check if socket file is a valid HAProxy socket file.
 
     We send a 'show info' command to the socket, build a dictinary structure
     and check if 'Name' key is present in the dictionary to confirm that
@@ -167,6 +168,8 @@ def connected_socket(path):
     :param path: file name path
     :type path: ``string``
     :rtype: ``bool``
+    :raises: class.`<SocketPermissionError>`, class.`<SocketConnectionError>`
+      and class.`<SocketApplicationError>`
     """
     try:
         unix_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
@@ -176,12 +179,18 @@ def connected_socket(path):
         file_handle = unix_socket.makefile()
         data = file_handle.read().splitlines()
         hap_info = info2dict(data)
+    except ConnectionRefusedError:
+        raise SocketConnectionError(path)
+    except PermissionError:
+        raise SocketPermissionError(path)
+
+    try:
         if hap_info['Name'] == 'HAProxy':
             return True
         else:
-            return False
-    except:
-        return False
+            raise SocketApplicationError(path)
+    except KeyError:
+        raise SocketApplicationError(path)
 
 
 def cmd_across_all_procs(hap_objects, method, *arg):
