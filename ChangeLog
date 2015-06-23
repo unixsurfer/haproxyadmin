@@ -1,6 +1,14 @@
 CHANGES
 =======
 
+0.0.5
+-----
+
+* RELEASE 0.0.5 version
+* utils.py: raise an appropriate exception when we check for valid socket files
+* add a bunch of exceptions for catching errors when we test socket file
+* connected_socket() perform a sanity on the date returned
+
 0.0.4
 -----
 
