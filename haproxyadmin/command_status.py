@@ -78,7 +78,7 @@ ERROR_OUTPUT_STRINGS = [
     "'set rate-limit' supports 'connections', 'sessions', 'ssl-sessions', and 'http-compression'.",
     "'set server <srv> agent' expects 'up' or 'down'.",
     "'set server <srv> health' expects 'up', 'stopping', or 'down'.",
-    "'set server <srv>' only supports 'agent', 'health', 'state' and 'weight'.",
+    "'set server <srv>' only supports 'agent', 'health', 'state', 'weight' add 'addr'.",
     "'set server <srv> state' expects 'ready', 'drain' and 'maint'.",
     "'set ssl ocsp-response' expects response in base64 encoding.",
     "'set ssl ocsp-response' received invalid base64 encoded response.",
