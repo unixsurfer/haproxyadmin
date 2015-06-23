@@ -106,7 +106,11 @@ class HAProxy(object):
         self._hap_processes = []
         socket_files = []
 
-        if socket_dir and os.path.isdir(socket_dir):
+        if socket_dir:
+            if not os.path.exists(socket_dir):
+                raise ValueError("socket directory does not exist "
+                                 "{}".format(socket_dir))
+
             for _file in glob.glob(os.path.join(socket_dir, '*')):
                 if is_unix_socket(_file) and connected_socket(_file):
                     socket_files.append(_file)
