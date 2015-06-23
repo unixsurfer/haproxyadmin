@@ -5,8 +5,6 @@ TODO
 
 - Add support for TLS ticket operations
 
-- Revisit the exceptions
-
 - Add support for OCSP stapling
 
 - Add support for changing server's IP
