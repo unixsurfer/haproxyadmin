@@ -1,6 +1,20 @@
 CHANGES
 =======
 
+0.0.6
+-----
+
+* RELEASE 0.0.6 version
+* internal.py: remove empty string from data returned from socket
+* update TODO
+* fix typo
+* tiny reformatting on exceptions
+* haproxy.py: explicitly check for the existence of socket directory
+* Update TODO
+* extend ERROR_OUTPUT_STRINGS to support address field
+* include Socket family exceptions in the documentation
+* updates on ChangeLog
+
 0.0.5
 -----
 
