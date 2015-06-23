@@ -117,9 +117,8 @@ class HAProxy(object):
             raise ValueError("UNIX socket file was not set")
 
         if not socket_files:
-            raise ValueError("No valid and/or open UNIX socket file was found, "
-                             "directory: {} file: {}".format(socket_dir,
-                                                             socket_file))
+            raise ValueError("No valid UNIX socket file was found, directory: "
+                             "{} file: {}".format(socket_dir, socket_file))
 
         for so_file in socket_files:
             self._hap_processes.append(
