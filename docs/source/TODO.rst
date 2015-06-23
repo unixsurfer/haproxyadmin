@@ -5,8 +5,6 @@ TODO
 
 - Add support for TLS ticket operations
 
-- Revisit the socket_file/socket_dir code path
-
 - Revisit the exceptions
 
 - Add support for OCSP stapling
