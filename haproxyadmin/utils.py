@@ -161,7 +161,7 @@ def is_unix_socket(path):
 def connected_socket(path):
     """Check if socket file is a valid HAProxy socket file.
 
-    We send a 'show info' command to the socket, build a dictinary structure
+    We send a 'show info' command to the socket, build a dictionary structure
     and check if 'Name' key is present in the dictionary to confirm that
     there is a HAProxy process connected to it.
 
