@@ -13,8 +13,8 @@ This module contains the set of haproxyadmin' exceptions.
 class CommandFailed(Exception):
     """Raised when a command to HAProxy returned an error.
 
-    Arguments:
-        message (str): String returned by HAProxy
+    :param message: error message.
+    :type message: ``string``
     """
     def __init__(self, message):
         super(CommandFailed, self).__init__(message)
@@ -32,3 +32,37 @@ class IncosistentData(Exception):
         self.message = 'Received different data per HAProxy process'
         self.results = results
         super(IncosistentData, self).__init__(self.message)
+
+class SocketPermissionError(Exception):
+    """Raised when permissions are not granted to access socket file.
+
+    :param socket_file: socket file.
+    :type socket_file: ``string``
+    """
+    def __init__(self, socket_file):
+        self.message = 'No permissions are granted to access socket file'
+        self.socket_file = socket_file
+        super(SocketPermissionError, self).__init__(self.message)
+
+class SocketConnectionError(Exception):
+    """Raised when socket file is not bound to a process.
+
+    :param socket_file: socket file.
+    :type socket_file: ``string``
+    """
+    def __init__(self, socket_file):
+        self.message = 'No process is bound to socket file'
+        self.socket_file = socket_file
+        super(SocketConnectionError, self).__init__(self.message)
+
+class SocketApplicationError(Exception):
+    """Raised when we connect to a socket but not HAProxy is bound to it.
+
+    :param socket_file: socket file.
+    :type socket_file: ``string``
+    """
+    def __init__(self, socket_file):
+        self.message = 'HAProxy is not bound to socket file'
+        self.socket_file = socket_file
+        super(SocketApplicationError, self).__init__(self.message)
+
