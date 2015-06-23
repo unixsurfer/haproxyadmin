@@ -168,8 +168,8 @@ def connected_socket(path):
     :param path: file name path
     :type path: ``string``
     :rtype: ``bool``
-    :raises: class.`<SocketPermissionError>`, class.`<SocketConnectionError>`
-      and class.`<SocketApplicationError>`
+    :raise: :class:`.SocketPermissionError`, :class:`.SocketConnectionError`
+      and :class:`.SocketApplicationError`
     """
     try:
         unix_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
@@ -267,7 +267,7 @@ def compare_values(values):
     :type values: ``list``
     :return: value
     :rtype: ``string``
-    :raise: class:`<IncosistentData>`.
+    :raise: :class:`.IncosistentData`.
     """
     if elements_of_list_same([msg[1] for msg in values]):
         return values[0][1]
@@ -315,7 +315,7 @@ def check_command(results):
     :type results: ``list``
     :return: ``True`` if command was successfully executed otherwise ``False``.
     :rtype: ``bool``
-    :raise: :class:`<MultipleCommandResults>` when output differers.
+    :raise: :class:`.MultipleCommandResults` when output differers.
     """
     if elements_of_list_same([msg[1] for msg in results]):
         msg = results[0][1]

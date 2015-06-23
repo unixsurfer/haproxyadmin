@@ -55,6 +55,12 @@ meant for external use.
 
 .. autoclass:: IncosistentData
 
+.. autoclass:: SocketApplicationError
+
+.. autoclass:: SocketConnectionError
+
+.. autoclass:: SocketPermissionError
+
 
 Constants
 ---------
