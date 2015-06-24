@@ -71,10 +71,10 @@ class _HAProxyProcess(object):
                 data = file_handle.read().splitlines()
                 # HAProxy always send an empty string at the end
                 # we remove it as it adds noise for things like ACL/MAP and etc
-                # We only do that when we get more than 2 lines, which only
+                # We only do that when we get more than 1 line, which only
                 # happens when we ask for ACL/MAP/etc and not for giving cmds
                 # such as disable/enable server
-                if len(data) > 2 and data[-1] == '':
+                if len(data) > 1 and data[-1] == '':
                     data.pop()
                 return data
             except socket.timeout:
