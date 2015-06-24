@@ -20,7 +20,7 @@ from .utils import (is_unix_socket, cmd_across_all_procs, calculate, isint,
                     connected_socket)
 
 from .internal import _HAProxyProcess
-
+from .exceptions import CommandFailed
 
 VALID_STATES = Server.VALID_STATES
 STATE_ENABLE = Server.STATE_ENABLE
@@ -543,7 +543,7 @@ class HAProxy(object):
                                            cmd)
         get_info_proc1 = get_results[0][1]
         if not check_output(get_info_proc1):
-            raise ValueError(get_info_proc1)
+            raise CommandFailed(get_info_proc1[0])
 
         return get_info_proc1
 
@@ -923,7 +923,7 @@ class HAProxy(object):
         map_info_proc1 = map_info[0][1]
 
         if not check_output(map_info_proc1):
-            raise ValueError(map_info_proc1)
+            raise CommandFailed(map_info_proc1[0])
 
         return map_info_proc1
 
