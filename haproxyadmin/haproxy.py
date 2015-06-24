@@ -181,11 +181,11 @@ class HAProxy(object):
           >>> from haproxyadmin import haproxy
           >>> hap = haproxy.HAProxy(socket_dir='/run/haproxy')
           >>> hap.show_map(0)
-          ['0x1a78b20 1 www.foo.com-1', '']
+          ['0x1a78b20 1 www.foo.com-1']
           >>> hap.add_map(0, '9', 'foo')
           True
           >>> hap.show_map(0)
-          ['0x1a78b20 1 www.foo.com-1', '0x1b15c80 9 foo', '']
+          ['0x1a78b20 1 www.foo.com-1', '0x1b15c80 9 foo']
         """
         if isint(mapid):
             cmd = "add map #{} {} {}".format(mapid, key, value)
@@ -374,19 +374,19 @@ class HAProxy(object):
           >>> from haproxyadmin import haproxy
           >>> hap = haproxy.HAProxy(socket_dir='/run/haproxy')
           >>> hap.show_map(0)
-          ['0x1b15cd0 9 foo', '0x1a78980 11 bar', '']
+          ['0x1b15cd0 9 foo', '0x1a78980 11 bar']
           >>> hap.del_map(0, '0x1b15cd0')
           True
           >>> hap.show_map(0)
-          ['0x1a78980 11 bar', '']
+          ['0x1a78980 11 bar']
           >>> hap.add_map(0, '22', 'bar22')
           True
           >>> hap.show_map(0)
-          ['0x1a78980 11 bar', '0x1b15c00 22 bar22', '']
+          ['0x1a78980 11 bar', '0x1b15c00 22 bar22']
           >>> hap.del_map(0, '22')
           True
           >>> hap.show_map(0)
-          ['0x1a78980 11 bar', '']
+          ['0x1a78980 11 bar']
         """
         if key.startswith('0x'):
             key = "#{}".format(key)
@@ -723,7 +723,7 @@ class HAProxy(object):
 
         :param mapid: map id or a file.
         :type mapid: ``integer`` or a file path passed as ``string``
-        :param key: Key to delete
+        :param key: key id
         :type key: ``string``
         :param value: value to set for the key.
         :type value: ``string``
@@ -735,15 +735,15 @@ class HAProxy(object):
           >>> from haproxyadmin import haproxy
           >>> hap = haproxy.HAProxy(socket_dir='/run/haproxy')
           >>> hap.show_map(0)
-          ['0x1a78980 11 9', '0x1b15c00 22 0', '']
+          ['0x1a78980 11 9', '0x1b15c00 22 0']
           >>> hap.set_map(0, '11', 'new')
           True
           >>> hap.show_map(0)
-          ['0x1a78980 11 new', '0x1b15c00 22 0', '']
+          ['0x1a78980 11 new', '0x1b15c00 22 0']
           >>> hap.set_map(0, '0x1a78980', 'new2')
           True
           >>> hap.show_map(0)
-          ['0x1a78980 11 new2', '0x1b15c00 22 0', '']
+          ['0x1a78980 11 new2', '0x1b15c00 22 0']
         """
         if key.startswith('0x'):
             key = "#{}".format(key)
