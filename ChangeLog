@@ -1,6 +1,14 @@
 CHANGES
 =======
 
+0.0.7
+-----
+
+* RELEASE 0.0.7 version
+* update docstring for map commands
+* haproxy: raise CommandFailed when output indicates something bad happened
+* remove empty string when more than 1 line is returned by HAProxy
+
 0.0.6
 -----
 
