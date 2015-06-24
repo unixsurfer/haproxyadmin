@@ -145,11 +145,11 @@ class HAProxy(object):
           >>> from haproxyadmin import haproxy
           >>> hap = haproxy.HAProxy(socket_dir='/run/haproxy')
           >>> hap.show_acl(acl=4)
-          ['0x23181c0 /static/css/', '']
+          ['0x23181c0 /static/css/']
           >>> hap.add_acl(acl=4, pattern='/foo/' )
           True
           >>> hap.show_acl(acl=4)
-          ['0x23181c0 /static/css/', '0x238f790 /foo/', '']
+          ['0x23181c0 /static/css/', '0x238f790 /foo/']
         """
         if isint(acl):
             cmd = "add acl #{} {}".format(acl, pattern)
@@ -333,15 +333,15 @@ class HAProxy(object):
           >>> from haproxyadmin import haproxy
           >>> hap = haproxy.HAProxy(socket_dir='/run/haproxy')
           >>> hap.show_acl(acl=4)
-          ['0x23181c0 /static/css/', '0x238f790 /foo/', '0x238f810 /bar/', '']
+          ['0x23181c0 /static/css/', '0x238f790 /foo/', '0x238f810 /bar/']
           >>> hap.del_acl(acl=4, key='/static/css/')
           True
           >>> hap.show_acl(acl=4)
-          ['0x238f790 /foo/', '0x238f810 /bar/', '']
+          ['0x238f790 /foo/', '0x238f810 /bar/']
           >>> hap.del_acl(acl=4, key='0x238f790')
           True
           >>> hap.show_acl(acl=4)
-          ['0x238f810 /bar/', '']
+          ['0x238f810 /bar/']
         """
         if key.startswith('0x'):
             key = "#{}".format(key)
@@ -489,7 +489,7 @@ class HAProxy(object):
           >>> from haproxyadmin import haproxy
           >>> hap = haproxy.HAProxy(socket_dir='/run/haproxy')
           >>> hap.show_acl(acl=4)
-          ['0x2318120 /static/js/', '0x23181c0 /static/css/', '']
+          ['0x2318120 /static/js/', '0x23181c0 /static/css/']
           >>> hap.get_acl(acl=4, value='/foo')
           'type=beg, case=sensitive, match=no'
           >>> hap.get_acl(acl=4, value='/static/js/')
@@ -526,7 +526,7 @@ class HAProxy(object):
           >>> from haproxyadmin import haproxy
           >>> hap = haproxy.HAProxy(socket_dir='/run/haproxy')
           >>> hap.show_map(0)
-          ['0x1a78980 11 new2', '0x1b15c00 22 0', '']
+          ['0x1a78980 11 new2', '0x1b15c00 22 0']
           >>> hap.get_map(0, '11')
           'type=str, case=sensitive, found=yes, idx=tree, key="11", value="new2", type="str"'
           >>> hap.get_map(0, '10')
@@ -855,13 +855,13 @@ class HAProxy(object):
           >>> from haproxyadmin import haproxy
           >>> hap = haproxy.HAProxy(socket_dir='/run/haproxy')
           >>> hap.show_acl(acl=6)
-          ['0x1d09730 ver%3A27%3Bvar%3A0', '']
+          ['0x1d09730 ver%3A27%3Bvar%3A0']
           >>> hap.show_acl()
           ['# id (file) description',
           "1 () acl 'ssl_fc' file '/etc/haproxy/haproxy.cfg' line 83",
           "2 () acl 'src' file '/etc/haproxy/haproxy.cfg' line 95",
           "3 () acl 'path_beg' file '/etc/haproxy/haproxy.cfg' line 97",
-          '',]
+          ]
         """
         if acl is not None:
             if isint(acl):
@@ -903,9 +903,9 @@ class HAProxy(object):
           >>> hap.show_map(map=6)
           ['# id (file) description',
            "0 (/etc/haproxy/v-m1-bk) pattern loaded ...... line 82",
-           '']
+           ]
           >>> hap.show_map(0)
-          ['0x1a78ab0 0 www.foo.com-0', '0x1a78b20 1 www.foo.com-1', '']
+          ['0x1a78ab0 0 www.foo.com-0', '0x1a78b20 1 www.foo.com-1']
         """
         if mapid is not None:
             if isint(mapid):
