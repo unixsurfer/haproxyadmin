@@ -839,14 +839,14 @@ class HAProxy(object):
         return check_command(results)
 
     @should_die
-    def show_acl(self, acl=None):
+    def show_acl(self, aclid=None):
         """Dump info about acls.
 
         Without argument, the list of all available acls is returned.
-        If a acl is specified, its contents are dumped.
+        If a aclid is specified, its contents are dumped.
 
-        :param acl: (optional) acl id or a file
-        :type acl: ``integer`` or a file path passed as ``string``
+        :param aclid: (optional) acl id or a file
+        :type aclid: ``integer`` or a file path passed as ``string``
         :return: a list with the acls
         :rtype: ``list``
 
@@ -854,7 +854,7 @@ class HAProxy(object):
 
           >>> from haproxyadmin import haproxy
           >>> hap = haproxy.HAProxy(socket_dir='/run/haproxy')
-          >>> hap.show_acl(acl=6)
+          >>> hap.show_acl(aclid=6)
           ['0x1d09730 ver%3A27%3Bvar%3A0']
           >>> hap.show_acl()
           ['# id (file) description',
@@ -863,11 +863,11 @@ class HAProxy(object):
           "3 () acl 'path_beg' file '/etc/haproxy/haproxy.cfg' line 97",
           ]
         """
-        if acl is not None:
-            if isint(acl):
-                cmd = "show acl #{}".format(acl)
-            elif os.path.isfile(acl):
-                cmd = "show acl {}".format(acl)
+        if aclid is not None:
+            if isint(aclid):
+                cmd = "show acl #{}".format(aclid)
+            elif os.path.isfile(aclid):
+                cmd = "show acl {}".format(aclid)
             else:
                 raise ValueError("Invalid input")
         else:
