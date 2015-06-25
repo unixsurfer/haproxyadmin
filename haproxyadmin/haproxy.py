@@ -880,7 +880,7 @@ class HAProxy(object):
         acl_info_proc1 = acl_info[0][1]
 
         if not check_output(acl_info_proc1):
-            raise ValueError(acl_info_proc1)
+            raise CommandFailed(acl_info_proc1[0])
 
         return acl_info_proc1
 
