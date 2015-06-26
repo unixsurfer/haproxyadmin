@@ -1,6 +1,15 @@
 CHANGES
 =======
 
+0.1.0
+-----
+
+* RELEASE 0.1.0 version
+* raise CommandFailed rather ValueError in show_acl
+* show_acl: rename acl argument to aclid to be consistent with show_map
+* update TODO
+* update docstring for acl commands
+
 0.0.7
 -----
 
