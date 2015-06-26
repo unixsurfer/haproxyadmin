@@ -58,26 +58,17 @@ class _HAProxyProcess(object):
         :return: Output. Newline character is stripped off.
         :rtype: list
         """
-        unix_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-        # I haven't seen a case where a running process which holds a UNIX
-        # socket will take more than few nanoseconds to accept a connection.
-        # Thus I hard-code a timeout of 0.1ms
-        unix_socket.settimeout(0.1)
-
+        data = []
+        print(command)
         for attempt in range(1, self.retry + 1):
             try:
+                unix_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+                # I haven't seen a case where a running process which holds a UNIX
+                # socket will take more than few nanoseconds to accept a connection.
+                # Thus I hard-code a timeout of 0.1ms
+                unix_socket.settimeout(0.1)
                 unix_socket.connect(self.socket_file)
                 unix_socket.send(six.b(command + '\n'))
-                file_handle = unix_socket.makefile()
-                data = file_handle.read().splitlines()
-                # HAProxy always send an empty string at the end
-                # we remove it as it adds noise for things like ACL/MAP and etc
-                # We only do that when we get more than 1 line, which only
-                # happens when we ask for ACL/MAP/etc and not for giving cmds
-                # such as disable/enable server
-                if len(data) > 1 and data[-1] == '':
-                    data.pop()
-                return data
             except socket.timeout:
                 if attempt == self.retry:
                     msg = "{} socket unavailable after {} reconnects".format(
@@ -86,8 +77,6 @@ class _HAProxyProcess(object):
                     raise socket.timeout(msg)
                 time.sleep(self.retry_interval)
                 continue
-            # PermissionDenied is raised when socket file isn't attached to a
-            # running process.
             except OSError as error:
                 # while stress testing HAProxy and querying for all frontend
                 # metrics I get:
@@ -97,10 +86,23 @@ class _HAProxyProcess(object):
                     raise SocketTransportError(error.message)
                 else:
                     raise
-            except:
-                raise
             else:
+                file_handle = unix_socket.makefile()
+                data = file_handle.read().splitlines()
+                # HAProxy always send an empty string at the end
+                # we remove it as it adds noise for things like ACL/MAP and etc
+                # We only do that when we get more than 1 line, which only
+                # happens when we ask for ACL/MAP/etc and not for giving cmds
+                # such as disable/enable server
+                if len(data) > 1 and data[-1] == '':
+                    data.pop()
+                # get out from the retry loop
+                break
+            finally:
+                print('close', self.socket_file)
                 unix_socket.close()
+
+        return data
 
     def reloaded(self):
         """Return ``True`` if process was reloaded otherwise ``False``."""
