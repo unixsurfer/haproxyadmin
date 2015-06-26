@@ -59,7 +59,6 @@ class _HAProxyProcess(object):
         :rtype: list
         """
         data = []
-        print(command)
         for attempt in range(1, self.retry + 1):
             try:
                 unix_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
@@ -99,7 +98,6 @@ class _HAProxyProcess(object):
                 # get out from the retry loop
                 break
             finally:
-                print('close', self.socket_file)
                 unix_socket.close()
 
         return data
