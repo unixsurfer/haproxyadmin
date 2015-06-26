@@ -70,3 +70,19 @@ class SocketApplicationError(Exception):
         self.message = 'HAProxy is not bound to socket file'
         self.socket_file = socket_file
         super(SocketApplicationError, self).__init__(self.message)
+
+
+class SocketTransportError(Exception):
+    """Raised when endpoint of socket hasn't closed an old connection.
+
+    .. note::
+       It only occurs in cases where HAProxy is ~90% CPU utilization for
+       processing traffic and we reconnect to the socket too
+       fast and as a result HAProxy doesn't have enough time to close the
+       previous connection.
+
+    :param message: error message.
+    :type message: ``string``
+    """
+    def __init__(self, message):
+        super(CommandFailed, self).__init__(message)
