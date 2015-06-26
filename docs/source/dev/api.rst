@@ -61,6 +61,8 @@ meant for external use.
 
 .. autoclass:: SocketPermissionError
 
+.. autoclass:: SocketTransportError
+
 
 Constants
 ---------
