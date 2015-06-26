@@ -18,6 +18,7 @@ import time
 import psutil
 
 from .utils import (info2dict, converter, stat2dict)
+from .exceptions import SocketTransportError
 
 
 class _HAProxyProcess(object):
@@ -87,6 +88,15 @@ class _HAProxyProcess(object):
                 continue
             # PermissionDenied is raised when socket file isn't attached to a
             # running process.
+            except OSError as error:
+                # while stress testing HAProxy and querying for all frontend
+                # metrics I get:
+                # OSError: [Errno 106] Transport endpoint is already connected
+                # catch this one only and reraise it withour exception
+                if error.errno == 106:
+                    raise SocketTransportError(error.message)
+                else:
+                    raise
             except:
                 raise
             else:
