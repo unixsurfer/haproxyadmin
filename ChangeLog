@@ -1,6 +1,17 @@
 CHANGES
 =======
 
+0.1.1
+-----
+
+* RELEASE 0.1.1 version
+* remove debugging statements
+* close the socket when we test if we can connect to it
+* fix 2 major bugs in the way we handle the socket
+* include SocketTransportError in the documentation
+* internal.py: catch transport error on socket
+* add exception to catch transport errors on the socket
+
 0.1.0
 -----
 
