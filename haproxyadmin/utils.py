@@ -177,12 +177,15 @@ def connected_socket(path):
         unix_socket.connect(path)
         unix_socket.send(six.b('show info' + '\n'))
         file_handle = unix_socket.makefile()
-        data = file_handle.read().splitlines()
-        hap_info = info2dict(data)
     except ConnectionRefusedError:
         raise SocketConnectionError(path)
     except PermissionError:
         raise SocketPermissionError(path)
+    else:
+        data = file_handle.read().splitlines()
+        hap_info = info2dict(data)
+    finally:
+        unix_socket.close()
 
     try:
         if hap_info['Name'] == 'HAProxy':
@@ -191,6 +194,8 @@ def connected_socket(path):
             raise SocketApplicationError(path)
     except KeyError:
         raise SocketApplicationError(path)
+
+    return False
 
 
 def cmd_across_all_procs(hap_objects, method, *arg):
