@@ -62,12 +62,17 @@ class _HAProxyProcess(object):
         for attempt in range(1, self.retry + 1):
             try:
                 unix_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-                # I haven't seen a case where a running process which holds a UNIX
-                # socket will take more than few nanoseconds to accept a connection.
-                # Thus I hard-code a timeout of 0.1ms
-                unix_socket.settimeout(0.1)
+                # I haven't seen a case where a running process which holds a
+                # UNIX socket will take more than few nanoseconds to accept a
+                # connection. But, I have seen cases where it takes ~0.5secs
+                # to get a respone from the socket.
+                # Thus I hard-code a timeout of 0.5ms
+                # TODO: consider having a configuration file for it
+                unix_socket.settimeout(0.5)
                 unix_socket.connect(self.socket_file)
                 unix_socket.send(six.b(command + '\n'))
+                file_handle = unix_socket.makefile()
+                data = file_handle.read().splitlines()
             except socket.timeout:
                 if attempt == self.retry:
                     msg = "{} socket unavailable after {} reconnects".format(
@@ -86,8 +91,6 @@ class _HAProxyProcess(object):
                 else:
                     raise
             else:
-                file_handle = unix_socket.makefile()
-                data = file_handle.read().splitlines()
                 # HAProxy always send an empty string at the end
                 # we remove it as it adds noise for things like ACL/MAP and etc
                 # We only do that when we get more than 1 line, which only
