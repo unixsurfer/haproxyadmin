@@ -85,7 +85,7 @@ class SocketTransportError(Exception):
     :type message: ``string``
     """
     def __init__(self, message):
-        super(CommandFailed, self).__init__(message)
+        super(SocketTransportError, self).__init__(message)
 
 
 class SocketTimeout(Exception):
@@ -95,4 +95,4 @@ class SocketTimeout(Exception):
     :type message: ``string``
     """
     def __init__(self, message):
-        super(CommandFailed, self).__init__(message)
+        super(SocketTimeout, self).__init__(message)
