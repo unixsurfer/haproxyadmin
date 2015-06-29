@@ -21,7 +21,7 @@ statistics and changing settings.
 
 HAProxy is a multi-process daemon and each process can only be accessed by a
 distinct stats socket. There isn't any shared memory for all these processes.
-That means that if a frontend or backend is managed by more than one process,
+That means that if a frontend or backend is managed by more than one processes,
 you have to find which stats socket you need to send the query/command.
 This makes the life of a sysadmin a bit difficult as he has to keep track of
 which stats socket to use for a given object(frontend/backend/server).
