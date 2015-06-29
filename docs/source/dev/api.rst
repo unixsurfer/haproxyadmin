@@ -48,20 +48,7 @@ meant for external use.
    :members:
 
 .. automodule:: haproxyadmin.exceptions
-
-.. autoclass:: CommandFailed
-
-.. autoclass:: MultipleCommandResults
-
-.. autoclass:: IncosistentData
-
-.. autoclass:: SocketApplicationError
-
-.. autoclass:: SocketConnectionError
-
-.. autoclass:: SocketPermissionError
-
-.. autoclass:: SocketTransportError
+   :members:
 
 
 Constants
