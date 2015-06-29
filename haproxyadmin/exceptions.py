@@ -86,3 +86,13 @@ class SocketTransportError(Exception):
     """
     def __init__(self, message):
         super(CommandFailed, self).__init__(message)
+
+
+class SocketTimeout(Exception):
+    """Raised when we timeout on the socket.
+
+    :param message: error message.
+    :type message: ``string``
+    """
+    def __init__(self, message):
+        super(CommandFailed, self).__init__(message)

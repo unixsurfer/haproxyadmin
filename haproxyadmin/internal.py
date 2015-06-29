@@ -18,7 +18,7 @@ import time
 import psutil
 
 from .utils import (info2dict, converter, stat2dict)
-from .exceptions import SocketTransportError
+from .exceptions import SocketTransportError, SocketTimeout
 
 
 class _HAProxyProcess(object):
@@ -75,10 +75,10 @@ class _HAProxyProcess(object):
                 data = file_handle.read().splitlines()
             except socket.timeout:
                 if attempt == self.retry:
-                    msg = "{} socket unavailable after {} reconnects".format(
+                    msg = "{} socket timeout after {} reconnects".format(
                         self.socket_file, self.retry
                     )
-                    raise socket.timeout(msg)
+                    raise SocketTimeout(msg)
                 time.sleep(self.retry_interval)
                 continue
             except OSError as error:
