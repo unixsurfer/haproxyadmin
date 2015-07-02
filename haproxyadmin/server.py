@@ -164,7 +164,6 @@ class Server(object):
         :rtype: number, integer or float
         :raise: ``ValueError`` when a given metric is not found
         """
-        metrics = []
         if name not in Server.SERVER_METRICS:
             raise ValueError("{} is not valid metric".format(name))
 
