@@ -17,8 +17,8 @@ import socket
 import time
 import psutil
 
-from .utils import (info2dict, converter, stat2dict)
-from .exceptions import SocketTransportError, SocketTimeout
+from haproxyadmin.utils import (info2dict, converter, stat2dict)
+from haproxyadmin.exceptions import SocketTransportError, SocketTimeout
 
 
 class _HAProxyProcess(object):

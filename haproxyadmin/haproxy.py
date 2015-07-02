@@ -12,15 +12,15 @@ This module implements the main haproxyadmin API.
 import os
 import glob
 
-from .frontend import Frontend
-from .backend import Backend
-from .server import Server
-from .utils import (is_unix_socket, cmd_across_all_procs, calculate, isint,
-                    should_die, check_command, check_output, compare_values,
-                    connected_socket)
+from haproxyadmin.frontend import Frontend
+from haproxyadmin.backend import Backend
+from haproxyadmin.server import Server
+from haproxyadmin.utils import (is_unix_socket, cmd_across_all_procs,
+                                calculate, isint, should_die, check_command,
+                                check_output, compare_values, connected_socket)
 
-from .internal import _HAProxyProcess
-from .exceptions import CommandFailed
+from haproxyadmin.internal import _HAProxyProcess
+from haproxyadmin.exceptions import CommandFailed
 
 VALID_STATES = Server.VALID_STATES
 STATE_ENABLE = Server.STATE_ENABLE

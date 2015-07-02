@@ -15,10 +15,12 @@ from six.moves import filter
 import os
 import stat
 from functools import wraps
-from .exceptions import (CommandFailed, MultipleCommandResults,
-                         IncosistentData, SocketPermissionError,
-                         SocketConnectionError, SocketApplicationError)
-from .command_status import ERROR_OUTPUT_STRINGS, SUCCESS_OUTPUT_STRINGS
+from haproxyadmin.exceptions import (CommandFailed, MultipleCommandResults,
+                                     IncosistentData, SocketPermissionError,
+                                     SocketConnectionError,
+                                     SocketApplicationError)
+from haproxyadmin.command_status import (ERROR_OUTPUT_STRINGS,
+                                         SUCCESS_OUTPUT_STRINGS)
 
 METRICS_SUM = [
     'CompressBpsIn',

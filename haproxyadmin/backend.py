@@ -10,8 +10,8 @@ This module provides the :class:`Backend <.Backend>` class which allows to
 run operation for a backend.
 
 """
-from .utils import (calculate, cmd_across_all_procs, compare_values)
-from .server import Server
+from haproxyadmin.utils import (calculate, cmd_across_all_procs, compare_values)
+from haproxyadmin.server import Server
 
 
 class Backend(object):

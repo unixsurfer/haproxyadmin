@@ -10,8 +10,8 @@ This module provides the :class:`Server <.Server>` class which allows to
 run operation for a server.
 
 """
-from .utils import (calculate, cmd_across_all_procs, compare_values,
-                    should_die, check_command)
+from haproxyadmin.utils import (calculate, cmd_across_all_procs, compare_values,
+                                should_die, check_command)
 
 
 class Server(object):

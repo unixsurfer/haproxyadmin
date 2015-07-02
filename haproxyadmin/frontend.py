@@ -10,8 +10,8 @@ This module provides the :class:`Frontend <.Frontend>` class. This class can
 be used to run operations on a frontend and retrieve statistics.
 
 """
-from .utils import (calculate, cmd_across_all_procs, compare_values,
-                    check_command, should_die)
+from haproxyadmin.utils import (calculate, cmd_across_all_procs, compare_values,
+                                check_command, should_die)
 
 
 class Frontend(object):
