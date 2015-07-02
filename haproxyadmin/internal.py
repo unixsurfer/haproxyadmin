@@ -87,7 +87,7 @@ class _HAProxyProcess(object):
                 # OSError: [Errno 106] Transport endpoint is already connected
                 # catch this one only and reraise it withour exception
                 if error.errno == 106:
-                    raise SocketTransportError(error.message)
+                    raise SocketTransportError(str(error))
                 else:
                     raise
             else:
