@@ -1,6 +1,20 @@
 CHANGES
 =======
 
+0.1.2
+-----
+
+* RELEASE 0.1.2 version
+* internal.py: OSError exception doesn't have message attribute
+* remove unnecessary declaration
+* don't use relative imports as our module layout is quit flat and very short
+* __init__.py:add version and remove ascii art
+* import all exceptions in the doc rather import each one individually
+* exceptions.py: use correct exception names
+* add SocketTimeout exception and raise it when we got timeout after X retries
+* README:fix typo
+* internal.py: catch timeout exception when reading data from the socket
+
 0.1.1
 -----
 
