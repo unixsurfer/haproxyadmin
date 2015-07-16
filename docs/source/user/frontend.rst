@@ -157,4 +157,11 @@ Retrieve various statistics
     5
     >>>
 
+
+.. note::
+    ``requests`` returns HTTP requests that are processed by the frontend.
+    If the frontend is in TCP mode the number will be always 0 and *stot*
+    metric should be used to retrieve the number of TCP requests processsed.
+
+
 Read :class:`Frontend <.Frontend>` class for more information.
