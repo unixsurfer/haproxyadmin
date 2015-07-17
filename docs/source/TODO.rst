@@ -11,6 +11,8 @@ TODO
 
 - Add support for DNS resolvers
 
+- Add support for dumping sessions
+
 - Investigate the use of __slots__ in utils.CSVLine as it could speed up
   the library when we create 100K objects
 
