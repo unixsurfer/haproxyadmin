@@ -114,7 +114,7 @@ class _HAProxyProcess(object):
             return False
         else:
             self.pid = current_pid
-            self.process_create_time = psutil.Process(self.pid).create_time()
+            self.process_create_time = current_process_create_time
             return True
 
     def run_command(self, command, full_output=False):
