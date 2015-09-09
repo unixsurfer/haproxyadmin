@@ -41,6 +41,11 @@ class CommandFailed(HAProxyBaseError):
 
 
 class HAProxyDataError(HAProxyBaseError):
+    """Base DataError class.
+
+    :param results: A structure which contains data returned be each socket.
+    :type results: ``list`` of ``list``
+    """
     def __init__(self, results):
         self.results = results
         super(HAProxyDataError, self).__init__()
@@ -57,7 +62,8 @@ class IncosistentData(HAProxyDataError):
 
 
 class HAProxySocketError(HAProxyBaseError):
-    """
+    """Base SocketError class.
+
     :param socket_file: socket file.
     :type socket_file: ``string``
     """
