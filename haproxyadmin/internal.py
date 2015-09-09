@@ -78,7 +78,8 @@ class _HAProxyProcess(object):
                     msg = "{} socket timeout after {} reconnects".format(
                         self.socket_file, self.retry
                     )
-                    raise SocketTimeout(msg)
+                    raise SocketTimeout(message=msg,
+                                        socket_file=self.socket_file)
                 time.sleep(self.retry_interval)
                 continue
             except OSError as error:
@@ -87,7 +88,8 @@ class _HAProxyProcess(object):
                 # OSError: [Errno 106] Transport endpoint is already connected
                 # catch this one only and reraise it withour exception
                 if error.errno == 106:
-                    raise SocketTransportError(str(error))
+                    raise SocketTransportError(message=str(error),
+                                               socket_file=self.socket_file)
                 else:
                     raise
             else:

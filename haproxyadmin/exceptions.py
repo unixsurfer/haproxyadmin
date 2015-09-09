@@ -5,74 +5,87 @@
 haproxyadmin.exceptions
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-This module contains the set of haproxyadmin' exceptions.
+This module contains the set of haproxyadmin' exceptions with the following
+hierarchy
 
+HAProxyBaseError
+├── CommandFailed
+├── HAProxyDataError
+│   ├── IncosistentData
+│   └── MultipleCommandResults
+└── HAProxySocketError
+    ├── SocketApplicationError
+    ├── SocketConnectionError
+    ├── SocketPermissionError
+    ├── SocketTimeout
+    └── SocketTransportError
 """
 
 
-class CommandFailed(Exception):
-    """Raised when a command to HAProxy returned an error.
+class HAProxyBaseError(Exception):
+    """haproxyadmin base exception.
 
     :param message: error message.
     :type message: ``string``
     """
-    def __init__(self, message):
-        super(CommandFailed, self).__init__(message)
+    message = ''
+
+    def __init__(self, message=''):
+        if message:
+            self.message = message
+        super(HAProxyBaseError, self).__init__(self.message)
 
 
-class MultipleCommandResults(Exception):
+class CommandFailed(HAProxyBaseError):
+    """Raised when a command to HAProxy returned an error."""
+
+
+class HAProxyDataError(HAProxyBaseError):
+    def __init__(self, results):
+        self.results = results
+        super(HAProxyDataError, self).__init__()
+
+
+class MultipleCommandResults(HAProxyDataError):
     """Command returned different results per HAProxy process."""
-    def __init__(self, results):
-        self.message = 'Received different result per HAProxy process'
-        self.results = results
-        super(MultipleCommandResults, self).__init__(self.message)
+    message = 'Received different result per HAProxy process'
 
 
-class IncosistentData(Exception):
+class IncosistentData(HAProxyDataError):
     """Data across all processes is not the same."""
-    def __init__(self, results):
-        self.message = 'Received different data per HAProxy process'
-        self.results = results
-        super(IncosistentData, self).__init__(self.message)
+    message = 'Received different data per HAProxy process'
 
 
-class SocketPermissionError(Exception):
-    """Raised when permissions are not granted to access socket file.
-
+class HAProxySocketError(HAProxyBaseError):
+    """
     :param socket_file: socket file.
     :type socket_file: ``string``
     """
     def __init__(self, socket_file):
-        self.message = 'No permissions are granted to access socket file'
         self.socket_file = socket_file
-        super(SocketPermissionError, self).__init__(self.message)
+        super(HAProxySocketError, self).__init__()
 
 
-class SocketConnectionError(Exception):
-    """Raised when socket file is not bound to a process.
-
-    :param socket_file: socket file.
-    :type socket_file: ``string``
-    """
-    def __init__(self, socket_file):
-        self.message = 'No process is bound to socket file'
-        self.socket_file = socket_file
-        super(SocketConnectionError, self).__init__(self.message)
+class SocketTimeout(HAProxySocketError):
+    """Raised when we timeout on the socket."""
 
 
-class SocketApplicationError(Exception):
-    """Raised when we connect to a socket and find HAProxy is not bound to it.
-
-    :param socket_file: socket file.
-    :type socket_file: ``string``
-    """
-    def __init__(self, socket_file):
-        self.message = 'HAProxy is not bound to socket file'
-        self.socket_file = socket_file
-        super(SocketApplicationError, self).__init__(self.message)
+class SocketPermissionError(HAProxySocketError):
+    """Raised when permissions are not granted to access socket file."""
+    message = 'No permissions are granted to access socket file'
 
 
-class SocketTransportError(Exception):
+class SocketConnectionError(HAProxySocketError):
+    """Raised when socket file is not bound to a process."""
+    message = 'No process is bound to socket file'
+
+
+class SocketApplicationError(HAProxySocketError):
+    """Raised when we connect to a socket and HAProxy is not bound to it."""
+    message = 'HAProxy is not bound to socket file'
+
+
+class SocketTransportError(HAProxySocketError):
     """Raised when endpoint of socket hasn't closed an old connection.
 
     .. note::
@@ -81,18 +94,4 @@ class SocketTransportError(Exception):
        fast and as a result HAProxy doesn't have enough time to close the
        previous connection.
 
-    :param message: error message.
-    :type message: ``string``
     """
-    def __init__(self, message):
-        super(SocketTransportError, self).__init__(message)
-
-
-class SocketTimeout(Exception):
-    """Raised when we timeout on the socket.
-
-    :param message: error message.
-    :type message: ``string``
-    """
-    def __init__(self, message):
-        super(SocketTimeout, self).__init__(message)
