@@ -18,7 +18,8 @@ import time
 import psutil
 
 from haproxyadmin.utils import (info2dict, converter, stat2dict)
-from haproxyadmin.exceptions import SocketTransportError, SocketTimeout
+from haproxyadmin.exceptions import (SocketTransportError, SocketTimeout,
+                                     SocketConnectionError)
 
 
 class _HAProxyProcess(object):
@@ -73,6 +74,8 @@ class _HAProxyProcess(object):
                 unix_socket.send(six.b(command + '\n'))
                 file_handle = unix_socket.makefile()
                 data = file_handle.read().splitlines()
+            except ConnectionRefusedError:
+                raise SocketConnectionError(self.socket_file)
             except socket.timeout:
                 if attempt == self.retry:
                     msg = "{} socket timeout after {} reconnects".format(
