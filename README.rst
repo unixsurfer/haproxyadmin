@@ -122,27 +122,27 @@ Release
 
 #. Commit above change with::
 
-   git commit -av -m'RELEASE 0.1.3 version'
+      git commit -av -m'RELEASE 0.1.3 version'
 
 #. Create a signed tag, pbr will use this for the version number::
 
-   git tag -s 0.1.3 -m 'bump release'
+      git tag -s 0.1.3 -m 'bump release'
 
 #. Create the source distribution archive (the archive will be placed in the **dist** directory)::
 
-   python setup.py sdist
+      python setup.py sdist
 
 #. pbr will update ChangeLog file and we want to squeeze them to the previous commit thus we run::
 
-   git commit -av --amend
+      git commit -av --amend
 
 #. Move current tag to the last commit::
 
-   git tag -fs 0.1.3 -m 'bump release'
+      git tag -fs 0.1.3 -m 'bump release'
 
 #. Push changes::
 
-   git push;git push --tags
+      git push;git push --tags
 
 
 Development
