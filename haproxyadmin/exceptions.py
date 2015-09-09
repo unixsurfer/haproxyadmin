@@ -6,19 +6,19 @@ haproxyadmin.exceptions
 ~~~~~~~~~~~~~~~~~~~~~~~
 
 This module contains the set of haproxyadmin' exceptions with the following
-hierarchy
+hierarchy::
 
-HAProxyBaseError
-├── CommandFailed
-├── HAProxyDataError
-│   ├── IncosistentData
-│   └── MultipleCommandResults
-└── HAProxySocketError
-    ├── SocketApplicationError
-    ├── SocketConnectionError
-    ├── SocketPermissionError
-    ├── SocketTimeout
-    └── SocketTransportError
+    HAProxyBaseError
+    ├── CommandFailed
+    ├── HAProxyDataError
+    │   ├── IncosistentData
+    │   └── MultipleCommandResults
+    └── HAProxySocketError
+        ├── SocketApplicationError
+        ├── SocketConnectionError
+        ├── SocketPermissionError
+        ├── SocketTimeout
+        └── SocketTransportError
 """
 
 
