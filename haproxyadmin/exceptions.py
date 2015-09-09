@@ -63,7 +63,8 @@ class HAProxySocketError(HAProxyBaseError):
     """
     def __init__(self, socket_file):
         self.socket_file = socket_file
-        super(HAProxySocketError, self).__init__()
+        self.message = self.message + ' ' + self.socket_file
+        super(HAProxySocketError, self).__init__(self.message)
 
 
 class SocketTimeout(HAProxySocketError):
