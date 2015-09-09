@@ -1,6 +1,18 @@
 CHANGES
 =======
 
+0.1.3
+-----
+
+* RELEASE 0.1.3 version
+* catch ConnectionRefusedError when we send a command to the socket
+* include socket file in the message when HAProxySocketError is raised
+* restructure exceptions
+* Update TODO
+* safe one call for retrieving process creation time
+* updates on TODO
+* add a note in documentation about request property when frontend is in TCP mode
+
 0.1.2
 -----
 
