@@ -462,6 +462,9 @@ class HAProxy(object):
 
         :param name: frontend name to look up.
         :type name: ``string``
+        :return: a :class:`Frontend <haproxyadmin.frontend.Frontend>` object
+          for the frontend.
+        :rtype: :class:`Frontend <haproxyadmin.frontend.Frontend>`
         :raises: :class::`ValueError` when frontend isn't found or more than 1
           frontend is found.
         """
