@@ -352,7 +352,7 @@ def calculate(name, metrics):
     if name in METRICS_SUM:
         return round(sum(filtered))
     elif name in METRICS_AVG:
-        return round(sum(filtered) / len(metrics))
+        return round(sum(filtered) / len(filtered))
     else:
         raise ValueError("Unknown type of calculation for {}".format(name))
 
