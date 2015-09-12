@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# pylint: disable=superfluous-parens
+#  pylint: disable=superfluous-parens
 #
 """
 haproxyadmin.internal
@@ -15,7 +15,6 @@ with a single HAProxy process.
 import six
 import socket
 import time
-import psutil
 
 from haproxyadmin.utils import (info2dict, converter, stat2dict)
 from haproxyadmin.exceptions import (SocketTransportError, SocketTimeout,
@@ -47,9 +46,6 @@ class _HAProxyProcess(object):
         self.retry_interval = retry_interval
         # process number associated with this object
         self.process_nb = self.metric('Process_num')
-        # process id associated with this process
-        self.pid = self.metric('Pid')
-        self.process_create_time = psutil.Process(self.pid).create_time()
 
     def send_command(self, command):
         """Send a command to HAProxy over UNIX stats socket.
@@ -109,18 +105,6 @@ class _HAProxyProcess(object):
                 unix_socket.close()
 
         return data
-
-    def reloaded(self):
-        """Return ``True`` if process was reloaded otherwise ``False``."""
-        current_pid = self.metric('Pid')
-        current_process_create_time = psutil.Process(current_pid).create_time()
-
-        if self.process_create_time == current_process_create_time:
-            return False
-        else:
-            self.pid = current_pid
-            self.process_create_time = current_process_create_time
-            return True
 
     def run_command(self, command, full_output=False):
         """Run a command to HAProxy process.
@@ -195,7 +179,7 @@ class _HAProxyProcess(object):
     def frontends_stats(self, iid=-1):
         """Build the data structure for frontends
 
-        If ``iid`` is set then builds a structure only for the particul
+        If ``iid`` is set then builds a structure only for the particular
         frontend.
 
         :param iid: (optinal) unique proxy id of a frontend.
@@ -286,7 +270,8 @@ class _Frontend(object):
     @property
     def iid(self):
         """Return Proxy ID"""
-        self.update_iid()
+        data = self.stats_data()
+        self._iid = data.iid
 
         return self._iid
 
@@ -294,25 +279,61 @@ class _Frontend(object):
     def process_nb(self):
         return int(self.hap_process_nb)
 
-    def update_iid(self):
-        if self.hap_process.reloaded():
-            self._iid = getattr(self.hap_process.frontends_stats()[self.name],
-                                'iid')
+    def stats_data(self):
+        """Return stats data
+
+        :rtype: ``utils.CSVLine`` object
+
+        HAProxy assigns unique ids to each object during the startup.
+        The id can change when configuration changes, objects order
+        is reshuffled or additions/removals take place.
+        In those cases the id we store at the instantiation of the object may
+        reference to another object or even to non-existent object when
+        configuration takes places afterwards.
+
+        The technique we use is quite simple. When an object is created
+        we store the name and the id. In order to detect if iid is changed,
+        we simply send a request to fetch data only for the given iid and check
+        if the current id points to an object of the same type
+        (frontend, backend, server) which has the same name.
+        """
+        # Fetch data using the last known iid
+        try:
+            data = self.hap_process.frontends_stats(self._iid)[self.name]
+        except KeyError:
+            # A lookup on HAProxy with the current id doesn't return
+            # an object with our name.
+            # Most likely object got different id due to a reshuffle in conf.
+            # Thus retrieve all objects to get latest data for the object.
+            try:
+                # This will basically request all object of the type
+                data = self.hap_process.frontends_stats()[self.name]
+            except KeyError:
+                # The object has gone from running configuration!
+                # This occurs when object was removed from configuration
+                # and haproxy was reloaded or frontend was shutdowned.
+                # We cant recover from this situation
+                raise
+
+        return data
 
     def stats(self):
-        self.update_iid()
-        keys = self.hap_process.frontends_stats(self.iid)[self.name].heads
-        values = self.hap_process.frontends_stats(self.iid)[self.name].parts
+        """Build dictionary for all statistics reported by HAProxy.
+
+        :return: A dictionary with statistics
+        :rtype: ``dict``
+        """
+        data = self.stats_data()
+        keys = data.heads
+        values = data.parts
 
         return dict(zip(keys, values))
 
     def metric(self, name):
         """Return the value of a metric"""
-        self.update_iid()
-        return converter(
-            getattr(self.hap_process.frontends_stats(self.iid)[self.name],
-                    name)
-        )
+        data = self.stats_data()
+
+        return converter(getattr(data, name))
 
     def command(self, cmd):
         """Run command to HAProxy
@@ -348,7 +369,8 @@ class _Backend(object):
     @property
     def iid(self):
         """Return Proxy ID"""
-        self.update_iid()
+        data = self.stats_data()
+        self._iid = data.iid
 
         return self._iid
 
@@ -356,10 +378,29 @@ class _Backend(object):
     def process_nb(self):
         return int(self.hap_process_nb)
 
-    def update_iid(self):
-        if self.hap_process.reloaded():
-            self._iid = getattr(
-                self.hap_process.backends_stats()[self.name]['stats'], 'iid')
+    def stats_data(self):
+        """Return stats data
+
+        Check documentation of ``stats_data`` method in :class:`_Frontend`.
+
+        :rtype: ``utils.CSVLine`` object
+        """
+        # Fetch data using the last known iid
+        try:
+            data = self.hap_process.backends_stats(self._iid)[self.name]
+        except KeyError:
+            # A lookup on HAProxy with the current id doesn't return
+            # an object with our name.
+            # Most likely object got different id due to a reshuffle in conf.
+            # Thus retrieve all objects to get latest data for the object.
+            try:
+                data = self.hap_process.backends_stats()[self.name]
+            except KeyError:
+                # The object has gone from running configuration!
+                # We cant recover from this situation.
+                raise
+
+        return data['stats']
 
     def stats(self):
         """Build dictionary for all statistics reported by HAProxy.
@@ -367,17 +408,16 @@ class _Backend(object):
         :return: A dictionary with statistics
         :rtype: ``dict``
         """
-        self.update_iid()
-        keys = self.hap_process.backends_stats(self.iid)[self.name]['stats'].heads
-        values = self.hap_process.backends_stats(self.iid)[self.name]['stats'].parts
+        data = self.stats_data()
+        keys = data.heads
+        values = data.parts
 
         return dict(zip(keys, values))
 
     def metric(self, name):
-        self.update_iid()
-        return converter(getattr(
-            self.hap_process.backends_stats(self.iid)[self.name]['stats'],
-            name))
+        data = self.stats_data()
+
+        return converter(getattr(data, name))
 
     def command(self, cmd):
         return self.hap_process.run_command(cmd)
@@ -385,13 +425,12 @@ class _Backend(object):
     def servers(self, name=None):
         """Return a list of _Server objects for each server of the backend.
 
-        :param name: (optional): server name lookup, defaults to None.
-        :type name: string
+        :param name: (optional): server name to lookup, defaults to None.
+        :type name: ``string``
         """
         servers = []
         return_list = []
 
-        self.update_iid()
         servers = self.hap_process.servers_stats(self.name, self.iid)
         if name is not None:
             if name in servers:
@@ -432,27 +471,52 @@ class _Server(object):
     @property
     def sid(self):
         """Return server id"""
-        self.update_sid()
+        data = self.stats_data()
+        self._sid = data.sid
 
         return self._sid
 
-    def update_sid(self):
-        if self.backend.hap_process.reloaded():
-            self._sid = getattr(
-                self.backend.hap_process.servers_stats(self.backend.name)[self.name],
-                'sid')
+    def stats_data(self):
+        """Return stats data
+
+        Check documentation of ``stats_data`` method in :class:`_Frontend`.
+
+        :rtype: ``utils.CSVLine`` object
+        """
+        # Fetch data using the last known sid
+        try:
+            data = self.backend.hap_process.servers_stats(
+                self.backend.name, self.backend.iid, self._sid)[self.name]
+        except KeyError:
+            # A lookup on HAProxy with the current id doesn't return
+            # an object with our name.
+            # Most likely object got different id due to a reshuffle in conf.
+            # Thus retrieve all objects to get latest data for the object.
+            try:
+                data = self.backend.hap_process.servers_stats(
+                    self.backend.name)[self.name]
+            except KeyError:
+                # The object has gone from running configuration!
+                # This occurs when object was removed from configuration
+                # and haproxy was reloaded.We cant recover from this situation.
+                raise
+
+        return data
 
     def metric(self, name):
-        self.update_sid()
-        return converter(getattr(
-            self.backend.hap_process.servers_stats(self.backend.name,
-                                                   self.backend.iid,
-                                                   self.sid)[self.name], name))
+        data = self.stats_data()
+
+        return converter(getattr(data, name))
 
     def stats(self):
-        self.update_sid()
-        keys = self.backend.hap_process.servers_stats(self.backend.name)[self.name].heads
-        values = self.backend.hap_process.servers_stats(self.backend.name)[self.name].parts
+        """Build dictionary for all statistics reported by HAProxy.
+
+        :return: A dictionary with statistics
+        :rtype: ``dict``
+        """
+        data = self.stats_data()
+        keys = data.heads
+        values = data.parts
 
         return dict(zip(keys, values))
 
