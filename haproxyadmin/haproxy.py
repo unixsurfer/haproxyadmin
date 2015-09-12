@@ -437,14 +437,12 @@ class HAProxy(object):
         """
         return_list = []
 
-        # store _Frontend objects for each frontend as it is reported by each
-        # HAProxy process.
+        # store _Frontend objects for each frontend per haproxy process.
         # key: name of the frontend
-        # value: a list of _Frontend object for the frontend for each HAProxy
-        # process
+        # value: a list of _Frontend objects
         frontends_across_hap_processes = {}
 
-        # loop over all HAProxy processes and get a list of frontend objects
+        # loop over all haproxy processes and get a list of frontend objects
         for haproxy in self._hap_processes:
             for frontend in haproxy.frontends(name):
                 if frontend.name not in frontends_across_hap_processes:
@@ -651,10 +649,9 @@ class HAProxy(object):
         """
         return_list = []
 
-        # store _Backend objects for each backend as it is reported by each HAProxy
-        # process.
+        # store _Backend objects for each backend per haproxy process.
         # key: name of the backend
-        # value: a list of _Backend object for the backend
+        # value: a list of _Backend objects
         backends_across_hap_processes = {}
 
         # loop over all HAProxy processes and get a set of backends
