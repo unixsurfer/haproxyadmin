@@ -279,11 +279,28 @@ class _Frontend(object):
         return int(self.hap_process_nb)
 
     def update_iid(self):
+        """Update proxy id for the frontend
+
+        HAProxy assigns unique ids to each object during the startup.
+        The id can change when configuration changes, objects order
+        is reshuffled or additions/removals take place.
+        In those cases the id we store at the instantiation of the object may
+        reference to another object or even to non-existent object when
+        configuration takes places afterwards. Therefore, we check if id is
+        changed and we update it accordingly.
+
+        The technique we use is quite simple. When an object is created
+        we store the name and the id. In order to detect if iid is changed,
+        we simply check if the current id points to an object of the same
+        type(frontend, backend, server) which has the same name.
+        """
         try:
             pxname = getattr(
                 self.hap_process.frontends_stats(self._iid)[self.name],
                 'pxname')
         except KeyError:
+            # A lookup on HAProxy with the current id returned nothing.
+            # Most likely object got different id due to a reshuffle of conf.
             self._iid = getattr(self.hap_process.frontends_stats()[self.name],
                                 'iid')
         else:
@@ -349,6 +366,10 @@ class _Backend(object):
         return int(self.hap_process_nb)
 
     def update_iid(self):
+        """Update proxy id
+
+        Check documentation of ``update_iid`` method in :class:`_Frontend`.
+        """
         try:
             pxname = getattr(
                 self.hap_process.backends_stats(self._iid)[self.name]['stats'],
@@ -438,6 +459,10 @@ class _Server(object):
         return self._sid
 
     def update_sid(self):
+        """Update server id
+
+        Check documentation of ``update_iid`` method in :class:`_Frontend`.
+        """
         servers_stats = self.backend.hap_process.servers_stats(
             self.backend.name, self.backend.iid, self._sid)
         try:
