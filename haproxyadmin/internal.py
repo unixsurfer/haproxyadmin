@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# pylint: disable=superfluous-parens
+#  pylint: disable=superfluous-parens
 #
 """
 haproxyadmin.internal
