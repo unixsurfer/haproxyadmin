@@ -15,7 +15,6 @@ with a single HAProxy process.
 import six
 import socket
 import time
-import psutil
 
 from haproxyadmin.utils import (info2dict, converter, stat2dict)
 from haproxyadmin.exceptions import (SocketTransportError, SocketTimeout,
@@ -47,9 +46,6 @@ class _HAProxyProcess(object):
         self.retry_interval = retry_interval
         # process number associated with this object
         self.process_nb = self.metric('Process_num')
-        # process id associated with this process
-        self.pid = self.metric('Pid')
-        self.process_create_time = psutil.Process(self.pid).create_time()
 
     def send_command(self, command):
         """Send a command to HAProxy over UNIX stats socket.
@@ -109,18 +105,6 @@ class _HAProxyProcess(object):
                 unix_socket.close()
 
         return data
-
-    def reloaded(self):
-        """Return ``True`` if process was reloaded otherwise ``False``."""
-        current_pid = self.metric('Pid')
-        current_process_create_time = psutil.Process(current_pid).create_time()
-
-        if self.process_create_time == current_process_create_time:
-            return False
-        else:
-            self.pid = current_pid
-            self.process_create_time = current_process_create_time
-            return True
 
     def run_command(self, command, full_output=False):
         """Run a command to HAProxy process.
@@ -195,7 +179,7 @@ class _HAProxyProcess(object):
     def frontends_stats(self, iid=-1):
         """Build the data structure for frontends
 
-        If ``iid`` is set then builds a structure only for the particul
+        If ``iid`` is set then builds a structure only for the particular
         frontend.
 
         :param iid: (optinal) unique proxy id of a frontend.
@@ -295,9 +279,17 @@ class _Frontend(object):
         return int(self.hap_process_nb)
 
     def update_iid(self):
-        if self.hap_process.reloaded():
+        try:
+            pxname = getattr(
+                self.hap_process.frontends_stats(self._iid)[self.name],
+                'pxname')
+        except KeyError:
             self._iid = getattr(self.hap_process.frontends_stats()[self.name],
                                 'iid')
+        else:
+            if pxname != self.name:
+                self._iid = getattr(
+                    self.hap_process.frontends_stats()[self.name], 'iid')
 
     def stats(self):
         self.update_iid()
@@ -357,9 +349,18 @@ class _Backend(object):
         return int(self.hap_process_nb)
 
     def update_iid(self):
-        if self.hap_process.reloaded():
+        try:
+            pxname = getattr(
+                self.hap_process.backends_stats(self._iid)[self.name]['stats'],
+                'pxname')
+        except KeyError:
             self._iid = getattr(
                 self.hap_process.backends_stats()[self.name]['stats'], 'iid')
+        else:
+            if pxname != self.name:
+                self._iid = getattr(
+                    self.hap_process.backends_stats()[self.name]['stats'],
+                    'iid')
 
     def stats(self):
         """Build dictionary for all statistics reported by HAProxy.
@@ -437,10 +438,19 @@ class _Server(object):
         return self._sid
 
     def update_sid(self):
-        if self.backend.hap_process.reloaded():
+        servers_stats = self.backend.hap_process.servers_stats(
+            self.backend.name, self.backend.iid, self._sid)
+        try:
+            pxname = getattr(servers_stats[self.name], 'pxname')
+        except KeyError:
             self._sid = getattr(
                 self.backend.hap_process.servers_stats(self.backend.name)[self.name],
                 'sid')
+        else:
+            if pxname != self.name:
+                self._sid = getattr(
+                    self.backend.hap_process.servers_stats(self.backend.name)[self.name],
+                    'sid')
 
     def metric(self, name):
         self.update_sid()
