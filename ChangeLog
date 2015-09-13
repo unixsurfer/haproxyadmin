@@ -1,6 +1,19 @@
 CHANGES
 =======
 
+0.1.4
+-----
+
+* RELEASE 0.1.4 version
+* improve the way we detect proxy id changes
+* fixes on comments
+* update docstrings
+* utils.py: calculate use the length of the correct list(filtered)
+* exceptions.py: update docstrings
+* README: more reStructured friendly format
+* README: update release instructions
+* more reStructuredText for exceptions.py
+
 0.1.3
 -----
 
