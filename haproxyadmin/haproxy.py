@@ -158,7 +158,7 @@ class HAProxy(object):
         else:
             raise ValueError("Invalid input")
 
-        results = cmd_across_all_procs(self._hap_processes, 'run_command',
+        results = cmd_across_all_procs(self._hap_processes, 'command',
                                        cmd)
 
         return check_command(results)
@@ -194,7 +194,7 @@ class HAProxy(object):
         else:
             raise ValueError("Invalid input")
 
-        results = cmd_across_all_procs(self._hap_processes, 'run_command',
+        results = cmd_across_all_procs(self._hap_processes, 'command',
                                        cmd)
 
         return check_command(results)
@@ -224,7 +224,7 @@ class HAProxy(object):
         else:
             raise ValueError("Invalid input")
 
-        results = cmd_across_all_procs(self._hap_processes, 'run_command',
+        results = cmd_across_all_procs(self._hap_processes, 'command',
                                        cmd)
 
         return check_command(results)
@@ -254,7 +254,7 @@ class HAProxy(object):
         else:
             raise ValueError("Invalid input")
 
-        results = cmd_across_all_procs(self._hap_processes, 'run_command',
+        results = cmd_across_all_procs(self._hap_processes, 'command',
                                        cmd)
 
         return check_command(results)
@@ -277,7 +277,7 @@ class HAProxy(object):
         else:
             cmd = "clear counters"
 
-        results = cmd_across_all_procs(self._hap_processes, 'run_command',
+        results = cmd_across_all_procs(self._hap_processes, 'command',
                                        cmd)
 
         return check_command(results)
@@ -353,7 +353,7 @@ class HAProxy(object):
         else:
             raise ValueError("Invalid input")
 
-        results = cmd_across_all_procs(self._hap_processes, 'run_command',
+        results = cmd_across_all_procs(self._hap_processes, 'command',
                                        cmd)
 
         return check_command(results)
@@ -398,7 +398,7 @@ class HAProxy(object):
         else:
             raise ValueError("Invalid input")
 
-        results = cmd_across_all_procs(self._hap_processes, 'run_command',
+        results = cmd_across_all_procs(self._hap_processes, 'command',
                                        cmd)
 
         return check_command(results)
@@ -424,8 +424,8 @@ class HAProxy(object):
         else:
             cmd = "show errors"
 
-        return cmd_across_all_procs(self._hap_processes, 'run_command',
-                                    cmd, True)
+        return cmd_across_all_procs(self._hap_processes, 'command',
+                                    cmd, full_output=True)
 
     def frontends(self, name=None):
         """Build a list of :class:`Frontend <haproxyadmin.frontend.Frontend>`
@@ -503,8 +503,7 @@ class HAProxy(object):
         else:
             raise ValueError("Invalid input")
 
-        get_results = cmd_across_all_procs(self._hap_processes, 'run_command',
-                                           cmd)
+        get_results = cmd_across_all_procs(self._hap_processes, 'command', cmd)
         get_info_proc1 = get_results[0][1]
         if not check_output(get_info_proc1):
             raise ValueError(get_info_proc1)
@@ -540,7 +539,7 @@ class HAProxy(object):
         else:
             raise ValueError("Invalid input")
 
-        get_results = cmd_across_all_procs(self._hap_processes, 'run_command',
+        get_results = cmd_across_all_procs(self._hap_processes, 'command',
                                            cmd)
         get_info_proc1 = get_results[0][1]
         if not check_output(get_info_proc1):
@@ -755,8 +754,7 @@ class HAProxy(object):
         else:
             raise ValueError("Invalid input")
 
-        results = cmd_across_all_procs(self._hap_processes, 'run_command',
-                                       cmd)
+        results = cmd_across_all_procs(self._hap_processes, 'command', cmd)
 
         return check_command(results)
 
@@ -780,7 +778,7 @@ class HAProxy(object):
             raise ValueError("Expected integer and got {}".format(type(value)))
         cmd = "set maxconn global {}".format(value)
 
-        results = cmd_across_all_procs(self._hap_processes, 'run_command', cmd)
+        results = cmd_across_all_procs(self._hap_processes, 'command', cmd)
 
         return check_command(results)
 
@@ -798,7 +796,7 @@ class HAProxy(object):
             raise ValueError("Expected integer and got {}".format(type(value)))
         cmd = "set rate-limit connections global {}".format(value)
 
-        results = cmd_across_all_procs(self._hap_processes, 'run_command', cmd)
+        results = cmd_across_all_procs(self._hap_processes, 'command', cmd)
 
         return check_command(results)
 
@@ -816,7 +814,7 @@ class HAProxy(object):
             raise ValueError("Expected integer and got {}".format(type(value)))
         cmd = "set rate-limit sessions global {}".format(value)
 
-        results = cmd_across_all_procs(self._hap_processes, 'run_command', cmd)
+        results = cmd_across_all_procs(self._hap_processes, 'command', cmd)
 
         return check_command(results)
 
@@ -834,9 +832,10 @@ class HAProxy(object):
             raise ValueError("Expected integer and got {}".format(type(value)))
         cmd = "set rate-limit ssl-sessions global {}".format(value)
 
-        results = cmd_across_all_procs(self._hap_processes, 'run_command', cmd)
+        results = cmd_across_all_procs(self._hap_processes, 'command', cmd)
 
         return check_command(results)
+
 
     @should_die
     def show_acl(self, aclid=None):

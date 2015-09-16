@@ -47,13 +47,18 @@ class _HAProxyProcess(object):
         # process number associated with this object
         self.process_nb = self.metric('Process_num')
 
-    def send_command(self, command):
+    def command(self, command, full_output=False):
         """Send a command to HAProxy over UNIX stats socket.
+
+        Newline character returned from haproxy is stripped off.
 
         :param command: A valid command to execute
         :type command: string
-        :return: Output. Newline character is stripped off.
-        :rtype: list
+        :param full_output: (optional) Return all output, by default
+          returns only the 1st line of the output
+        :type full_output: ``bool``
+        :return: 1st line of the output or the whole output as a list
+        :rtype: ``string`` or ``list`` if full_output is True
         """
         data = []
         for attempt in range(1, self.retry + 1):
@@ -104,32 +109,17 @@ class _HAProxyProcess(object):
             finally:
                 unix_socket.close()
 
-        return data
-
-    def run_command(self, command, full_output=False):
-        """Run a command to HAProxy process.
-
-        :param command: A valid command to execute
-        :type command: string
-        :param full_output: (optional) Return all output, by default
-          returns only the 1st line of the output
-        :type full_output: bool
-        :return: 1st line of the output or the whole output as a list
-        :rtype: string or list if full_output is True
-        """
-        output = self.send_command(command)
-
         if full_output:
-            return output
+            return data
         else:
-            return output[0]
+            return data[0]
 
     def proc_info(self):
         """Return a dictionary containing information about HAProxy daemon.
 
         :rtype: dictionary, see utils.info2dict() for details
         """
-        raw_info = self.send_command('show info')
+        raw_info = self.command('show info')
 
         return info2dict(raw_info)
 
@@ -154,9 +144,9 @@ class _HAProxyProcess(object):
         :type sid: ``integer``
         :rtype: dict, see ``utils.stat2dict`` for details on the structure
         """
-        csv_data = self.send_command('show stat {} {} {}'.format(iid,
-                                                                 obj_type,
-                                                                 sid))
+        csv_data = self.command('show stat {} {} {}'.format(iid,
+                                                            obj_type,
+                                                            sid))
         self.hap_stats = stat2dict(csv_data)
         return self.hap_stats
 
@@ -343,7 +333,7 @@ class _Frontend(object):
         :return: 1st line of the output.
         :rtype: ``string``
         """
-        return self.hap_process.run_command(cmd)
+        return self.hap_process.command(cmd)
 
 
 class _Backend(object):
@@ -420,7 +410,7 @@ class _Backend(object):
         return converter(getattr(data, name))
 
     def command(self, cmd):
-        return self.hap_process.run_command(cmd)
+        return self.hap_process.command(cmd)
 
     def servers(self, name=None):
         """Return a list of _Server objects for each server of the backend.
@@ -521,4 +511,4 @@ class _Server(object):
         return dict(zip(keys, values))
 
     def command(self, cmd):
-        return self.backend.hap_process.run_command(cmd)
+        return self.backend.hap_process.command(cmd)
