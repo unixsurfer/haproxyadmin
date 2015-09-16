@@ -759,6 +759,37 @@ class HAProxy(object):
         return check_command(results)
 
     @should_die
+    def command(self, cmd):
+        """Send a command to haproxy process.
+
+        This allows a user to send any kind of command to
+        haproxy. We **do not* perfom any sanitization on input
+        and on output.
+
+        :param cmd: a command to send to haproxy process.
+        :type cmd: ``string``
+        :return: list of 2-item tuple
+
+        #. HAProxy process number
+        #. what the method returned
+
+        :rtype: ``list``
+
+        Usage::
+
+          >>> from haproxyadmin import haproxy
+          >>> hap = haproxy.HAProxy(socket_dir='/run/haproxy')
+          >>> hap.command('show stats')
+          ['0x23181c0 /static/css/']
+          >>> hap.add_acl(acl=4, pattern='/foo/' )
+          True
+          >>> hap.show_acl(acl=4)
+          ['0x23181c0 /static/css/', '0x238f790 /foo/']
+        """
+        return cmd_across_all_procs(self._hap_processes,
+                                    'command', cmd, full_output=True)
+
+    @should_die
     def setmaxconn(self, value):
         """Set maximum connection to the frontend.
 
