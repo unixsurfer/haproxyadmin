@@ -1,8 +1,6 @@
 TODO
 ====
 
-#. Add support for sending commands to stats socket
-
 #. Add support for TLS ticket operations
 
 #. Add support for OCSP stapling
