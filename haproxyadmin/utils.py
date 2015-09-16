@@ -200,7 +200,7 @@ def connected_socket(path):
     return False
 
 
-def cmd_across_all_procs(hap_objects, method, *arg):
+def cmd_across_all_procs(hap_objects, method, *arg, **kargs):
     """Return the result of a command executed in all HAProxy process.
 
     .. note::
@@ -222,7 +222,7 @@ def cmd_across_all_procs(hap_objects, method, *arg):
     results = []
     for obj in hap_objects:
         results.append(
-            (getattr(obj, 'process_nb'), getattr(obj, method)(*arg))
+            (getattr(obj, 'process_nb'), getattr(obj, method)(*arg, **kargs))
         )
 
     return results
