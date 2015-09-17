@@ -1,6 +1,19 @@
 CHANGES
 =======
 
+0.1.6
+-----
+
+* RELEASE 0.1.6 version
+* update TODO
+* fix a regression introduced with dcc5173e31deac
+* add support for sending commands to haproxy
+* simplify the way we send commands to socket
+* add support for keyword arguments in cmd_across_all_procs()
+* fix (once again) format issues in TODO.rst
+* fix format issues in TODO.rst
+* add some ordering in our TODO items
+
 0.1.5
 -----
 
