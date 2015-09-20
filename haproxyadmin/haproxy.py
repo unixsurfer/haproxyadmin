@@ -903,7 +903,7 @@ class HAProxy(object):
         else:
             cmd = "show acl"
 
-        acl_info = cmd_across_all_procs(self._hap_processes, 'send_command',
+        acl_info = cmd_across_all_procs(self._hap_processes, 'command',
                                         cmd)
         # ACL can't be different per process thus we only return the acl
         # content found in 1st process.
@@ -946,7 +946,7 @@ class HAProxy(object):
                 raise ValueError("Invalid input")
         else:
             cmd = "show map"
-        map_info = cmd_across_all_procs(self._hap_processes, 'send_command',
+        map_info = cmd_across_all_procs(self._hap_processes, 'command',
                                         cmd)
         # map can't be different per process thus we only return the map
         # content found in 1st process.
