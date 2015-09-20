@@ -116,7 +116,7 @@ class _HAProxyProcess(object):
             else:
                 return data[0]
         else:
-            raise ValueError('no data returned from socket')
+            raise ValueError("no data returned from socket {}".self.socket_file)
 
     def proc_info(self):
         """Return a dictionary containing information about HAProxy daemon.
