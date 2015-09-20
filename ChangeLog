@@ -1,6 +1,14 @@
 CHANGES
 =======
 
+0.1.7
+-----
+
+* RELEASE 0.1.7 version
+* 9fbb459 didn't fix regression from dcc5173e31deac
+* better handling of error when we connect to socket
+* fix a regression introduced with dcc5173e31deac
+
 0.1.6
 -----
 
