@@ -60,15 +60,16 @@ class _HAProxyProcess(object):
         :return: 1st line of the output or the whole output as a list
         :rtype: ``string`` or ``list`` if full_output is True
         """
-        data = []
-        for attempt in range(1, self.retry + 1):
+        data = []  # hold data returned from socket
+        raised = None  # hold possible exception raised during connect phase
+        for attempt in range(self.retry):
             try:
                 unix_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
                 # I haven't seen a case where a running process which holds a
                 # UNIX socket will take more than few nanoseconds to accept a
                 # connection. But, I have seen cases where it takes ~0.5secs
-                # to get a respone from the socket.
-                # Thus I hard-code a timeout of 0.5ms
+                # to get a respone from the socket. Thus I hard-code a timeout
+                # of 0.5ms
                 # TODO: consider having a configuration file for it
                 unix_socket.settimeout(0.5)
                 unix_socket.connect(self.socket_file)
@@ -76,26 +77,22 @@ class _HAProxyProcess(object):
                 file_handle = unix_socket.makefile()
                 data = file_handle.read().splitlines()
             except ConnectionRefusedError:
-                raise SocketConnectionError(self.socket_file)
+                raised = SocketConnectionError(self.socket_file)
             except socket.timeout:
-                if attempt == self.retry:
-                    msg = "{} socket timeout after {} reconnects".format(
-                        self.socket_file, self.retry
-                    )
-                    raise SocketTimeout(message=msg,
-                                        socket_file=self.socket_file)
-                time.sleep(self.retry_interval)
-                continue
+                msg = "{} socket timeout".format(self.socket_file)
+                raised = SocketTimeout(message=msg,
+                                       socket_file=self.socket_file)
             except OSError as error:
                 # while stress testing HAProxy and querying for all frontend
-                # metrics I get:
+                # metrics I get sometimes:
                 # OSError: [Errno 106] Transport endpoint is already connected
                 # catch this one only and reraise it withour exception
                 if error.errno == 106:
-                    raise SocketTransportError(message=str(error),
-                                               socket_file=self.socket_file)
+                    raised = SocketTransportError(message=str(error),
+                                                  socket_file=self.socket_file)
                 else:
-                    raise
+                    # for the rest of OSError exceptions just reraise them
+                    raised = error
             else:
                 # HAProxy always send an empty string at the end
                 # we remove it as it adds noise for things like ACL/MAP and etc
@@ -108,11 +105,18 @@ class _HAProxyProcess(object):
                 break
             finally:
                 unix_socket.close()
+                if raised:
+                    time.sleep(self.retry_interval)
 
-        if full_output:
-            return data
+        if raised:
+            raise raised
+        elif data:
+            if full_output:
+                return data
+            else:
+                return data[0]
         else:
-            return data[0]
+            raise ValueError('no data returned from socket')
 
     def proc_info(self):
         """Return a dictionary containing information about HAProxy daemon.
