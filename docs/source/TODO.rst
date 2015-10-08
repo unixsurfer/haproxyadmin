@@ -1,6 +1,10 @@
 TODO
 ====
 
+#. Add support for enabling/disabling health/agent checks
+
+#. TLS ticket operations
+
 #. Add support for TLS ticket operations
 
 #. Add support for OCSP stapling
