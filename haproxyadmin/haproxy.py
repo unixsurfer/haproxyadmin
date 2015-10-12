@@ -548,7 +548,7 @@ class HAProxy(object):
         return get_info_proc1
 
     def info(self):
-        """Dump info about haproxy status on current process.
+        """Dump info about haproxy stats on current process.
 
         :return: A list of ``dict`` for each process.
         :rtype: ``list``
