@@ -97,4 +97,7 @@ ERROR_OUTPUT_STRINGS = [
     "Unknown map identifier. Please use #<id> or <file>.",
     "Unknown command. Please enter one of the following commands only :",
     "Value out of range.",
+    "Missing resolver section identifier.",
+    "Can't find resolvers section.",
+    "Can't find backend.",
 ]
