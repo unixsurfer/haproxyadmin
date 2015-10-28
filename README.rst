@@ -168,7 +168,7 @@ Contacts
 
 **Project website**: https://github.com/unixsurfer/haproxyadmin
 
-**Author**: Palvos Parissis <pavlos.parissis@gmail.com>
+**Author**: Pavlos Parissis <pavlos.parissis@gmail.com>
 
 .. _HAProxy: http://www.haproxy.org/
 .. _stats socket: http://cbonte.github.io/haproxy-dconv/configuration-1.5.html#9.2
