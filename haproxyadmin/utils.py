@@ -374,13 +374,30 @@ def isint(value):
 
 
 def converter(value):
-    """Convert a number or string to an integer
+    """Tries to convert value to an integer
 
-    For floating point numbers, this truncates towards zero.
+    For floating point numbers, it truncates towards zero.
+    Value of empty string, or multiple spaces, returns 0::
+
+        >>> a = ''
+        >>> if not a:
+        ...   print('empty')
+        ...
+        empty
+        >>> a = ' '
+        >>> if not a:
+        ...   print('empty')
+        ...
+        >>> if not a.strip():
+        ...   print('empty')
+        ...
+        empty
+        >>>
 
     :param value: a value to convert to int.
     :type value: ``string``
     :rtype: ``integer or ``string`` if value can't be converted to int.
+    :raise: ``ValueError`` when it fails to convert value to an integer
 
     Usage::
 
@@ -388,7 +405,9 @@ def converter(value):
       >>> utils.converter('5.0')
       5
       >>> utils.converter('5.0j')
-      '5.0j'
+      ....
+      ....
+      ValueError '5.0j'
       >>> utils.converter('5.0')
       5
       >>> utils.converter(5.0)
@@ -396,12 +415,14 @@ def converter(value):
       >>> utils.converter(5)
       5
     """
+    if not value.strip():
+        return 0
     if isint(value):
         return int(value)
     elif isfloat(value):
         return int(float(value))
     else:
-        return value
+        raise ValueError(value)
 
 
 class CSVLine(object):
