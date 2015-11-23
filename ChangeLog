@@ -1,6 +1,18 @@
 CHANGES
 =======
 
+0.1.8
+-----
+
+* RELEASE 0.1.8 version
+* Remove unnecessary filtering of empty values
+* Fix broken design in converter function
+* fix type in README
+* cosmetic fix in doc string
+* extend the support of error strings returned by haproxy
+* add items in the TODO list
+* mention from which socket file we don't get any data
+
 0.1.7
 -----
 
