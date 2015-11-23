@@ -11,7 +11,6 @@ haproxyadmin.
 
 import socket
 import six
-from six.moves import filter
 import os
 import stat
 from functools import wraps
@@ -347,12 +346,10 @@ def calculate(name, metrics):
     :raise: :class:`ValueError` when matric name has unknown type of
       calculation.
     """
-    # Remove empty values, for some metrics HAProxy returns '' instead of 0
-    filtered = filter(None, metrics)
     if name in METRICS_SUM:
-        return round(sum(filtered))
+        return round(sum(metrics))
     elif name in METRICS_AVG:
-        return round(sum(filtered) / len(filtered))
+        return round(sum(metrics) / len(metrics))
     else:
         raise ValueError("Unknown type of calculation for {}".format(name))
 
