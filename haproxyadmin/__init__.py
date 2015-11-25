@@ -5,5 +5,5 @@
 __title__ = 'haproxyadmin'
 __author__ = 'Pavlos Parissis'
 __license__ = 'Apache 2.0'
-__version__ = '0.1.8'
+__version__ = '0.1.9'
 __copyright__ = 'Copyright 2015 Pavlos Parissis'
