@@ -346,21 +346,17 @@ def calculate(name, metrics):
     :raise: :class:`ValueError` when matric name has unknown type of
       calculation.
     """
+    if not metrics:
+        return None
+
     if name in METRICS_SUM:
-        return round(sum(metrics))
+        return sum(metrics)
     elif name in METRICS_AVG:
-        return round(sum(metrics) / len(metrics))
+        return int(sum(metrics)/len(metrics))
     else:
+        # This is to catch the case where the caller forgets to check if
+        # metric name is a valide metric for HAProxy.
         raise ValueError("Unknown type of calculation for {}".format(name))
-
-
-def isfloat(value):
-    try:
-        float(value)
-        return True
-    except ValueError:
-        return False
-
 
 def isint(value):
     try:
@@ -369,57 +365,54 @@ def isint(value):
     except ValueError:
         return False
 
-
 def converter(value):
-    """Tries to convert value to an integer
+    """Tries to convert input value to an integer.
 
+    If input can be safely converted to number it returns an ``int`` type.
+    If input is a valid string(not empty) it returns that.
+    In all other cases we return None, including the ones which raise
+    exceptions when conversion fails.
     For floating point numbers, it truncates towards zero.
-    Value of empty string, or multiple spaces, returns 0::
 
-        >>> a = ''
-        >>> if not a:
-        ...   print('empty')
-        ...
-        empty
-        >>> a = ' '
-        >>> if not a:
-        ...   print('empty')
-        ...
-        >>> if not a.strip():
-        ...   print('empty')
-        ...
-        empty
-        >>>
+    Why are we doing this?
+    HAProxy may return for a metric either a number or zero or string or an
+    empty string.
+
+    It is up to the caller to use correctly the returned value. If the returned
+    value is passed to a function which does math operations the caller has to
+    filtered out possible ``None`` values.
 
     :param value: a value to convert to int.
     :type value: ``string``
-    :rtype: ``integer or ``string`` if value can't be converted to int.
-    :raise: ``ValueError`` when it fails to convert value to an integer
+    :rtype: ``integer or ``string`` or ``None`` if value can't be converted
+            to ``int`` or to ``string``.
 
     Usage::
 
       >>> from haproxyadmin import utils
-      >>> utils.converter('5.0')
-      5
-      >>> utils.converter('5.0j')
-      ....
-      ....
-      ValueError '5.0j'
-      >>> utils.converter('5.0')
-      5
-      >>> utils.converter(5.0)
-      5
-      >>> utils.converter(5)
-      5
+      >>> utils.converter('0')
+      0
+      >>> utils.converter('13.5')
+      13
+      >>> utils.converter('13.5f')
+      '13.5f'
+      >>> utils.converter('')
+      >>> utils.converter(' ')
+      >>> utils.converter('UP')
+      'UP'
+      >>> utils.converter('UP 1/2')
+      'UP 1/2'
+      >>>
     """
-    if not value.strip():
-        return 0
-    if isint(value):
-        return int(value)
-    elif isfloat(value):
+    try:
         return int(float(value))
-    else:
-        raise ValueError(value)
+    except ValueError:
+        # if it isn't an empty string return it otherwise return None
+        return value.strip() or None
+    except TypeError:
+        # This is to catch the case where input value is a data structure or
+        # object it is very unlikely someone to pass those, but you never know.
+        return None
 
 
 class CSVLine(object):

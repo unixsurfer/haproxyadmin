@@ -11,7 +11,7 @@ run operation for a server.
 
 """
 from haproxyadmin.utils import (calculate, cmd_across_all_procs, compare_values,
-                                should_die, check_command)
+                                should_die, check_command, converter)
 
 
 class Server(object):
@@ -159,15 +159,18 @@ class Server(object):
         :data:`haproxyadmin.utils.METRICS_SUM` and
         :data:`haproxyadmin.utils.METRICS_AVG`.
 
-        :param name: Metric name to retrieve
+        :param name: The name of the metric
         :type name: any of :data:`haproxyadmin.haproxy.SERVER_METRICS`
-        :rtype: number, integer or float
+        :rtype: number, integer
         :raise: ``ValueError`` when a given metric is not found
         """
         if name not in Server.SERVER_METRICS:
             raise ValueError("{} is not valid metric".format(name))
 
         metrics = [x.metric(name) for x in self._server_per_proc]
+        # num_metrics = filter(None, map(converter, metrics))
+        metrics[:] = (converter(x) for x in metrics)
+        metrics[:] = (x for x in metrics if x is not None)
 
         return calculate(name, metrics)
 
@@ -360,7 +363,8 @@ class Server(object):
         :rtype: ``bool``
         """
 
-        cmd = "shutdown sessions server {}/{}".format(self.backendname, self.name)
+        cmd = "shutdown sessions server {b}/{s}".format(b=self.backendname,
+                                                        s=self.name)
         results = cmd_across_all_procs(self._server_per_proc, 'command', cmd)
 
         return check_command(results)

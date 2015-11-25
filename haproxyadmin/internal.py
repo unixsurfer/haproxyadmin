@@ -16,7 +16,7 @@ import six
 import socket
 import time
 
-from haproxyadmin.utils import (info2dict, converter, stat2dict)
+from haproxyadmin.utils import (info2dict, stat2dict)
 from haproxyadmin.exceptions import (SocketTransportError, SocketTimeout,
                                      SocketConnectionError)
 
@@ -116,7 +116,8 @@ class _HAProxyProcess(object):
             else:
                 return data[0]
         else:
-            raise ValueError("no data returned from socket {}".self.socket_file)
+            raise ValueError("no data returned from socket {}".format(
+                self.socket_file))
 
     def proc_info(self):
         """Return a dictionary containing information about HAProxy daemon.
@@ -154,7 +155,7 @@ class _HAProxyProcess(object):
         return self.hap_stats
 
     def metric(self, name):
-        return converter(self.proc_info()[name])
+        return self.proc_info()[name]
 
     def backends_stats(self, iid=-1):
         """Build the data structure for backends
@@ -326,7 +327,7 @@ class _Frontend(object):
         """Return the value of a metric"""
         data = self.stats_data()
 
-        return converter(getattr(data, name))
+        return getattr(data, name)
 
     def command(self, cmd):
         """Run command to HAProxy
@@ -410,7 +411,7 @@ class _Backend(object):
     def metric(self, name):
         data = self.stats_data()
 
-        return converter(getattr(data, name))
+        return getattr(data, name)
 
     def command(self, cmd):
         return self.hap_process.command(cmd)
@@ -499,7 +500,7 @@ class _Server(object):
     def metric(self, name):
         data = self.stats_data()
 
-        return converter(getattr(data, name))
+        return getattr(data, name)
 
     def stats(self):
         """Build dictionary for all statistics reported by HAProxy.

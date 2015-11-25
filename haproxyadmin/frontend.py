@@ -11,7 +11,7 @@ be used to run operations on a frontend and retrieve statistics.
 
 """
 from haproxyadmin.utils import (calculate, cmd_across_all_procs, compare_values,
-                                check_command, should_die)
+                                check_command, should_die, converter)
 
 
 class Frontend(object):
@@ -134,6 +134,8 @@ class Frontend(object):
             raise ValueError("{} is not valid metric".format(name))
 
         metrics = [x.metric(name) for x in self._frontend_per_proc]
+        metrics[:] = (converter(x) for x in metrics)
+        metrics[:] = (x for x in metrics if x is not None)
 
         return calculate(name, metrics)
 

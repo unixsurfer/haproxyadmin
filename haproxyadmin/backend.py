@@ -10,7 +10,8 @@ This module provides the :class:`Backend <.Backend>` class which allows to
 run operation for a backend.
 
 """
-from haproxyadmin.utils import (calculate, cmd_across_all_procs, compare_values)
+from haproxyadmin.utils import (calculate, cmd_across_all_procs,
+                                compare_values, converter)
 from haproxyadmin.server import Server
 
 
@@ -156,6 +157,8 @@ class Backend(object):
             raise ValueError("{} is not valid metric".format(name))
 
         metrics = [x.metric(name) for x in self._backend_per_proc]
+        metrics[:] = (converter(x) for x in metrics)
+        metrics[:] = (x for x in metrics if x is not None)
 
         return calculate(name, metrics)
 

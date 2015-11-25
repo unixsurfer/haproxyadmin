@@ -15,7 +15,7 @@ import glob
 from haproxyadmin.frontend import Frontend
 from haproxyadmin.backend import Backend
 from haproxyadmin.server import Server
-from haproxyadmin.utils import (is_unix_socket, cmd_across_all_procs,
+from haproxyadmin.utils import (is_unix_socket, cmd_across_all_procs, converter,
                                 calculate, isint, should_die, check_command,
                                 check_output, compare_values, connected_socket)
 
@@ -634,7 +634,10 @@ class HAProxy(object):
         if name not in HAProxy.HAPROXY_METRICS:
             raise ValueError("{} is not valid metric".format(name))
 
+
         metrics = [x.metric(name) for x in self._hap_processes]
+        metrics[:] = (converter(x) for x in metrics)
+        metrics[:] = (x for x in metrics if x is not None)
 
         return calculate(name, metrics)
 
