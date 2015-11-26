@@ -1,6 +1,12 @@
 CHANGES
 =======
 
+0.1.10
+------
+
+* RELEASE 0.1.10 version
+* Implement a proper retry logic for socket failures
+
 0.1.9
 -----
 
