@@ -62,7 +62,17 @@ class _HAProxyProcess(object):
         """
         data = []  # hold data returned from socket
         raised = None  # hold possible exception raised during connect phase
-        for attempt in range(self.retry):
+        attempt = 0 # times to attempt to connect after a connection failure
+        if self.retry == 0:
+            # 0 means retry indefinitely
+            attempt = -1
+        elif self.retry is None:
+            # None means don't retry
+            attempt = 1
+        else:
+            # any other value means retry N times
+            attempt = self.retry + 1
+        while attempt != 0:
             try:
                 unix_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
                 # I haven't seen a case where a running process which holds a
@@ -107,6 +117,8 @@ class _HAProxyProcess(object):
                 unix_socket.close()
                 if raised:
                     time.sleep(self.retry_interval)
+
+            attempt -= 1
 
         if raised:
             raise raised

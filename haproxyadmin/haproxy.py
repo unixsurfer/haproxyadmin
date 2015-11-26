@@ -48,8 +48,13 @@ class HAProxy(object):
     :param socket_file: absolute path of HAProxy stats file.
     :type socket_file: ``string``
     :param retry: number of times to retry to open a UNIX socket
-      connection after a failure occurred.
-    :type retry: ``integer``
+      connection after a failure occurred, possible values
+
+      - None => don't retry
+      - 0 => retry indefinitely
+      - 1..N => times to retry
+
+    :type retry: ``integer`` or ``None``
     :param retry_interval: sleep time between the retries.
     :type retry_interval: ``integer``
     :return: a user-created :class:`HAProxy` object.
@@ -633,7 +638,6 @@ class HAProxy(object):
         """
         if name not in HAProxy.HAPROXY_METRICS:
             raise ValueError("{} is not valid metric".format(name))
-
 
         metrics = [x.metric(name) for x in self._hap_processes]
         metrics[:] = (converter(x) for x in metrics)
