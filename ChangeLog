@@ -1,6 +1,13 @@
 CHANGES
 =======
 
+0.1.11
+------
+
+* RELEASE 0.1.11 version
+* Make sure we clear out possible previous errors
+* Remove unnecessary keyword argument
+
 0.1.10
 ------
 
