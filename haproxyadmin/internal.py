@@ -108,6 +108,8 @@ class _HAProxyProcess(object):
                 # such as disable/enable server
                 if len(data) > 1 and data[-1] == '':
                     data.pop()
+                # make sure possible previous errors are cleared
+                raised = None
                 # get out from the retry loop
                 break
             finally:
