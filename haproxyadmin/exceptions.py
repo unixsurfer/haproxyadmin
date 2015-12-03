@@ -75,7 +75,7 @@ class HAProxySocketError(HAProxyBaseError):
 
 class SocketTimeout(HAProxySocketError):
     """Raised when we timeout on the socket."""
-
+    message = 'Socket timed out'
 
 class SocketPermissionError(HAProxySocketError):
     """Raised when permissions are not granted to access socket file."""
@@ -102,3 +102,4 @@ class SocketTransportError(HAProxySocketError):
        previous connection.
 
     """
+    message = 'Transport endpoint is already connected'

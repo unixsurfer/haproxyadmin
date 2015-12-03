@@ -89,17 +89,14 @@ class _HAProxyProcess(object):
             except ConnectionRefusedError:
                 raised = SocketConnectionError(self.socket_file)
             except socket.timeout:
-                msg = "{} socket timeout".format(self.socket_file)
-                raised = SocketTimeout(message=msg,
-                                       socket_file=self.socket_file)
+                raised = SocketTimeout(socket_file=self.socket_file)
             except OSError as error:
                 # while stress testing HAProxy and querying for all frontend
                 # metrics I get sometimes:
                 # OSError: [Errno 106] Transport endpoint is already connected
                 # catch this one only and reraise it withour exception
                 if error.errno == 106:
-                    raised = SocketTransportError(message=str(error),
-                                                  socket_file=self.socket_file)
+                    raised = SocketTransportError(socket_file=self.socket_file)
                 else:
                     # for the rest of OSError exceptions just reraise them
                     raised = error
