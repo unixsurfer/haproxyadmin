@@ -1,6 +1,12 @@
 CHANGES
 =======
 
+0.1.12
+------
+
+* RELEASE 0.1.12 version
+* Return zero rather None for metrics without value
+
 0.1.11
 ------
 
