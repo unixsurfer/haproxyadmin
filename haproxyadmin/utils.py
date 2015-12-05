@@ -347,7 +347,7 @@ def calculate(name, metrics):
       calculation.
     """
     if not metrics:
-        return None
+        return 0
 
     if name in METRICS_SUM:
         return sum(metrics)
