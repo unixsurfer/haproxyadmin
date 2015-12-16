@@ -1,6 +1,13 @@
 CHANGES
 =======
 
+0.2.0
+-----
+
+* RELEASE 0.2.0 version
+* Refactor constants for metrics
+* Include a module docstring
+
 0.1.12
 ------
 
