@@ -1,7 +1,12 @@
 # -*- coding: utf-8 -*-
 # vim:fenc=utf-8
 #
+"""
+haproxyadmin
+~~~~~~~~~~~~
 
+A python library to interact with HAProxy over UNIX socket
+"""
 __title__ = 'haproxyadmin'
 __author__ = 'Pavlos Parissis'
 __license__ = 'Apache 2.0'
