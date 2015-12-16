@@ -15,6 +15,50 @@ from haproxyadmin.utils import (calculate, cmd_across_all_procs,
 from haproxyadmin.server import Server
 
 
+BACKEND_METRICS = [
+    'act',
+    'bck',
+    'bin',
+    'bout',
+    'chkdown',
+    'cli_abrt',
+    'comp_byp',
+    'comp_in',
+    'comp_out',
+    'comp_rsp',
+    'ctime',
+    'downtime',
+    'dreq',
+    'dresp',
+    'econ',
+    'eresp',
+    'hrsp_1xx',
+    'hrsp_2xx',
+    'hrsp_3xx',
+    'hrsp_4xx',
+    'hrsp_5xx',
+    'hrsp_other',
+    'lastchg',
+    'lastsess',
+    'lbtot',
+    'qcur',
+    'qmax',
+    'qtime',
+    'rate',
+    'rate_max',
+    'rtime',
+    'scur',
+    'slim',
+    'smax',
+    'srv_abrt',
+    'stot',
+    'ttime',
+    'weight',
+    'wredis',
+    'wretr',
+]
+
+
 class Backend(object):
     """Build a user-created :class:`Backend` for a single backend.
 
@@ -22,48 +66,6 @@ class Backend(object):
     :type backend_per_proc: ``list``
     :rtype: a :class:`Backend`.
     """
-    BACKEND_METRICS = [
-        'act',
-        'bck',
-        'bin',
-        'bout',
-        'chkdown',
-        'cli_abrt',
-        'comp_byp',
-        'comp_in',
-        'comp_out',
-        'comp_rsp',
-        'ctime',
-        'downtime',
-        'dreq',
-        'dresp',
-        'econ',
-        'eresp',
-        'hrsp_1xx',
-        'hrsp_2xx',
-        'hrsp_3xx',
-        'hrsp_4xx',
-        'hrsp_5xx',
-        'hrsp_other',
-        'lastchg',
-        'lastsess',
-        'lbtot',
-        'qcur',
-        'qmax',
-        'qtime',
-        'rate',
-        'rate_max',
-        'rtime',
-        'scur',
-        'slim',
-        'smax',
-        'srv_abrt',
-        'stot',
-        'ttime',
-        'weight',
-        'wredis',
-        'wretr',
-    ]
 
     def __init__(self, backend_per_proc):
         self._backend_per_proc = backend_per_proc
@@ -153,7 +155,7 @@ class Backend(object):
         :raise: ValueError when a given metric is not found.
         """
         metrics = []
-        if name not in Backend.BACKEND_METRICS:
+        if name not in BACKEND_METRICS:
             raise ValueError("{} is not valid metric".format(name))
 
         metrics = [x.metric(name) for x in self._backend_per_proc]

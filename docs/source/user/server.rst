@@ -24,7 +24,7 @@ Retrieve various statistics
     >>> backend = hap.backend('backend1_proc34')
     >>> for server in backend.servers():
     ...    print(server.name)
-    ...    for m in haproxy.SERVER_METRICS:
+    ...    for m in SERVER_METRICS:
     ...       print("name {} value {}".format(m, server.metric(m)))
     ...    print("-----------")
     ...

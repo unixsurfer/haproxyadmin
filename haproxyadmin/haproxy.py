@@ -22,15 +22,49 @@ from haproxyadmin.utils import (is_unix_socket, cmd_across_all_procs, converter,
 from haproxyadmin.internal import _HAProxyProcess
 from haproxyadmin.exceptions import CommandFailed
 
-VALID_STATES = Server.VALID_STATES
-STATE_ENABLE = Server.STATE_ENABLE
-STATE_DISABLE = Server.STATE_DISABLE
-STATE_READY = Server.STATE_READY
-STATE_DRAIN = Server.STATE_DRAIN
-STATE_MAINT = Server.STATE_MAINT
-FRONTEND_METRICS = Frontend.FRONTEND_METRICS
-BACKEND_METRICS = Backend.BACKEND_METRICS
-SERVER_METRICS = Server.SERVER_METRICS
+
+HAPROXY_METRICS = [
+    'SslFrontendMaxKeyRate',
+    'Hard_maxconn',
+    'SessRateLimit',
+    'Process_num',
+    'Memmax_MB',
+    'CompressBpsRateLim',
+    'MaxSslConns',
+    'ConnRateLimit',
+    'SslRateLimit',
+    'MaxConnRate',
+    'CumConns',
+    'SslBackendKeyRate',
+    'SslCacheLookups',
+    'CurrSslConns',
+    'Run_queue',
+    'Maxpipes',
+    'Idle_pct',
+    'SslFrontendKeyRate',
+    'Tasks',
+    'MaxZlibMemUsage',
+    'SslFrontendSessionReuse_pct',
+    'CurrConns',
+    'SslCacheMisses',
+    'SslRate',
+    'CumSslConns',
+    'PipesUsed',
+    'Maxconn',
+    'CompressBpsIn',
+    'ConnRate',
+    'Ulimit-n',
+    'SessRate',
+    'SslBackendMaxKeyRate',
+    'CumReq',
+    'PipesFree',
+    'ZlibMemUsage',
+    'Uptime_sec',
+    'CompressBpsOut',
+    'Maxsock',
+    'MaxSslRate',
+    'MaxSessRate',
+]
 
 
 class HAProxy(object):
@@ -60,48 +94,6 @@ class HAProxy(object):
     :return: a user-created :class:`HAProxy` object.
     :rtype: :class:`HAProxy`
     """
-    HAPROXY_METRICS = [
-        'SslFrontendMaxKeyRate',
-        'Hard_maxconn',
-        'SessRateLimit',
-        'Process_num',
-        'Memmax_MB',
-        'CompressBpsRateLim',
-        'MaxSslConns',
-        'ConnRateLimit',
-        'SslRateLimit',
-        'MaxConnRate',
-        'CumConns',
-        'SslBackendKeyRate',
-        'SslCacheLookups',
-        'CurrSslConns',
-        'Run_queue',
-        'Maxpipes',
-        'Idle_pct',
-        'SslFrontendKeyRate',
-        'Tasks',
-        'MaxZlibMemUsage',
-        'SslFrontendSessionReuse_pct',
-        'CurrConns',
-        'SslCacheMisses',
-        'SslRate',
-        'CumSslConns',
-        'PipesUsed',
-        'Maxconn',
-        'CompressBpsIn',
-        'ConnRate',
-        'Ulimit-n',
-        'SessRate',
-        'SslBackendMaxKeyRate',
-        'CumReq',
-        'PipesFree',
-        'ZlibMemUsage',
-        'Uptime_sec',
-        'CompressBpsOut',
-        'Maxsock',
-        'MaxSslRate',
-        'MaxSessRate',
-    ]
 
     def __init__(self, socket_dir=None,
                  socket_file=None,
@@ -636,7 +628,7 @@ class HAProxy(object):
         :rtype: ``integer``
         :raise: ``ValueError`` when a given metric is not found
         """
-        if name not in HAProxy.HAPROXY_METRICS:
+        if name not in HAPROXY_METRICS:
             raise ValueError("{} is not valid metric".format(name))
 
         metrics = [x.metric(name) for x in self._hap_processes]
@@ -1075,6 +1067,3 @@ class HAProxy(object):
         values = cmd_across_all_procs(self._hap_processes, 'metric', 'Version')
 
         return compare_values(values)
-
-
-HAPROXY_METRICS = HAProxy.HAPROXY_METRICS

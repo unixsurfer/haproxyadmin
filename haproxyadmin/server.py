@@ -14,6 +14,60 @@ from haproxyadmin.utils import (calculate, cmd_across_all_procs, compare_values,
                                 should_die, check_command, converter)
 
 
+STATE_ENABLE = 'enable'
+STATE_DISABLE = 'disable'
+STATE_READY = 'ready'
+STATE_DRAIN = 'drain'
+STATE_MAINT = 'maint'
+VALID_STATES = [
+    STATE_ENABLE,
+    STATE_DISABLE,
+    STATE_MAINT,
+    STATE_DRAIN,
+    STATE_READY,
+]
+SERVER_METRICS = [
+    'qcur',
+    'qmax',
+    'scur',
+    'smax',
+    'stot',
+    'bin',
+    'bout',
+    'dresp',
+    'econ',
+    'eresp',
+    'wretr',
+    'wredis',
+    'weight',
+    'act',
+    'bck',
+    'chkfail',
+    'chkdown',
+    'lastchg',
+    'downtime',
+    'qlimit',
+    'throttle',
+    'lbtot',
+    'rate',
+    'rate_max',
+    'check_duration',
+    'hrsp_1xx',
+    'hrsp_2xx',
+    'hrsp_3xx',
+    'hrsp_4xx',
+    'hrsp_5xx',
+    'hrsp_other',
+    'cli_abrt',
+    'srv_abrt',
+    'lastsess',
+    'qtime',
+    'ctime',
+    'rtime',
+    'ttime',
+]
+
+
 class Server(object):
     """Build a user-created :class:`Server` for a single server.
 
@@ -21,58 +75,6 @@ class Server(object):
     :type _server_per_proc: ``list``
     :rtype: a :class:`Server`.
     """
-    STATE_ENABLE = 'enable'
-    STATE_DISABLE = 'disable'
-    STATE_READY = 'ready'
-    STATE_DRAIN = 'drain'
-    STATE_MAINT = 'maint'
-    VALID_STATES = [
-        STATE_ENABLE,
-        STATE_DISABLE,
-        STATE_MAINT,
-        STATE_DRAIN,
-        STATE_READY,
-    ]
-    SERVER_METRICS = [
-        'qcur',
-        'qmax',
-        'scur',
-        'smax',
-        'stot',
-        'bin',
-        'bout',
-        'dresp',
-        'econ',
-        'eresp',
-        'wretr',
-        'wredis',
-        'weight',
-        'act',
-        'bck',
-        'chkfail',
-        'chkdown',
-        'lastchg',
-        'downtime',
-        'qlimit',
-        'throttle',
-        'lbtot',
-        'rate',
-        'rate_max',
-        'check_duration',
-        'hrsp_1xx',
-        'hrsp_2xx',
-        'hrsp_3xx',
-        'hrsp_4xx',
-        'hrsp_5xx',
-        'hrsp_other',
-        'cli_abrt',
-        'srv_abrt',
-        'lastsess',
-        'qtime',
-        'ctime',
-        'rtime',
-        'ttime',
-    ]
 
     def __init__(self, server_per_proc, backendname):
         self._server_per_proc = server_per_proc
@@ -164,7 +166,7 @@ class Server(object):
         :rtype: number, integer
         :raise: ``ValueError`` when a given metric is not found
         """
-        if name not in Server.SERVER_METRICS:
+        if name not in SERVER_METRICS:
             raise ValueError("{} is not valid metric".format(name))
 
         metrics = [x.metric(name) for x in self._server_per_proc]
@@ -254,8 +256,8 @@ class Server(object):
           'no check'
 
         """
-        if state not in Server.VALID_STATES:
-            states = ', '.join(Server.VALID_STATES)
+        if state not in VALID_STATES:
+            states = ', '.join(VALID_STATES)
             raise ValueError("Wrong state, allowed states {}".format(states))
         if state == 'enable' or state == 'disable':
             cmd = "{} server {}/{}".format(state, self.backendname, self.name)

@@ -22,7 +22,7 @@ Retrieve various statistics
 .. code:: python
 
     >>> backend = hap.backend('backend1_proc34')
-    >>> for m in haproxy.BACKEND_METRICS:
+    >>> for m in BACKEND_METRICS:
     ...     print("name {} value {}".format(m, backend.metric(m)))
     ...
     name act value 3

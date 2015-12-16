@@ -120,7 +120,7 @@ Retrieve various statistics
 .. code:: python
 
     >>> frontend = hap.frontend('frontend2_proc34')
-    >>> for m in haproxy.FRONTEND_METRICS:
+    >>> for m in FRONTEND_METRICS:
     ...    print("name {} value {}".format(m, frontend.metric(m)))
     ...
     name bin value 380

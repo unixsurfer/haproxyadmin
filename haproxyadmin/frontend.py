@@ -14,6 +14,35 @@ from haproxyadmin.utils import (calculate, cmd_across_all_procs, compare_values,
                                 check_command, should_die, converter)
 
 
+FRONTEND_METRICS = [
+    'bin',
+    'bout',
+    'comp_byp',
+    'comp_in',
+    'comp_out',
+    'comp_rsp',
+    'dreq',
+    'dresp',
+    'ereq',
+    'hrsp_1xx',
+    'hrsp_2xx',
+    'hrsp_3xx',
+    'hrsp_4xx',
+    'hrsp_5xx',
+    'hrsp_other',
+    'rate',
+    'rate_lim',
+    'rate_max',
+    'req_rate',
+    'req_rate_max',
+    'req_tot',
+    'scur',
+    'slim',
+    'smax',
+    'stot',
+]
+
+
 class Frontend(object):
     """Build a user-created :class:`Frontend` for a single frontend.
 
@@ -21,33 +50,6 @@ class Frontend(object):
     :type frontend_per_proc: ``list``
     :rtype: a :class:`Frontend`.
     """
-    FRONTEND_METRICS = [
-        'bin',
-        'bout',
-        'comp_byp',
-        'comp_in',
-        'comp_out',
-        'comp_rsp',
-        'dreq',
-        'dresp',
-        'ereq',
-        'hrsp_1xx',
-        'hrsp_2xx',
-        'hrsp_3xx',
-        'hrsp_4xx',
-        'hrsp_5xx',
-        'hrsp_other',
-        'rate',
-        'rate_lim',
-        'rate_max',
-        'req_rate',
-        'req_rate_max',
-        'req_tot',
-        'scur',
-        'slim',
-        'smax',
-        'stot',
-    ]
 
     def __init__(self, frontend_per_proc):
         self._frontend_per_proc = frontend_per_proc
@@ -130,7 +132,7 @@ class Frontend(object):
         :rtype: ``integer``
         :raise: ``ValueError`` when a given metric is not found
         """
-        if name not in Frontend.FRONTEND_METRICS:
+        if name not in FRONTEND_METRICS:
             raise ValueError("{} is not valid metric".format(name))
 
         metrics = [x.metric(name) for x in self._frontend_per_proc]
