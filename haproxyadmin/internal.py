@@ -160,7 +160,9 @@ class _HAProxyProcess(object):
         :type sid: ``integer``
         :rtype: dict, see ``utils.stat2dict`` for details on the structure
         """
-        csv_data = self.command('show stat {} {} {}'.format(iid, obj_type, sid),
+        csv_data = self.command('show stat {i} {o} {s}'.format(i=iid,
+                                                               o=obj_type,
+                                                               s=sid),
                                 full_output=True)
         self.hap_stats = stat2dict(csv_data)
         return self.hap_stats
