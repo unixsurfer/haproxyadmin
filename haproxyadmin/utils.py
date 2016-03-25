@@ -158,7 +158,6 @@ def is_unix_socket(path):
 
     return stat.S_ISSOCK(mode)
 
-
 def connected_socket(path):
     """Check if socket file is a valid HAProxy socket file.
 
@@ -168,9 +167,9 @@ def connected_socket(path):
 
     :param path: file name path
     :type path: ``string``
+    :return: ``True`` is socket file is a valid HAProxy stats socket file False
+      otherwise
     :rtype: ``bool``
-    :raise: :class:`.SocketPermissionError`, :class:`.SocketConnectionError`
-      and :class:`.SocketApplicationError`
     """
     try:
         unix_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
@@ -178,25 +177,23 @@ def connected_socket(path):
         unix_socket.connect(path)
         unix_socket.send(six.b('show info' + '\n'))
         file_handle = unix_socket.makefile()
-    except ConnectionRefusedError:
-        raise SocketConnectionError(path)
-    except PermissionError:
-        raise SocketPermissionError(path)
+    except (ConnectionRefusedError, PermissionError, socket.timeout, OSError):
+        return False
     else:
-        data = file_handle.read().splitlines()
-        hap_info = info2dict(data)
+        try:
+            data = file_handle.read().splitlines()
+        except (ConnectionResetError, ConnectionRefusedError, PermissionError,
+                socket.timeout, OSError):
+            return False
+        else:
+            hap_info = info2dict(data)
     finally:
         unix_socket.close()
 
     try:
-        if hap_info['Name'] == 'HAProxy':
-            return True
-        else:
-            raise SocketApplicationError(path)
+        return hap_info['Name'] == 'HAProxy'
     except KeyError:
-        raise SocketApplicationError(path)
-
-    return False
+        return False
 
 
 def cmd_across_all_procs(hap_objects, method, *arg, **kargs):
