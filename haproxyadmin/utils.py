@@ -246,11 +246,7 @@ def elements_of_list_same(iterator):
       >>> utils.elements_of_list_same(iterator)
       False
     """
-    length = len(set(iterator))
-    if length == 1:
-        return True
-    else:
-        return False
+    return len(set(iterator)) == 1
 
 
 def compare_values(values):
