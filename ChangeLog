@@ -1,6 +1,19 @@
 CHANGES
 =======
 
+0.2.1
+-----
+
+* RELEASE 0.2.1 version
+* Reorder inclusion of modules
+* Add docstring for isint()
+* Simplify conditional statement
+* Fix typos in a docstring
+* Reorder inclusion of modules and remove unused exceptions
+* Return False when a file isn't a valid stats socket
+* Update copyright
+* Pass keyword parameters in format method, fix #1
+
 0.2.0
 -----
 
