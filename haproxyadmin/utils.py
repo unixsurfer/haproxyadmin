@@ -120,10 +120,10 @@ def should_die(old_implementation):
 
     When a function raises an exception in some cases we don't care for the
     reason but only if the function run successfully or not. We add an extra
-    argument to the decorating function with the name ``die`` to control this
+    argument to the decorated function with the name ``die`` to control this
     behavior. When it is set to ``True``, which is the default value, it
-    raises any exception raised by the decorating function. When it is set to
-    ``False`` it returns ``True`` if decorating function run successfully or
+    raises any exception raised by the decorated function. When it is set to
+    ``False`` it returns ``True`` if decorated function run successfully or
     ``False`` if an exception was raised.
     """
     @wraps(old_implementation)
