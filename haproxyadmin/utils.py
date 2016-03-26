@@ -10,14 +10,13 @@ haproxyadmin.
 """
 
 import socket
-import six
 import os
 import stat
 from functools import wraps
+import six
+
 from haproxyadmin.exceptions import (CommandFailed, MultipleCommandResults,
-                                     IncosistentData, SocketPermissionError,
-                                     SocketConnectionError,
-                                     SocketApplicationError)
+                                     IncosistentData)
 from haproxyadmin.command_status import (ERROR_OUTPUT_STRINGS,
                                          SUCCESS_OUTPUT_STRINGS)
 
