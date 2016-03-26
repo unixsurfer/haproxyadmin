@@ -14,11 +14,9 @@ import glob
 
 from haproxyadmin.frontend import Frontend
 from haproxyadmin.backend import Backend
-from haproxyadmin.server import Server
 from haproxyadmin.utils import (is_unix_socket, cmd_across_all_procs, converter,
                                 calculate, isint, should_die, check_command,
                                 check_output, compare_values, connected_socket)
-
 from haproxyadmin.internal import _HAProxyProcess
 from haproxyadmin.exceptions import CommandFailed
 

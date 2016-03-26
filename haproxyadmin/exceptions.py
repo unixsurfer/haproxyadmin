@@ -77,6 +77,7 @@ class SocketTimeout(HAProxySocketError):
     """Raised when we timeout on the socket."""
     message = 'Socket timed out'
 
+
 class SocketPermissionError(HAProxySocketError):
     """Raised when permissions are not granted to access socket file."""
     message = 'No permissions are granted to access socket file'

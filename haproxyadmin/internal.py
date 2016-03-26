@@ -12,9 +12,9 @@ with a single HAProxy process.
 
 """
 
-import six
 import socket
 import time
+import six
 
 from haproxyadmin.utils import (info2dict, stat2dict)
 from haproxyadmin.exceptions import (SocketTransportError, SocketTimeout,
