@@ -351,6 +351,14 @@ def calculate(name, metrics):
         raise ValueError("Unknown type of calculation for {}".format(name))
 
 def isint(value):
+    """Check if input can be converted to an integer
+
+    :param value: value to check
+    :type value: a ``string`` or ``int``
+    :return: ``True`` if value can be converted to an integer
+    :rtype: ``bool``
+    :raise: :class:`ValueError` when value can't be converted to an integer
+    """
     try:
         int(value)
         return True
