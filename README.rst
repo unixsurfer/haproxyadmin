@@ -102,6 +102,10 @@ Features
 Installation
 ------------
 
+Use pip::
+
+    pip install haproxyadmin
+
 From Source::
 
    sudo python setup.py install
@@ -113,7 +117,6 @@ Build (source) RPMs::
 Build a source archive for manual installation::
 
    python setup.py sdist
-
 
 Release
 -------
