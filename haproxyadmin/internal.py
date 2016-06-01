@@ -13,6 +13,7 @@ with a single HAProxy process.
 """
 
 import socket
+import errno
 import time
 import six
 
@@ -86,20 +87,20 @@ class _HAProxyProcess(object):
                 unix_socket.send(six.b(command + '\n'))
                 file_handle = unix_socket.makefile()
                 data = file_handle.read().splitlines()
-            except ConnectionRefusedError:
-                raised = SocketConnectionError(self.socket_file)
             except socket.timeout:
                 raised = SocketTimeout(socket_file=self.socket_file)
-            except OSError as error:
+            except OSError as exc:
                 # while stress testing HAProxy and querying for all frontend
-                # metrics I get sometimes:
+                # metrics I sometimes get:
                 # OSError: [Errno 106] Transport endpoint is already connected
                 # catch this one only and reraise it withour exception
-                if error.errno == 106:
+                if exc.errno == errno.EISCONN:
                     raised = SocketTransportError(socket_file=self.socket_file)
+                elif exc.errno == errno.ECONNREFUSED:
+                    raised = SocketConnectionError(self.socket_file)
                 else:
                     # for the rest of OSError exceptions just reraise them
-                    raised = error
+                    raised = exc
             else:
                 # HAProxy always send an empty string at the end
                 # we remove it as it adds noise for things like ACL/MAP and etc
