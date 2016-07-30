@@ -70,8 +70,8 @@ class HAProxy(object):
 
     This is the main class to interact with HAProxy and provides methods
     to create objects for managing frontends, backends and servers. It also
-    provides an interface to interact with HAProxy as a process to
-    retrieve settings/statistics but also change various settings.
+    provides an interface to interact with HAProxy as a way to
+    retrieve settings/statistics but also change settings.
 
     ACLs and MAPs are also managed by :class:`HAProxy` class.
 

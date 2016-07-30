@@ -205,8 +205,6 @@ def cmd_across_all_procs(hap_objects, method, *arg, **kargs):
     :param hap_objects: a list of objects.
     :type hap_objects: ``list``
     :param method: a valid method for the objects.
-    :param arg: (optional) argument on the method
-    :type arg: whatever is acceptable for the method
     :return: list of 2-item tuple
 
       #. HAProxy process number
