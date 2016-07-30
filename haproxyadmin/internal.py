@@ -36,11 +36,8 @@ class _HAProxyProcess(object):
                            (defaults to 2)
     :type retry_interval: integer
     """
-    SUCCESS_OUTPUT_STRINGS = ['Done.', '']
-
     def __init__(self, socket_file, retry=3, retry_interval=2):
         self.socket_file = socket_file
-        self.timer = time.time()
         self.hap_stats = {}
         self.hap_info = {}
         self.retry = retry
