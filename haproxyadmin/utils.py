@@ -176,13 +176,12 @@ def connected_socket(path):
         unix_socket.connect(path)
         unix_socket.send(six.b('show info' + '\n'))
         file_handle = unix_socket.makefile()
-    except (ConnectionRefusedError, PermissionError, socket.timeout, OSError):
+    except (socket.timeout, OSError):
         return False
     else:
         try:
             data = file_handle.read().splitlines()
-        except (ConnectionResetError, ConnectionRefusedError, PermissionError,
-                socket.timeout, OSError):
+        except (socket.timeout, OSError):
             return False
         else:
             hap_info = info2dict(data)
