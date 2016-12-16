@@ -20,6 +20,13 @@ from haproxyadmin.exceptions import (CommandFailed, MultipleCommandResults,
 from haproxyadmin.command_status import (ERROR_OUTPUT_STRINGS,
                                          SUCCESS_OUTPUT_STRINGS)
 
+try:
+    EXCEPT_LIST = (ConnectionRefusedError, PermissionError, socket.timeout, OSError)
+    EXCEPT_RESET_LIST = tuple([ConnectionResetError].extend(EXCEPT_LIST))
+except:
+    EXCEPT_RESET_LIST = EXCEPT_LIST = (socket.error, socket.timeout, OSError)
+    
+
 METRICS_SUM = [
     'CompressBpsIn',
     'CompressBpsOut',
@@ -176,13 +183,12 @@ def connected_socket(path):
         unix_socket.connect(path)
         unix_socket.send(six.b('show info' + '\n'))
         file_handle = unix_socket.makefile()
-    except (ConnectionRefusedError, PermissionError, socket.timeout, OSError):
+    except EXCEPT_LIST:
         return False
     else:
         try:
             data = file_handle.read().splitlines()
-        except (ConnectionResetError, ConnectionRefusedError, PermissionError,
-                socket.timeout, OSError):
+        except EXCEPT_RESET_LIST:
             return False
         else:
             hap_info = info2dict(data)
