@@ -22,7 +22,7 @@ from haproxyadmin.command_status import (ERROR_OUTPUT_STRINGS,
 
 try:
     EXCEPT_LIST = (ConnectionRefusedError, PermissionError, socket.timeout, OSError)
-    EXCEPT_RESET_LIST = tuple([ConnectionResetError].extend(EXCEPT_LIST))
+    EXCEPT_RESET_LIST = tuple([ConnectionResetError] + EXCEPT_LIST)
 except:
     EXCEPT_RESET_LIST = EXCEPT_LIST = (socket.error, socket.timeout, OSError)
     
