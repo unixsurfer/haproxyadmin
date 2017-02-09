@@ -130,6 +130,23 @@ class Server(object):
         return compare_values(values)
 
     @property
+    def address(self):
+        return self._server_per_proc[0].address
+
+    def setaddress(self, new_address):
+        """
+        Set this server's address.
+        :rtype: ``string``
+        """
+
+        values = cmd_across_all_procs(
+            self._server_per_proc, 'setaddress', new_address=str(new_address)
+        )
+
+        return compare_values(values)
+
+
+    @property
     def last_status(self):
         """Return the last health check contents or textual error.
 
