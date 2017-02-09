@@ -513,6 +513,18 @@ class _Server(object):
 
         return getattr(data, name)
 
+    @property
+    def address(self):
+        """
+        Return server address
+        """
+        data = self.stats_data()
+        return data.addr
+
+    def setaddress(self, new_address):
+        return self.command("set server {be}/{srv} addr {new_address}".format(
+            be=self.backend.name, srv=self._name, new_address=new_address))
+
     def stats(self):
         """Build dictionary for all statistics reported by HAProxy.
 
