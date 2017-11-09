@@ -118,7 +118,6 @@ class HAProxy(object):
 	elif (uris):
 	    uriarr = uris.split(",")
 	    for uri in uriarr:
-		print uri
                 sockets.append(uri)
         else:
             raise ValueError("UNIX socket file was not set")
