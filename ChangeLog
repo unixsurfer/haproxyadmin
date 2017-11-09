@@ -1,6 +1,12 @@
 CHANGES
 =======
 
+* Added setaddress and address to Servers
+* Fix docstrings
+* Remove unused variables
+* Ignore Python 3 class hierarchy of OSError errors
+* Update installation instructions
+
 0.2.1
 -----
 
@@ -74,7 +80,7 @@ CHANGES
 * fix a regression introduced with dcc5173e31deac
 * add support for sending commands to haproxy
 * simplify the way we send commands to socket
-* add support for keyword arguments in cmd_across_all_procs()
+* add support for keyword arguments in cmd\_across\_all\_procs()
 * fix (once again) format issues in TODO.rst
 * fix format issues in TODO.rst
 * add some ordering in our TODO items
@@ -117,7 +123,7 @@ CHANGES
 * internal.py: OSError exception doesn't have message attribute
 * remove unnecessary declaration
 * don't use relative imports as our module layout is quit flat and very short
-* __init__.py:add version and remove ascii art
+* \_\_init\_\_.py:add version and remove ascii art
 * import all exceptions in the doc rather import each one individually
 * exceptions.py: use correct exception names
 * add SocketTimeout exception and raise it when we got timeout after X retries
@@ -139,8 +145,8 @@ CHANGES
 -----
 
 * RELEASE 0.1.0 version
-* raise CommandFailed rather ValueError in show_acl
-* show_acl: rename acl argument to aclid to be consistent with show_map
+* raise CommandFailed rather ValueError in show\_acl
+* show\_acl: rename acl argument to aclid to be consistent with show\_map
 * update TODO
 * update docstring for acl commands
 
@@ -162,7 +168,7 @@ CHANGES
 * tiny reformatting on exceptions
 * haproxy.py: explicitly check for the existence of socket directory
 * Update TODO
-* extend ERROR_OUTPUT_STRINGS to support address field
+* extend ERROR\_OUTPUT\_STRINGS to support address field
 * include Socket family exceptions in the documentation
 * updates on ChangeLog
 
@@ -173,7 +179,7 @@ CHANGES
 * haproxy.py: reformating
 * utils.py: raise an appropriate exception when we check for valid socket files
 * add a bunch of exceptions for catching errors when we test socket file
-* connected_socket() perform a sanity on the date returned
+* connected\_socket() perform a sanity on the date returned
 
 0.0.4
 -----
@@ -182,7 +188,7 @@ CHANGES
 * update TODO
 * haproxy.py: fix a bug in add map where we forgot to set value
 * haproxy.py: ignore socket files not bound to a process
-* utils.py: add connected_socket to check if a socket is bound to a process
+* utils.py: add connected\_socket to check if a socket is bound to a process
 * include six and not docopt in requirements.txt
 * add requirements file for pip installations
 * bump version on docs as well
@@ -195,7 +201,7 @@ CHANGES
 
 * RELEASE 0.0.3 version
 * DOC: another set of updates
-* rename get_frontends to frontends
+* rename get\_frontends to frontends
 * Performance improvements due to the way we interact with stats socket
 * update haproxy.cfg, give a unique name for each listen directive
 * Update TODO.rst
@@ -208,7 +214,7 @@ CHANGES
 * DOC: add remaining examples for frontends in User Guide
 * README: add missing variable
 * DOC: add examples for backends in User Guide
-* backend.py: remove status from BACKEND_METRICS
+* backend.py: remove status from BACKEND\_METRICS
 * DOC: add a bunch of examples for frontends in User Guide
 * DOC: add missing example code
 * DOC: add more examples for HAProxy operations in the User Guide
@@ -231,7 +237,7 @@ CHANGES
 * RELEASE 0.0.2 version
 * README: merged TODO into README
 * README: documention reference doesn't need to be a section
-* internal.py: wrong refactoring for _Backend class
+* internal.py: wrong refactoring for \_Backend class
 * refactor Pool to backend
 * refactor PoolMember to Server
 * major updates on docstrings to allow sphinx integration
@@ -241,7 +247,7 @@ CHANGES
 * utils.py update docstrings
 * TODO: work in progress for updating docstrings
 * internal.py: update docstrings
-* internal.py: change parameter name to name for get_frontends
+* internal.py: change parameter name to name for get\_frontends
 * merged NOTES into TODO
 * NOTES: tiny fix
 * add some notes
@@ -251,12 +257,12 @@ CHANGES
 * haproxy.py: fix typo
 * We don't need it anymore and it was a bad idea
 * add haproxy.cfg which we use
-* utils.py: we don't perform any calculation for Uptime_sec field
+* utils.py: we don't perform any calculation for Uptime\_sec field
 * haproxy.py: docstring fix
 * haproxy.py: add a bunch of properties for HAProxy process
 * utils.py don't remove trailing whitespace when parse 'show info' output
 * haproxy.py: perform calculation in metric() if the caller wants it
-* internal.py remove unused function run_commandold
+* internal.py remove unused function run\_commandold
 * change license to Apache 2.0
 * README.rst: add acknowledgement section
 * switch to README.rst by removing README.md

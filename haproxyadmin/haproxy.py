@@ -12,6 +12,8 @@ This module implements the main haproxyadmin API.
 import os
 import glob
 
+from urlparse import urlparse
+
 from haproxyadmin.frontend import Frontend
 from haproxyadmin.backend import Backend
 from haproxyadmin.utils import (is_unix_socket, cmd_across_all_procs, converter,
@@ -95,11 +97,12 @@ class HAProxy(object):
 
     def __init__(self, socket_dir=None,
                  socket_file=None,
+		 uris=None,
                  retry=2,
                  retry_interval=2):
 
         self._hap_processes = []
-        socket_files = []
+        sockets = []
 
         if socket_dir:
             if not os.path.exists(socket_dir):
@@ -112,16 +115,21 @@ class HAProxy(object):
         elif (socket_file and is_unix_socket(socket_file) and
               connected_socket(socket_file)):
             socket_files.append(os.path.realpath(socket_file))
+	elif (uris):
+	    uriarr = uris.split(",")
+	    for uri in uriarr:
+		print uri
+                sockets.append(uri)
         else:
             raise ValueError("UNIX socket file was not set")
 
-        if not socket_files:
+        if not sockets:
             raise ValueError("No valid UNIX socket file was found, directory: "
                              "{} file: {}".format(socket_dir, socket_file))
 
-        for so_file in socket_files:
+        for sock in sockets:
             self._hap_processes.append(
-                _HAProxyProcess(so_file, retry, retry_interval)
+                _HAProxyProcess(sock, retry, retry_interval)
             )
 
     @should_die

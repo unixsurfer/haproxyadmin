@@ -145,6 +145,12 @@ def should_die(old_implementation):
 
     return new_implementation
 
+def hostname_resolves(hostname):
+    try:
+        socket.gethostbyname(hostname)
+        return True
+    except socket.error:
+        return False
 
 def is_unix_socket(path):
     """Return ``True`` if path is a valid UNIX socket otherwise False.
@@ -153,9 +159,15 @@ def is_unix_socket(path):
     :type path: ``string``
     :rtype: ``bool``
     """
-    mode = os.stat(path).st_mode
+    issock = None
+    try:
+      mode = os.stat(path).st_mode
+      issock = S_ISSOCK(mode)
 
-    return stat.S_ISSOCK(mode)
+    except Exception, e:
+      return False
+    else:
+      return issock
 
 def connected_socket(path):
     """Check if socket file is a valid HAProxy socket file.
