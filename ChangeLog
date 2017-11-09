@@ -1,6 +1,7 @@
 CHANGES
 =======
 
+* Allow use of tcp socket to connect to haproxy stats
 * Added setaddress and address to Servers
 * Fix docstrings
 * Remove unused variables
