@@ -87,7 +87,7 @@ class _HAProxyProcess(object):
 		    tcpsocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		    parts = urisplit(self.sock)
     		    if type(parts.gethost()) == ipaddress.IPv4Address or hostname_resolves(parts.gethost()):
-			tcpsocket.settimeout(0.5)
+			tcpsocket.settimeout(2.0)
                         tcpsocket.connect((parts.gethost(), parts.getport()))
                         tcpsocket.send(six.b(command + '\n'))
                         file_handle = tcpsocket.makefile()
