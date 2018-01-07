@@ -73,29 +73,29 @@ class _HAProxyProcess(object):
             attempt = self.retry + 1
         while attempt != 0:
             try:
-		unix_socket = None;
-		tcpsocket = None;
-		if is_unix_socket(self.sock):
-		    unix_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+                unix_socket = None
+                tcpsocket = None
+                if is_unix_socket(self.sock):
+                    unix_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
                     unix_socket.settimeout(0.5)
                     unix_socket.connect(self.sock)
                     unix_socket.send(six.b(command + '\n'))
                     file_handle = unix_socket.makefile()
                     data = file_handle.read().splitlines()
 
-		else:
-		    tcpsocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		    parts = urisplit(self.sock)
-    		    if type(parts.gethost()) == ipaddress.IPv4Address or hostname_resolves(parts.gethost()):
-			tcpsocket.settimeout(2.0)
+                else:
+                    tcpsocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                    parts = urisplit(self.sock)
+                    if type(parts.gethost()) == ipaddress.IPv4Address or hostname_resolves(parts.gethost()):
+                        tcpsocket.settimeout(2.0)
                         tcpsocket.connect((parts.gethost(), parts.getport()))
                         tcpsocket.send(six.b(command + '\n'))
                         file_handle = tcpsocket.makefile()
                         data = file_handle.read().splitlines()
-		    else:
-			raise ValueError("URI is neither a valid IPAddess nor a resolvable hostname")
-			
-			
+                    else:
+                        raise ValueError("URI is neither a valid IPAddess nor a resolvable hostname")
+
+
                 # I haven't seen a case where a running process which holds a
                 # UNIX socket will take more than few nanoseconds to accept a
                 # connection. But, I have seen cases where it takes ~0.5secs
@@ -129,10 +129,10 @@ class _HAProxyProcess(object):
                 # get out from the retry loop
                 break
             finally:
-		if unix_socket:
+                if unix_socket:
                     unix_socket.close()
-		elif tcpsocket:
-		    tcpsocket.close()
+                elif tcpsocket:
+                    tcpsocket.close()
                 if raised:
                     time.sleep(self.retry_interval)
 

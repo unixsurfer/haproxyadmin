@@ -12,7 +12,10 @@ This module implements the main haproxyadmin API.
 import os
 import glob
 
-from urlparse import urlparse
+from future.standard_library import install_aliases
+install_aliases()
+
+from urllib.parse import urlparse
 
 from haproxyadmin.frontend import Frontend
 from haproxyadmin.backend import Backend
@@ -97,7 +100,7 @@ class HAProxy(object):
 
     def __init__(self, socket_dir=None,
                  socket_file=None,
-		 uris=None,
+                 uris=None,
                  retry=2,
                  retry_interval=2):
 
@@ -115,9 +118,10 @@ class HAProxy(object):
         elif (socket_file and is_unix_socket(socket_file) and
               connected_socket(socket_file)):
             socket_files.append(os.path.realpath(socket_file))
-	elif (uris):
-	    uriarr = uris.split(",")
-	    for uri in uriarr:
+
+        elif uris:
+            uriarr = uris.split(",")
+            for uri in uriarr:
                 sockets.append(uri)
         else:
             raise ValueError("UNIX socket file was not set")
