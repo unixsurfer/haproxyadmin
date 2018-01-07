@@ -164,8 +164,8 @@ def is_unix_socket(path):
       mode = os.stat(path).st_mode
       issock = S_ISSOCK(mode)
 
-    except Exception, e:
-      return False
+    except Exception as e:
+        return False
     else:
       return issock
 
