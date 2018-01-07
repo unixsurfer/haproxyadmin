@@ -9,16 +9,16 @@ haproxyadmin.
 
 """
 
-import socket
 import os
+import socket
 import stat
 from functools import wraps
-import six
 
-from haproxyadmin.exceptions import (CommandFailed, MultipleCommandResults,
-                                     IncosistentData)
+import six
 from haproxyadmin.command_status import (ERROR_OUTPUT_STRINGS,
                                          SUCCESS_OUTPUT_STRINGS)
+from haproxyadmin.exceptions import (CommandFailed, MultipleCommandResults,
+                                     IncosistentData)
 
 METRICS_SUM = [
     'CompressBpsIn',
@@ -126,11 +126,12 @@ def should_die(old_implementation):
     ``False`` it returns ``True`` if decorated function run successfully or
     ``False`` if an exception was raised.
     """
+
     @wraps(old_implementation)
     def new_implementation(*args, **kwargs):
         try:
             die = kwargs['die']
-            del(kwargs['die'])
+            del (kwargs['die'])
         except KeyError:
             die = True
 
@@ -145,12 +146,14 @@ def should_die(old_implementation):
 
     return new_implementation
 
+
 def hostname_resolves(hostname):
     try:
         socket.gethostbyname(hostname)
         return True
     except socket.error:
         return False
+
 
 def is_unix_socket(path):
     """Return ``True`` if path is a valid UNIX socket otherwise False.
@@ -161,13 +164,14 @@ def is_unix_socket(path):
     """
     issock = None
     try:
-      mode = os.stat(path).st_mode
-      issock = S_ISSOCK(mode)
+        mode = os.stat(path).st_mode
+        issock = S_ISSOCK(mode)
 
     except Exception as e:
         return False
     else:
-      return issock
+        return issock
+
 
 def connected_socket(path):
     """Check if socket file is a valid HAProxy socket file.
@@ -354,11 +358,12 @@ def calculate(name, metrics):
     if name in METRICS_SUM:
         return sum(metrics)
     elif name in METRICS_AVG:
-        return int(sum(metrics)/len(metrics))
+        return int(sum(metrics) / len(metrics))
     else:
         # This is to catch the case where the caller forgets to check if
         # metric name is a valide metric for HAProxy.
         raise ValueError("Unknown type of calculation for {}".format(name))
+
 
 def isint(value):
     """Check if input can be converted to an integer
@@ -374,6 +379,7 @@ def isint(value):
         return True
     except ValueError:
         return False
+
 
 def converter(value):
     """Tries to convert input value to an integer.
