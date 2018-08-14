@@ -131,16 +131,23 @@ class Server(object):
 
     @property
     def address(self):
+        """Return server ip and port
+
+        :rtype: ``string``
+        """
         return self._server_per_proc[0].address
 
-    def setaddress(self, new_address):
-        """
-        Set this server's address.
+    def setaddress(self, new_address, new_port=None):
+        """Set this servers address.
+
+        :param new_address: new ip address of server
+        :param new_port: new port of server (optional)
+
         :rtype: ``string``
         """
 
         values = cmd_across_all_procs(
-            self._server_per_proc, 'setaddress', new_address=str(new_address)
+            self._server_per_proc, 'setaddress', new_address=str(new_address), new_port=new_port
         )
 
         return compare_values(values)

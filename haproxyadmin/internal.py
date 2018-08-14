@@ -515,13 +515,25 @@ class _Server(object):
 
     @property
     def address(self):
-        """
-        Return server address
+        """Return server address
+
+        :rtype: ``string``
         """
         data = self.stats_data()
         return data.addr
 
-    def setaddress(self, new_address):
+    def setaddress(self, new_address, new_port=None):
+        """Set server ip and port
+
+        :param new_address: new ip address of server
+        :param new_port: new port of server (optional)
+        :return:
+        """
+
+        if new_port:
+            return self.command("set server {be}/{srv} addr {new_address} port {new_port}".format(
+                be=self.backend.name, srv=self._name, new_address=new_address, new_port=new_port))
+
         return self.command("set server {be}/{srv} addr {new_address}".format(
             be=self.backend.name, srv=self._name, new_address=new_address))
 
