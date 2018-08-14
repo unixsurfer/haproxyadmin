@@ -32,6 +32,20 @@ for various statistics provided by HAProxy. For instance, to report the
 requests processed by a frontend it queries all processes which manage that
 frontend and return the sum.
 
+To make this possible, haproxy need to expose a stat socket for every process.
+This is accomplished by defining a number of uniquely named stat sockets 
+in 'global' equal to nbproc and attaching them to a dedicated process each:
+
+.. code-block:: 
+
+   global
+      nbproc 4
+      stats socket /run/haproxy/1.sock mode 600 level admin process 1
+      stats socket /run/haproxy/2.sock mode 600 level admin process 2
+      stats socket /run/haproxy/3.sock mode 600 level admin process 3
+      stats socket /run/haproxy/4.sock mode 600 level admin process 4
+
+
 The library works with Python 2.7 and Python 3.4, but for development and
 testing Python 3.4 is used. The `Six Python 2 and 3 Compatibility Library`_
 is being used to provide the necessary wrapping over the differences between
