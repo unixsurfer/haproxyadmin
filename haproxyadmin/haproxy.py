@@ -953,7 +953,10 @@ class HAProxy(object):
         if not check_output(map_info_proc1):
             raise CommandFailed(map_info_proc1[0])
 
-        return map_info_proc1
+        if len(map_info_proc1) == 1 and not map_info_proc1[0]:
+            return []
+        else:
+            return map_info_proc1
 
     @property
     def uptime(self):
