@@ -32,8 +32,8 @@ for various statistics provided by HAProxy. For instance, to report the
 requests processed by a frontend it queries all processes which manage that
 frontend and return the sum.
 
-The library works with Python 2.7 and Python 3.4, but for development and
-testing Python 3.4 is used. The `Six Python 2 and 3 Compatibility Library`_
+The library works with Python 2.7 and Python 3.6, but for development and
+testing Python 3.6 is used. The `Six Python 2 and 3 Compatibility Library`_
 is being used to provide the necessary wrapping over the differences between
 these 2 major versions of Python.
 
