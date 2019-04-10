@@ -927,11 +927,11 @@ class HAProxy(object):
 
           >>> from haproxyadmin import haproxy
           >>> hap = haproxy.HAProxy(socket_dir='/run/haproxy')
-          >>> hap.show_map(map=6)
+          >>> hap.show_map()
           ['# id (file) description',
            "0 (/etc/haproxy/v-m1-bk) pattern loaded ...... line 82",
            ]
-          >>> hap.show_map(0)
+          >>> hap.show_map(mapid=0)
           ['0x1a78ab0 0 www.foo.com-0', '0x1a78b20 1 www.foo.com-1']
         """
         if mapid is not None:
