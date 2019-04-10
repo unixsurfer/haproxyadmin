@@ -243,15 +243,15 @@ class Server(object):
 
         State can be any of the following
 
-          * :const:`haproxyadmin.haproxy.STATE_ENABLE`: Mark the server UP and
+          * :const:`haproxyadmin.STATE_ENABLE`: Mark the server UP and
             checks are re-enabled
-          * :const:`haproxyadmin.haproxy.STATE_DISABLE`: Mark the server DOWN
+          * :const:`haproxyadmin.STATE_DISABLE`: Mark the server DOWN
             for maintenance and checks disabled.
-          * :const:`haproxyadmin.haproxy.STATE_READY`: Put server in normal
+          * :const:`haproxyadmin.STATE_READY`: Put server in normal
             mode.
-          * :const:`haproxyadmin.haproxy.STATE_DRAIN`: Remove the server from
+          * :const:`haproxyadmin.STATE_DRAIN`: Remove the server from
             load balancing.
-          * :const:`haproxyadmin.haproxy.STATE_MAINT`: Remove the server from
+          * :const:`haproxyadmin.STATE_MAINT`: Remove the server from
             load balancing and health checks are disabled.
 
         :param state: state to set.
@@ -261,7 +261,7 @@ class Server(object):
 
         Usage:
 
-          >>> from haproxyadmin import haproxy
+          >>> from haproxyadmin import haproxy, STATE_DISABLE, STATE_ENABLE
           >>> hap = haproxy.HAProxy(socket_dir='/run/haproxy')
           >>> server = hap.server('member_bkall', backend='backend_proc1')[0]
           >>> server.setstate(haproxy.STATE_DISABLE)
