@@ -148,10 +148,8 @@ class HAProxy(object):
         """
         if isint(acl):
             cmd = "add acl #{} {}".format(acl, pattern)
-        elif os.path.isfile(acl):
-            cmd = "add acl {} {}".format(acl, pattern)
         else:
-            raise ValueError("Invalid input")
+            cmd = "add acl {} {}".format(acl, pattern)
 
         results = cmd_across_all_procs(self._hap_processes, 'command',
                                        cmd)
@@ -184,10 +182,8 @@ class HAProxy(object):
         """
         if isint(mapid):
             cmd = "add map #{} {} {}".format(mapid, key, value)
-        elif os.path.isfile(mapid):
-            cmd = "add map {} {} {}".format(mapid, key, value)
         else:
-            raise ValueError("Invalid input")
+            cmd = "add map {} {} {}".format(mapid, key, value)
 
         results = cmd_across_all_procs(self._hap_processes, 'command',
                                        cmd)
@@ -214,10 +210,8 @@ class HAProxy(object):
         """
         if isint(acl):
             cmd = "clear acl #{}".format(acl)
-        elif os.path.isfile(acl):
-            cmd = "clear acl {}".format(acl)
         else:
-            raise ValueError("Invalid input")
+            cmd = "clear acl {}".format(acl)
 
         results = cmd_across_all_procs(self._hap_processes, 'command',
                                        cmd)
@@ -244,10 +238,8 @@ class HAProxy(object):
         """
         if isint(mapid):
             cmd = "clear map #{}".format(mapid)
-        elif os.path.isfile(mapid):
-            cmd = "clear map {}".format(mapid)
         else:
-            raise ValueError("Invalid input")
+            cmd = "clear map {}".format(mapid)
 
         results = cmd_across_all_procs(self._hap_processes, 'command',
                                        cmd)
@@ -343,10 +335,8 @@ class HAProxy(object):
 
         if isint(acl):
             cmd = "del acl #{} {}".format(acl, key)
-        elif os.path.isfile(acl):
-            cmd = "del acl {} {}".format(acl, key)
         else:
-            raise ValueError("Invalid input")
+            cmd = "del acl {} {}".format(acl, key)
 
         results = cmd_across_all_procs(self._hap_processes, 'command',
                                        cmd)
@@ -388,10 +378,8 @@ class HAProxy(object):
 
         if isint(mapid):
             cmd = "del map #{} {}".format(mapid, key)
-        elif os.path.isfile(mapid):
-            cmd = "del map {} {}".format(mapid, key)
         else:
-            raise ValueError("Invalid input")
+            cmd = "del map {} {}".format(mapid, key)
 
         results = cmd_across_all_procs(self._hap_processes, 'command',
                                        cmd)
@@ -493,10 +481,8 @@ class HAProxy(object):
         """
         if isint(acl):
             cmd = "get acl #{} {}".format(acl, value)
-        elif os.path.isfile(acl):
-            cmd = "get acl {} {}".format(acl, value)
         else:
-            raise ValueError("Invalid input")
+            cmd = "get acl {} {}".format(acl, value)
 
         get_results = cmd_across_all_procs(self._hap_processes, 'command', cmd)
         get_info_proc1 = get_results[0][1]
@@ -529,10 +515,8 @@ class HAProxy(object):
         """
         if isint(mapid):
             cmd = "get map #{} {}".format(mapid, value)
-        elif os.path.isfile(mapid):
-            cmd = "get map {} {}".format(mapid, value)
         else:
-            raise ValueError("Invalid input")
+            cmd = "get map {} {}".format(mapid, value)
 
         get_results = cmd_across_all_procs(self._hap_processes, 'command',
                                            cmd)
@@ -746,10 +730,8 @@ class HAProxy(object):
 
         if isint(mapid):
             cmd = "set map #{} {} {}".format(mapid, key, value)
-        elif os.path.isfile(mapid):
-            cmd = "set map {} {} {}".format(mapid, key, value)
         else:
-            raise ValueError("Invalid input")
+            cmd = "set map {} {} {}".format(mapid, key, value)
 
         results = cmd_across_all_procs(self._hap_processes, 'command', cmd)
 
@@ -892,10 +874,8 @@ class HAProxy(object):
         if aclid is not None:
             if isint(aclid):
                 cmd = "show acl #{}".format(aclid)
-            elif os.path.isfile(aclid):
-                cmd = "show acl {}".format(aclid)
             else:
-                raise ValueError("Invalid input")
+                cmd = "show acl {}".format(aclid)
         else:
             cmd = "show acl"
 
@@ -940,10 +920,8 @@ class HAProxy(object):
         if mapid is not None:
             if isint(mapid):
                 cmd = "show map #{}".format(mapid)
-            elif os.path.isfile(mapid):
-                cmd = "show map {}".format(mapid)
             else:
-                raise ValueError("Invalid input")
+                cmd = "show map {}".format(mapid)
         else:
             cmd = "show map"
         map_info = cmd_across_all_procs(self._hap_processes, 'command',
