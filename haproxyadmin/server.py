@@ -59,6 +59,7 @@ SERVER_METRICS = [
     'rate_max',
     'rtime',
     'scur',
+    'slim',
     'smax',
     'srv_abrt',
     'stot',
