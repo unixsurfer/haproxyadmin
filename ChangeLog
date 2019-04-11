@@ -1,6 +1,31 @@
 CHANGES
 =======
 
+0.2.2
+-----
+
+* RELEASE 0.2.2 version
+* Revert "Add 'slim' metric for servers"
+* DOC: One more try to get this right
+* DOC: Update docstring for address method
+* Add support for changing address and port of a server
+* DOC: Fix various documentation issues
+* Add 'slim' metric for servers
+* Don't check if ACL/MAP is a file
+* Return empty list if a acl doesn't have any entries
+* DOC: Change python version we use for development
+* Ignore Python 3 class hierarchy of OSError errors
+* Return empty list if a map doesn't have any entries
+* Fix example code for show_map function
+* Fix incorrect module path for constants in docstring
+* Add support for slim metric to Server object
+* List server metric names in alphabetic order
+* Added setaddress and address to Servers
+* Fix docstrings
+* Remove unused variables
+* Ignore Python 3 class hierarchy of OSError errors
+* Update installation instructions
+
 0.2.1
 -----
 
