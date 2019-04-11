@@ -11,7 +11,9 @@ run operation for a server.
 
 """
 from haproxyadmin.utils import (calculate, cmd_across_all_procs, compare_values,
-                                should_die, check_command, converter)
+                                should_die, check_command, converter,
+                                check_command_addr_port, elements_of_list_same)
+from haproxyadmin.exceptions import IncosistentData
 
 
 STATE_ENABLE = 'enable'
@@ -130,21 +132,72 @@ class Server(object):
         return compare_values(values)
 
     @property
-    def address(self):
-        return self._server_per_proc[0].address
+    def port(self):
+        """Return port of server.
 
-    def setaddress(self, new_address):
-        """
-        Set this server's address.
         :rtype: ``string``
         """
-
         values = cmd_across_all_procs(
-            self._server_per_proc, 'setaddress', new_address=str(new_address)
+            self._server_per_proc, 'metric', 'addr'
         )
 
-        return compare_values(values)
+        try:
+            value = compare_values(values)
+        except IncosistentData as exc:
+            ports_across_proc = [value[1].split(':')[1] for value in values]
+            if elements_of_list_same(ports_across_proc):
+                return ports_across_proc[0]
+            else:
+                raise exc
+        else:
+            return value.split(':')[1]
 
+    @port.setter
+    def port(self, port):
+        """Set server's port.
+
+        :param port: port to set.
+        :type port: ``string``
+        :rtype: ``bool``
+        """
+        cmd = "set server {}/{} addr {} port {}".format(
+            self.backendname, self.name, self.address, port
+        )
+        results = cmd_across_all_procs(self._server_per_proc, 'command', cmd)
+
+        return check_command_addr_port('port', results)
+
+    @property
+    def address(self):
+        """Return address of server.
+
+        :rtype: ``string``
+        """
+        values = cmd_across_all_procs(
+            self._server_per_proc, 'metric', 'addr'
+        )
+
+        try:
+            value = compare_values(values)
+        except IncosistentData as exc:
+            raise exc
+        else:
+            return value.split(':')[0]
+
+    @address.setter
+    def address(self, address):
+        """Set server's address.
+
+        :param address: address to set.
+        :type address: ``string``
+        :rtype: ``bool``
+        """
+        cmd = "set server {}/{} addr {}".format(
+            self.backendname, self.name, address
+        )
+        results = cmd_across_all_procs(self._server_per_proc, 'command', cmd)
+
+        return check_command_addr_port('addr', results)
 
     @property
     def last_status(self):

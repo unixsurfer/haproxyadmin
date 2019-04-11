@@ -14,11 +14,12 @@ import os
 import stat
 from functools import wraps
 import six
+import re
 
 from haproxyadmin.exceptions import (CommandFailed, MultipleCommandResults,
                                      IncosistentData)
 from haproxyadmin.command_status import (ERROR_OUTPUT_STRINGS,
-                                         SUCCESS_OUTPUT_STRINGS)
+        SUCCESS_OUTPUT_STRINGS, SUCCESS_STRING_PORT, SUCCESS_STRING_ADDRESS)
 
 METRICS_SUM = [
     'CompressBpsIn',
@@ -315,6 +316,46 @@ def check_command(results):
     if elements_of_list_same([msg[1] for msg in results]):
         msg = results[0][1]
         if msg in SUCCESS_OUTPUT_STRINGS:
+            return True
+        else:
+            raise CommandFailed(msg)
+    else:
+        raise MultipleCommandResults(results)
+
+def check_command_addr_port(change_type, results):
+    """Check if command to set port or address was successfully executed.
+
+    Unfortunately, haproxy returns many different combinations of output when
+    we change the address or the port of the server and trying to determine
+    if address or port was successfully changed isn't that trivial.
+
+    So, after we change address or port, we check if the same output is
+    returned by all processes and we also check if a collection of specific
+    strings are part of the output. This is a suboptimal solution, but I
+    couldn't come up with something more elegant.
+
+    :param change_type: either ``addr`` or ``port``
+    :type change_type: ``string``
+    :param results: a list of tuples with 2 elements.
+
+          #. process number of HAProxy
+          #. message returned by HAProxy
+    :type results: ``list``
+    :return: ``True`` if command was successfully executed otherwise ``False``.
+    :rtype: ``bool``
+    :raise: :class:`.MultipleCommandResults`, :class:`.CommandFailed` and
+      :class:`ValueError`.
+    """
+    if change_type == 'addr':
+        _match = SUCCESS_STRING_ADDRESS
+    elif change_type == 'port':
+        _match = SUCCESS_STRING_PORT
+    else:
+        raise ValueError('invalid value for change_type')
+
+    if elements_of_list_same([msg[1] for msg in results]):
+        msg = results[0][1]
+        if re.match(_match, msg):
             return True
         else:
             raise CommandFailed(msg)

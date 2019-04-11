@@ -101,3 +101,8 @@ ERROR_OUTPUT_STRINGS = [
     "Can't find resolvers section.",
     "Can't find backend.",
 ]
+
+SUCCESS_STRING_ADDRESS = "IP changed from|no need to change the addr"
+SUCCESS_STRING_PORT = ("no need to change the addr, port changed from|no need "
+                       "to change the addr, no need to change the port"
+                      )
