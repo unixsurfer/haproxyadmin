@@ -342,7 +342,7 @@ class Server:
         if state not in VALID_STATES:
             states = ', '.join(VALID_STATES)
             raise ValueError("Wrong state, allowed states {}".format(states))
-        if state == 'enable' or state == 'disable':
+        if state in ('enable', 'disable'):
             cmd = "{} server {}/{}".format(state, self.backendname, self.name)
         else:
             cmd = "set server {}/{} state {}".format(
