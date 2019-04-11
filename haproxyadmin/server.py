@@ -171,7 +171,10 @@ class Server(object):
     def address(self):
         """Return address of server.
 
-        :rtype: ``string``
+        :getter: :rtype: ``string``
+        :setter: :param address: address to set.
+        :setter: :type address: ``string``
+        :setter: :rtype: ``bool``
         """
         values = cmd_across_all_procs(
             self._server_per_proc, 'metric', 'addr'
@@ -186,12 +189,7 @@ class Server(object):
 
     @address.setter
     def address(self, address):
-        """Set server's address.
-
-        :param address: address to set.
-        :type address: ``string``
-        :rtype: ``bool``
-        """
+        """Set server's address."""
         cmd = "set server {}/{} addr {}".format(
             self.backendname, self.name, address
         )
