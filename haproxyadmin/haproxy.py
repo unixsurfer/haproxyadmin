@@ -909,7 +909,10 @@ class HAProxy(object):
         if not check_output(acl_info_proc1):
             raise CommandFailed(acl_info_proc1[0])
 
-        return acl_info_proc1
+        if len(acl_info_proc1) == 1 and not acl_info_proc1[0]:
+            return []
+        else:
+            return acl_info_proc1
 
     @should_die
     def show_map(self, mapid=None):
