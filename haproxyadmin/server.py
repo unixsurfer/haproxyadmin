@@ -71,7 +71,7 @@ SERVER_METRICS = [
 ]
 
 
-class Server(object):
+class Server:
     """Build a user-created :class:`Server` for a single server.
 
     :param _server_per_proc: list of :class:`._Server` objects.
