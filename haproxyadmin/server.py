@@ -149,11 +149,16 @@ class Server:
         try:
             value = compare_values(values)
         except IncosistentData as exc:
+            # haproxy returns address:port and compare_values() may raise
+            # IncosistentData exception because assigned address is different
+            # per process and not the assigned port.
+            # Since we want to report the port, we simply catch that case and
+            # report the assigned port.
             ports_across_proc = [value[1].split(':')[1] for value in values]
-            if elements_of_list_same(ports_across_proc):
-                return ports_across_proc[0]
-            else:
+            if not elements_of_list_same(ports_across_proc):
                 raise exc
+            else:
+                return ports_across_proc[0]
         else:
             return value.split(':')[1]
 
@@ -184,7 +189,16 @@ class Server:
         try:
             value = compare_values(values)
         except IncosistentData as exc:
-            raise exc
+            # haproxy returns address:port and compare_values() may raise
+            # IncosistentData exception because assigned port is different
+            # per process and not the assigned address.
+            # Since we want to report the address, we simply catch that case
+            # and report the assigned address.
+            addr_across_proc = [value[1].split(':')[0] for value in values]
+            if not elements_of_list_same(addr_across_proc):
+                raise exc
+            else:
+                return addr_across_proc[0]
         else:
             return value.split(':')[0]
 
