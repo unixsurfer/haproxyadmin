@@ -172,9 +172,10 @@ class Server(object):
         """Return address of server.
 
         :getter: :rtype: ``string``
-        :setter: :param address: address to set.
-        :setter: :type address: ``string``
-        :setter: :rtype: ``bool``
+        :setter:
+          :param address: address to set.
+          :type address: ``string``
+          :rtype: ``bool``
         """
         values = cmd_across_all_procs(
             self._server_per_proc, 'metric', 'addr'
