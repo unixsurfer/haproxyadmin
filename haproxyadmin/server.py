@@ -134,9 +134,13 @@ class Server(object):
 
     @property
     def port(self):
-        """Return port of server.
+        """The assigned port of server.
 
-        :rtype: ``string``
+        :getter: :rtype: ``string``
+        :setter:
+          :param port: port to set.
+          :type port: ``string``
+          :rtype: ``bool``
         """
         values = cmd_across_all_procs(
             self._server_per_proc, 'metric', 'addr'
@@ -155,12 +159,7 @@ class Server(object):
 
     @port.setter
     def port(self, port):
-        """Set server's port.
-
-        :param port: port to set.
-        :type port: ``string``
-        :rtype: ``bool``
-        """
+        """Set server's port."""
         cmd = "set server {}/{} addr {} port {}".format(
             self.backendname, self.name, self.address, port
         )
@@ -170,7 +169,7 @@ class Server(object):
 
     @property
     def address(self):
-        """Return address of server.
+        """The assigned address of server.
 
         :getter: :rtype: ``string``
         :setter:
