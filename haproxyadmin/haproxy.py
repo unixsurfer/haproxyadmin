@@ -554,8 +554,8 @@ class HAProxy(object):
         If ``backend`` specified then lookup is limited to that backend.
 
         .. note::
-            If a server is member of more than 1 backends then muliple
-            objects for the same server is returned.
+            If a server is member of more than 1 backend then muliple objects
+            for the same server is returned.
 
         :param hostname: servername to look for.
         :type hostname: ``string``

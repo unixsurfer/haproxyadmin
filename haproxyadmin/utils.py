@@ -366,16 +366,16 @@ def converter(value):
     """Tries to convert input value to an integer.
 
     If input can be safely converted to number it returns an ``int`` type.
-    If input is a valid string(not empty) it returns that.
-    In all other cases we return None, including the ones which raise
-    exceptions when conversion fails.
+    If input is a valid string but not an empty one it returns that.
+    In all other cases we return None, including the ones which an
+    ``TypeError`` exception is raised by ``int()``.
     For floating point numbers, it truncates towards zero.
 
     Why are we doing this?
     HAProxy may return for a metric either a number or zero or string or an
     empty string.
 
-    It is up to the caller to use correctly the returned value. If the returned
+    It is up to the caller to correctly use the returned value. If the returned
     value is passed to a function which does math operations the caller has to
     filtered out possible ``None`` values.
 
@@ -408,7 +408,7 @@ def converter(value):
         return value.strip() or None
     except TypeError:
         # This is to catch the case where input value is a data structure or
-        # object it is very unlikely someone to pass those, but you never know.
+        # object. It is very unlikely someone to pass those, but you never know.
         return None
 
 
@@ -455,7 +455,7 @@ class CSVLine(object):
 
 
 def info2dict(raw_info):
-    """Build a dictionary structure.
+    """Build a dictionary structure from the output of 'show info' command.
 
     :param raw_info: data returned by 'show info' UNIX socket command
     :type raw_info: ``list``
