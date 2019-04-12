@@ -89,14 +89,19 @@ class HAProxy(object):
     :type retry: ``integer`` or ``None``
     :param retry_interval: sleep time between the retries.
     :type retry_interval: ``integer``
+    :param timeout: timeout for the connection
+    :type timeout: ``float``
     :return: a user-created :class:`HAProxy` object.
     :rtype: :class:`HAProxy`
     """
 
-    def __init__(self, socket_dir=None,
+    def __init__(self,
+                 socket_dir=None,
                  socket_file=None,
                  retry=2,
-                 retry_interval=2):
+                 retry_interval=2,
+                 timeout=1,
+                 ):
 
         self._hap_processes = []
         socket_files = []
@@ -121,7 +126,12 @@ class HAProxy(object):
 
         for so_file in socket_files:
             self._hap_processes.append(
-                _HAProxyProcess(so_file, retry, retry_interval)
+                _HAProxyProcess(
+                    socket_file=so_file,
+                    retry=retry,
+                    retry_interval=retry_interval,
+                    timeout=timeout
+                 )
             )
 
     @should_die

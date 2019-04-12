@@ -31,19 +31,22 @@ class _HAProxyProcess:
     HAProxy process using UNIX stats socket.
 
     :param socket_file: Full path of socket file.
-    :type socket_file: string
+    :type socket_file: ``string``
     :param retry: (optional) Number of connect retries (defaults to 3)
-    :type retry: integer
+    :type retry: ``integer``
     :param retry_interval: (optional) Interval time in seconds between retries
                            (defaults to 2)
-    :type retry_interval: integer
+    :param timeout: timeout for the connection
+    :type timeout: ``float``
+    :type retry_interval: ``integer``
     """
-    def __init__(self, socket_file, retry=3, retry_interval=2):
+    def __init__(self, socket_file, retry=3, retry_interval=2, timeout=1):
         self.socket_file = socket_file
         self.hap_stats = {}
         self.hap_info = {}
         self.retry = retry
         self.retry_interval = retry_interval
+        self.timeout = timeout
         # process number associated with this object
         self.process_nb = self.metric('Process_num')
 
@@ -73,15 +76,10 @@ class _HAProxyProcess:
             # any other value means retry N times
             attempt = self.retry + 1
         while attempt != 0:
+            print(time.ctime(), attempt, self.retry)
             try:
                 unix_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-                # I haven't seen a case where a running process which holds a
-                # UNIX socket will take more than few nanoseconds to accept a
-                # connection. But, I have seen cases where it takes ~0.5secs
-                # to get a respone from the socket. Thus I hard-code a timeout
-                # of 0.5ms
-                # TODO: consider having a configuration file for it
-                unix_socket.settimeout(0.5)
+                unix_socket.settimeout(self.timeout)
                 unix_socket.connect(self.socket_file)
                 unix_socket.send(six.b(command + '\n'))
                 file_handle = unix_socket.makefile()
