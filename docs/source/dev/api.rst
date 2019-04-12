@@ -40,7 +40,19 @@ meant for external use.
 .. autoclass:: Server
    :members:
 
-.. automodule:: haproxyadmin.internal
+.. automodule:: haproxyadmin.internal.haproxy
+   :members:
+   :private-members:
+
+.. automodule:: haproxyadmin.internal.frontend
+   :members:
+   :private-members:
+
+.. automodule:: haproxyadmin.internal.backend
+   :members:
+   :private-members:
+
+.. automodule:: haproxyadmin.internal.server
    :members:
    :private-members:
 
