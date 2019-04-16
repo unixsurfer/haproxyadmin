@@ -30,8 +30,9 @@ class _HAProxyProcess:
     It acts as a communication pipe between the caller and individual
     HAProxy process using UNIX stats socket.
 
-    :param socket_file: Full path of socket file.
-    :type socket_file: ``string``
+    :param socket_file: Either the full path of the UNIX socket or a tuple with
+        two elements, where 1st element is the host and the second is the port.
+    :type socket_file: ``string`` or ``tuple``
     :param retry: (optional) Number of connect retries (defaults to 3)
     :type retry: ``integer``
     :param retry_interval: (optional) Interval time in seconds between retries
@@ -40,8 +41,8 @@ class _HAProxyProcess:
     :type timeout: ``float``
     :type retry_interval: ``integer``
     """
-    def __init__(self, socket_file, retry=3, retry_interval=2, timeout=1):
-        self.socket_file = socket_file
+    def __init__(self, socket_name, retry=3, retry_interval=2, timeout=1):
+        self.socket_name = socket_name
         self.hap_stats = {}
         self.hap_info = {}
         self.retry = retry
@@ -64,7 +65,8 @@ class _HAProxyProcess:
         :rtype: ``string`` or ``list`` if full_output is True
         """
         data = []  # hold data returned from socket
-        raised = None  # hold possible exception raised during connect phase
+        # raised = None  # hold possible exception raised during connect phase
+        failure_occured = False
         attempt = 0 # times to attempt to connect after a connection failure
         if self.retry == 0:
             # 0 means retry indefinitely
@@ -76,29 +78,38 @@ class _HAProxyProcess:
             # any other value means retry N times
             attempt = self.retry + 1
         while attempt != 0:
+            if failure_occured:
+                time.sleep(self.retry_interval)
             print(time.ctime(), attempt, self.retry)
             try:
-                unix_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-                unix_socket.settimeout(self.timeout)
-                unix_socket.connect(self.socket_file)
-                unix_socket.send(six.b(command + '\n'))
-                file_handle = unix_socket.makefile()
-                data = file_handle.read().splitlines()
+                if isinstance(self.socket_name, str):
+                    address = socket.socket(socket.AF_UNIX,
+                                            socket.SOCK_STREAM)
+                    address.settimeout(self.timeout)
+                    address.connect(self.socket_name)
+                elif isinstance(self.socket_name, tuple):
+                    address = socket.create_connection(self.socket_name,
+                                                       timeout=self.timeout)
             except socket.timeout:
-                raised = SocketTimeout(socket_file=self.socket_file)
+                raised = SocketTimeout(socket_file=self.socket_name)
+                failure_occured = True
             except OSError as exc:
                 # while stress testing HAProxy and querying for all frontend
                 # metrics I sometimes get:
                 # OSError: [Errno 106] Transport endpoint is already connected
                 # catch this one only and reraise it withour exception
                 if exc.errno == errno.EISCONN:
-                    raised = SocketTransportError(socket_file=self.socket_file)
+                    raised = SocketTransportError(socket_file=str(self.socket_name))
                 elif exc.errno == errno.ECONNREFUSED:
-                    raised = SocketConnectionError(self.socket_file)
+                    raised = SocketConnectionError(str(self.socket_name))
                 else:
                     # for the rest of OSError exceptions just reraise them
                     raised = exc
+                failure_occured = True
             else:
+                address.send(six.b(command + '\n'))
+                file_handle = address.makefile()
+                data = file_handle.read().splitlines()
                 # HAProxy always send an empty string at the end
                 # we remove it as it adds noise for things like ACL/MAP and etc
                 # We only do that when we get more than 1 line, which only
@@ -107,26 +118,18 @@ class _HAProxyProcess:
                 if len(data) > 1 and data[-1] == '':
                     data.pop()
                 # make sure possible previous errors are cleared
-                raised = None
-                # get out from the retry loop
+                failure_occured = False
                 break
-            finally:
-                unix_socket.close()
-                if raised:
-                    time.sleep(self.retry_interval)
 
             attempt -= 1
 
-        if raised:
+        if failure_occured:
             raise raised
-        elif data:
-            if full_output:
-                return data
-            else:
-                return data[0]
+
+        if not full_output:
+            return data[0]
         else:
-            raise ValueError("no data returned from socket {}".format(
-                self.socket_file))
+            return data
 
     def proc_info(self):
         """Return a dictionary containing information about HAProxy daemon.

@@ -11,6 +11,7 @@ This module implements the main haproxyadmin API.
 """
 import os
 import glob
+from urllib.parse import urlparse
 
 from haproxyadmin.frontend import Frontend
 from haproxyadmin.backend import Backend
@@ -92,6 +93,15 @@ class HAProxy(object):
     :param timeout: timeout for the connection
     :type timeout: ``float``
     :return: a user-created :class:`HAProxy` object.
+    :param servers: a list of servers to connect to. You define a server by
+      passing a URL(tcp://127.0.0.1:55, tcp://fo.br.co:44, unix:///run/hap.sock,
+      tcp://[fe80::3f2f:46b3:ef0c:a420]:4444)
+
+      Only TCP and UNIX schemes are supported and the port for TCP servers must
+      be set. For UNIX scheme you can only pass a file and not a directory.
+      You can use comma as separator to pass multiple servers
+      (unix:///run/haproxy.sock,tcp://127.0.0.1:555,tcp://127.0.0.1:556)
+    :type servers: ``string``
     :rtype: :class:`HAProxy`
     """
 
@@ -101,10 +111,10 @@ class HAProxy(object):
                  retry=2,
                  retry_interval=2,
                  timeout=1,
+                 servers=None,
                  ):
-
         self._hap_processes = []
-        socket_files = []
+        sockets = []
 
         if socket_dir:
             if not os.path.exists(socket_dir):
@@ -113,21 +123,27 @@ class HAProxy(object):
 
             for _file in glob.glob(os.path.join(socket_dir, '*')):
                 if is_unix_socket(_file) and connected_socket(_file):
-                    socket_files.append(_file)
-        elif (socket_file and is_unix_socket(socket_file) and
-              connected_socket(socket_file)):
-            socket_files.append(os.path.realpath(socket_file))
-        else:
-            raise ValueError("UNIX socket file was not set")
+                    sockets.append(_file)
+        if (socket_file and is_unix_socket(socket_file)
+                and connected_socket(socket_file)):
+            sockets.append(os.path.realpath(socket_file))
+        if servers:
+            for server in servers:
+                print(server)
+                url = urlparse(server.strip())
+                if url.scheme == 'unix':
+                    sockets.append(url.path)
+                elif url.scheme == 'tcp':
+                    sockets.append((url.hostname, url.port))
 
-        if not socket_files:
+        if not sockets:
             raise ValueError("No valid UNIX socket file was found, directory: "
                              "{} file: {}".format(socket_dir, socket_file))
 
-        for so_file in socket_files:
+        for socket_name in sockets:
             self._hap_processes.append(
                 _HAProxyProcess(
-                    socket_file=so_file,
+                    socket_name=socket_name,
                     retry=retry,
                     retry_interval=retry_interval,
                     timeout=timeout
