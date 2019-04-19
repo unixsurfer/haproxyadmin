@@ -76,7 +76,6 @@ class _HAProxyProcess:
             # any other value means retry N times
             attempt = self.retry + 1
         while attempt != 0:
-            print(time.ctime(), attempt, self.retry)
             try:
                 unix_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
                 unix_socket.settimeout(self.timeout)
