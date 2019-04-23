@@ -28,6 +28,7 @@ class HAProxyBaseError(Exception):
     :param message: error message.
     :type message: ``string``
     """
+
     message = ''
 
     def __init__(self, message=''):
@@ -46,6 +47,7 @@ class HAProxyDataError(HAProxyBaseError):
     :param results: A structure which contains data returned be each socket.
     :type results: ``list`` of ``list``
     """
+
     def __init__(self, results):
         self.results = results
         super(HAProxyDataError, self).__init__()
@@ -53,12 +55,25 @@ class HAProxyDataError(HAProxyBaseError):
 
 class MultipleCommandResults(HAProxyDataError):
     """Command returned different results per HAProxy process."""
+
     message = 'Received different result per HAProxy process'
 
 
 class IncosistentData(HAProxyDataError):
     """Data across all processes is not the same."""
+
     message = 'Received different data per HAProxy process'
+
+
+class HAProxySocketErrors(HAProxyBaseError):
+    """Raised when at least one connection fails."""
+    message = "Socket errors"
+    def __init__(self, details):
+        self.details = details
+        super(HAProxySocketErrors, self).__init__()
+
+class AllServersFailed(HAProxySocketErrors):
+    message = "Failed to connected to all HAProxy servers"
 
 
 class HAProxySocketError(HAProxyBaseError):
@@ -67,31 +82,51 @@ class HAProxySocketError(HAProxyBaseError):
     :param socket_file: socket file.
     :type socket_file: ``string``
     """
-    def __init__(self, socket_file):
-        self.socket_file = socket_file
-        self.message = self.message + ' ' + self.socket_file
+
+    def __init__(self, message, haproxy_server):
+        self.haproxy_server = haproxy_server
+        if self.haproxy_server.socket_file is not None:
+            self.message = ("{}: socket file {}".format(
+                message, self.haproxy_server.socket_file))
+        else:
+            self.message = ("{}: address {}:{}".format(
+                message, self.haproxy_server.address,
+                self.haproxy_server.port))
         super(HAProxySocketError, self).__init__(self.message)
 
 
 class SocketTimeout(HAProxySocketError):
     """Raised when we timeout on the socket."""
+
     message = 'Socket timed out'
 
 
 class SocketPermissionError(HAProxySocketError):
     """Raised when permissions are not granted to access socket file."""
+
     message = 'No permissions are granted to access socket file'
+
 
 
 class SocketConnectionError(HAProxySocketError):
     """Raised when socket file is not bound to a process."""
-    message = 'No process is bound to socket file'
+
+    message = 'No HAProxy process is bound to socket'
 
 
-class SocketApplicationError(HAProxySocketError):
+class SocketApplicationError(HAProxyBaseError):
     """Raised when we connect to a socket and HAProxy is not bound to it."""
-    message = 'HAProxy is not bound to socket file'
 
+    def __init__(self, haproxy_server):
+        self.haproxy_server = haproxy_server
+        if self.haproxy_server.socket_file is not None:
+            self.message = ("Process listening on UNIX socket {} isn't "
+                            "HAProxy!".format(self.haproxy_server.socket_file))
+        else:
+            self.message = ("Process listening on address {}:{} isn't "
+                            "HAProxy!".format(self.haproxy_server.address,
+                                              self.haproxy_server.port))
+        super(SocketApplicationError, self).__init__(self.message)
 
 class SocketTransportError(HAProxySocketError):
     """Raised when endpoint of socket hasn't closed an old connection.
@@ -103,4 +138,5 @@ class SocketTransportError(HAProxySocketError):
        previous connection.
 
     """
+
     message = 'Transport endpoint is already connected'

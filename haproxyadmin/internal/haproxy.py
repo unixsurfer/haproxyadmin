@@ -13,15 +13,13 @@ this class to send commands to HAProxy process.
 """
 
 import socket
-import errno
 import time
 import six
 
 from haproxyadmin.utils import (info2dict, stat2dict)
-from haproxyadmin.exceptions import (SocketTransportError, SocketTimeout,
-                                     SocketConnectionError)
 from haproxyadmin.internal.frontend import _Frontend
 from haproxyadmin.internal.backend import _Backend
+from haproxyadmin.exceptions import HAProxySocketError, SocketApplicationError
 
 
 class _HAProxyProcess:
@@ -41,18 +39,24 @@ class _HAProxyProcess:
     :type timeout: ``float``
     :type retry_interval: ``integer``
     """
-    def __init__(self, socket_name, retry=3, retry_interval=2, timeout=1):
-        self.socket_name = socket_name
+    def __init__(self, haproxy_server, retry=3, retry_interval=2, timeout=1):
+        self.haproxy_server = haproxy_server
         self.hap_stats = {}
         self.hap_info = {}
         self.retry = retry
         self.retry_interval = retry_interval
         self.timeout = timeout
-        # process number associated with this object
-        self.process_nb = self.metric('Process_num')
+        try:
+            _name = self.metric('Name')
+        except KeyError:
+            raise SocketApplicationError(haproxy_server=self.haproxy_server)
+        else:
+            if _name != "HAProxy":
+                raise SocketApplicationError(haproxy_server=self.haproxy_server)
+        self.haproxy_server.process_number = self.metric('Process_num')
 
     def command(self, command, full_output=False):
-        """Send a command to HAProxy over UNIX stats socket.
+        """Send a command to HAProxy.
 
         Newline character returned from haproxy is stripped off.
 
@@ -65,66 +69,70 @@ class _HAProxyProcess:
         :rtype: ``string`` or ``list`` if full_output is True
         """
         data = []  # hold data returned from socket
-        # raised = None  # hold possible exception raised during connect phase
-        failure_occured = False
+        error = None
         attempt = 0 # times to attempt to connect after a connection failure
-        if self.retry == 0:
-            # 0 means retry indefinitely
-            attempt = -1
-        elif self.retry is None:
-            # None means don't retry
-            attempt = 1
+
+        if self.haproxy_server.socket_file is not None:
+            address = self.haproxy_server.socket_file
+            socket_info = "socket file {}".format(self.haproxy_server.socket_file)
+            hap_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         else:
-            # any other value means retry N times
+            address = (self.haproxy_server.address, self.haproxy_server.port)
+            socket_info = ("address {}:{}".format(
+                self.haproxy_server.address, self.haproxy_server.port))
+            hap_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+        hap_socket.settimeout(self.timeout)
+
+        if self.retry == 0:  # 0 means retry indefinitely
+            attempt = -1
+        elif self.retry is None:  # None means don't retry
+            attempt = 1
+        else:  # any other value means retry N times
             attempt = self.retry + 1
+
         while attempt != 0:
-            if failure_occured:
+            if error is not None:
                 time.sleep(self.retry_interval)
-            print(time.ctime(), attempt, self.retry)
             try:
-                if isinstance(self.socket_name, str):
-                    address = socket.socket(socket.AF_UNIX,
-                                            socket.SOCK_STREAM)
-                    address.settimeout(self.timeout)
-                    address.connect(self.socket_name)
-                elif isinstance(self.socket_name, tuple):
-                    address = socket.create_connection(self.socket_name,
-                                                       timeout=self.timeout)
-            except socket.timeout:
-                raised = SocketTimeout(socket_file=self.socket_name)
-                failure_occured = True
+                hap_socket.connect(address)
+            except socket.timeout as exc:
+                # error = "{}: {}".format(exc, socket_info)
+                error = HAProxySocketError(message=exc,
+                                           haproxy_server=self.haproxy_server)
             except OSError as exc:
-                # while stress testing HAProxy and querying for all frontend
-                # metrics I sometimes get:
-                # OSError: [Errno 106] Transport endpoint is already connected
-                # catch this one only and reraise it withour exception
-                if exc.errno == errno.EISCONN:
-                    raised = SocketTransportError(socket_file=str(self.socket_name))
-                elif exc.errno == errno.ECONNREFUSED:
-                    raised = SocketConnectionError(str(self.socket_name))
-                else:
-                    # for the rest of OSError exceptions just reraise them
-                    raised = exc
-                failure_occured = True
+                # error = "{}: {}".format(exc, socket_info)
+                error = HAProxySocketError(message=exc,
+                                           haproxy_server=self.haproxy_server)
             else:
-                address.send(six.b(command + '\n'))
-                file_handle = address.makefile()
-                data = file_handle.read().splitlines()
-                # HAProxy always send an empty string at the end
-                # we remove it as it adds noise for things like ACL/MAP and etc
-                # We only do that when we get more than 1 line, which only
-                # happens when we ask for ACL/MAP/etc and not for giving cmds
-                # such as disable/enable server
-                if len(data) > 1 and data[-1] == '':
-                    data.pop()
-                # make sure possible previous errors are cleared
-                failure_occured = False
-                break
+                try:
+                    hap_socket.send(six.b(command + '\n'))
+                    file_handle = hap_socket.makefile()
+                    data = file_handle.read().splitlines()
+                except socket.timeout as exc:
+                    # error = "{}: {}".format(exc, socket_info)
+                    error = HAProxySocketError(message=exc,
+                                               haproxy_server=self.haproxy_server)
+                except OSError as exc:
+                    # error = "{}: {}".format(exc, socket_info)
+                    error = HAProxySocketError(message=exc,
+                                               haproxy_server=self.haproxy_server)
+                else:
+                    # HAProxy always send an empty string at the end
+                    # we remove it as it adds noise for things like ACL/MAP
+                    # and etc. We only do that when we get more than 1 line,
+                    # which only happens when we ask for ACL/MAP/etc and not
+                    # for giving cmds such as disable/enable server.
+                    if len(data) > 1 and data[-1] == '':
+                        data.pop()
+                    error = None  # clear possible previous errors
+                    hap_socket.close()
+                    break
 
             attempt -= 1
 
-        if failure_occured:
-            raise raised
+        if error is not None:
+            raise error
 
         if not full_output:
             return data[0]
@@ -169,6 +177,7 @@ class _HAProxyProcess:
         return self.hap_stats
 
     def metric(self, name):
+        """Return the value of a metric."""
         return self.proc_info()[name]
 
     def backends_stats(self, iid=-1):
@@ -198,6 +207,19 @@ class _HAProxyProcess:
         return self.stats(iid, obj_type=1)['frontends']
 
     def servers_stats(self, backend, iid=-1, sid=-1):
+        """Build the data structure for servers
+
+        If ``iid`` is set then it builds a structure only for server, which are
+        members of the particular backend and if ``sid`` is set then it builds
+        the structure for that particular server.
+
+        :param iid: (optinal) unique proxy id of a backend.
+        :type iid: ``string``
+        :param iid: (optinal) unique server id.
+        :type iid: ``string``
+        :retur: a dictinary with backend information.
+        :rtype: ``dict``
+        """
         return self.stats(iid=iid,
                           obj_type=6,
                           sid=sid)['backends'][backend]['servers']
@@ -221,10 +243,10 @@ class _HAProxyProcess:
             else:
                 return return_list
         else:
-            for name in backends:
+            for backend in backends:
                 return_list.append(_Backend(self,
-                                            name,
-                                            backends[name]['stats'].iid))
+                                            backend,
+                                            backends[backend]['stats'].iid))
 
         return return_list
 

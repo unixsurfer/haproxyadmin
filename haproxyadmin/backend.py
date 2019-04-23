@@ -10,7 +10,7 @@ This module provides the :class:`Backend <.Backend>` class which allows to
 run operation for a backend.
 
 """
-from haproxyadmin.utils import (calculate, cmd_across_all_procs,
+from haproxyadmin.utils import (calculate, cmd_across_all_servers,
                                 compare_values, converter)
 from haproxyadmin.server import Server
 
@@ -203,7 +203,7 @@ class Backend(object):
         :rtype: ``list``
 
         """
-        results = cmd_across_all_procs(self._backend_per_proc, 'metric', 'stot')
+        results = cmd_across_all_servers(self._backend_per_proc, 'metric', 'stot')
 
         return results
 
@@ -218,7 +218,7 @@ class Backend(object):
         :rtype: ``list``
 
         """
-        values = cmd_across_all_procs(self._backend_per_proc, 'stats')
+        values = cmd_across_all_servers(self._backend_per_proc, 'stats')
 
         return values
 
@@ -231,6 +231,6 @@ class Backend(object):
           per process.
 
         """
-        results = cmd_across_all_procs(self._backend_per_proc, 'metric', 'status')
+        results = cmd_across_all_servers(self._backend_per_proc, 'metric', 'status')
 
         return compare_values(results)

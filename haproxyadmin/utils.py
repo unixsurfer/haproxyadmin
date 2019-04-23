@@ -158,7 +158,7 @@ def is_unix_socket(path):
 
     return stat.S_ISSOCK(mode)
 
-def connected_socket(path):
+def not_haproxy_connected_socket(address, timeout):
     """Check if socket file is a valid HAProxy socket file.
 
     We send a 'show info' command to the socket, build a dictionary structure
@@ -171,31 +171,36 @@ def connected_socket(path):
       otherwise
     :rtype: ``bool``
     """
+    if isinstance(address, str):
+        socket_type = socket.AF_UNIX
+    elif isinstance(address, tuple):
+        socket_type = socket.AF_INET
+
     try:
-        unix_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-        unix_socket.settimeout(0.1)
-        unix_socket.connect(path)
-        unix_socket.send(six.b('show info' + '\n'))
-        file_handle = unix_socket.makefile()
+        hap_socket = socket.socket(socket_type, socket.SOCK_STREAM)
+        hap_socket.settimeout(timeout)
+        hap_socket.connect(address)
     except (socket.timeout, OSError):
         return False
     else:
+        hap_socket.send(six.b('show info' + '\n'))
+        file_handle = hap_socket.makefile()
         try:
             data = file_handle.read().splitlines()
         except (socket.timeout, OSError):
             return False
         else:
             hap_info = info2dict(data)
-    finally:
-        unix_socket.close()
 
     try:
-        return hap_info['Name'] == 'HAProxy'
+        _ = hap_info['Name'] == 'HAProxy'
     except KeyError:
+        return True
+    else:
         return False
 
 
-def cmd_across_all_procs(hap_objects, method, *arg, **kargs):
+def cmd_across_all_servers(hap_objects, method, *arg, **kargs):
     """Return the result of a command executed in all HAProxy process.
 
     .. note::
@@ -215,7 +220,7 @@ def cmd_across_all_procs(hap_objects, method, *arg, **kargs):
     results = []
     for obj in hap_objects:
         results.append(
-            (getattr(obj, 'process_nb'), getattr(obj, method)(*arg, **kargs))
+            (getattr(obj, 'haproxy_server'), getattr(obj, method)(*arg, **kargs))
         )
 
     return results

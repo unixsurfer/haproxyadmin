@@ -9,17 +9,21 @@ haproxyadmin.haproxy
 This module implements the main haproxyadmin API.
 
 """
+from collections import namedtuple
 import os
 import glob
 from urllib.parse import urlparse
+import logging
 
 from haproxyadmin.frontend import Frontend
 from haproxyadmin.backend import Backend
-from haproxyadmin.utils import (is_unix_socket, cmd_across_all_procs, converter,
+from haproxyadmin.utils import (cmd_across_all_servers, converter,
                                 calculate, isint, should_die, check_command,
-                                check_output, compare_values, connected_socket)
+                                check_output, compare_values)
 from haproxyadmin.internal.haproxy import _HAProxyProcess
-from haproxyadmin.exceptions import CommandFailed
+from haproxyadmin.exceptions import (CommandFailed, HAProxySocketError,
+                                     HAProxySocketErrors, AllServersFailed,
+                                     SocketApplicationError)
 
 
 HAPROXY_METRICS = [
@@ -66,7 +70,7 @@ HAPROXY_METRICS = [
 ]
 
 
-class HAProxy(object):
+class HAProxy:
     """Build a user-created :class:`HAProxy` object for HAProxy.
 
     This is the main class to interact with HAProxy and provides methods
@@ -101,54 +105,77 @@ class HAProxy(object):
       be set. For UNIX scheme you can only pass a file and not a directory.
       You can use comma as separator to pass multiple servers
       (unix:///run/haproxy.sock,tcp://127.0.0.1:555,tcp://127.0.0.1:556)
-    :type servers: ``string``
+    :type servers: ``list``
     :rtype: :class:`HAProxy`
     """
 
     def __init__(self,
                  socket_dir=None,
                  socket_file=None,
-                 retry=2,
+                 retry=None,
                  retry_interval=2,
                  timeout=1,
                  servers=None,
                  ):
-        self._hap_processes = []
-        sockets = []
+        self.log = logging.getLogger("haproxyadmin")
+        self._haproxy_servers = []
+        self.configured_sockets = []
+        connected_sockets = 0
+        errors = []
 
         if socket_dir:
-            if not os.path.exists(socket_dir):
-                raise ValueError("socket directory does not exist "
-                                 "{}".format(socket_dir))
-
             for _file in glob.glob(os.path.join(socket_dir, '*')):
-                if is_unix_socket(_file) and connected_socket(_file):
-                    sockets.append(_file)
-        if (socket_file and is_unix_socket(socket_file)
-                and connected_socket(socket_file)):
-            sockets.append(os.path.realpath(socket_file))
+                self.configured_sockets.append(_file)
+        if socket_file:
+            self.configured_sockets.append(os.path.realpath(socket_file))
         if servers:
             for server in servers:
-                print(server)
                 url = urlparse(server.strip())
                 if url.scheme == 'unix':
-                    sockets.append(url.path)
+                    self.configured_sockets.append(url.path)
                 elif url.scheme == 'tcp':
-                    sockets.append((url.hostname, url.port))
+                    self.configured_sockets.append((url.hostname, url.port))
 
-        if not sockets:
-            raise ValueError("No valid UNIX socket file was found, directory: "
-                             "{} file: {}".format(socket_dir, socket_file))
+        for name in self.configured_sockets:
+            haproxy_server = namedtuple(
+                'HaproxyServer',
+                [
+                    'socket_file',
+                    'address',
+                    'port',
+                    'process_number',
+                ]
 
-        for socket_name in sockets:
-            self._hap_processes.append(
-                _HAProxyProcess(
-                    socket_name=socket_name,
-                    retry=retry,
-                    retry_interval=retry_interval,
-                    timeout=timeout
-                 )
             )
+            for _field in haproxy_server._fields:
+                setattr(haproxy_server, _field, None)  # set default values
+
+            if isinstance(name, str):
+                haproxy_server.socket_file = name
+            elif isinstance(name, tuple):
+                haproxy_server.address = name[0]
+                haproxy_server.port = name[1]
+            try:
+                self._haproxy_servers.append(
+                    _HAProxyProcess(
+                        haproxy_server=haproxy_server,
+                        retry=retry,
+                        retry_interval=retry_interval,
+                        timeout=timeout
+                    )
+                )
+            except (HAProxySocketError, SocketApplicationError) as exc:
+                errors.append(str(exc))
+            else:
+                connected_sockets += 1
+
+        if 0 < connected_sockets < len(self.configured_sockets):
+            self.log.warning("socket errors from some HAProxy servers %s.",
+                             errors)
+        elif connected_sockets == 0:
+            raise AllServersFailed(details=errors)
+
+
 
     @should_die
     def add_acl(self, acl, pattern):
@@ -177,8 +204,8 @@ class HAProxy(object):
         else:
             cmd = "add acl {} {}".format(acl, pattern)
 
-        results = cmd_across_all_procs(self._hap_processes, 'command',
-                                       cmd)
+        results = cmd_across_all_servers(self._haproxy_servers, 'command',
+                                         cmd)
 
         return check_command(results)
 
@@ -211,8 +238,8 @@ class HAProxy(object):
         else:
             cmd = "add map {} {} {}".format(mapid, key, value)
 
-        results = cmd_across_all_procs(self._hap_processes, 'command',
-                                       cmd)
+        results = cmd_across_all_servers(self._haproxy_servers, 'command',
+                                         cmd)
 
         return check_command(results)
 
@@ -239,8 +266,8 @@ class HAProxy(object):
         else:
             cmd = "clear acl {}".format(acl)
 
-        results = cmd_across_all_procs(self._hap_processes, 'command',
-                                       cmd)
+        results = cmd_across_all_servers(self._haproxy_servers, 'command',
+                                         cmd)
 
         return check_command(results)
 
@@ -267,8 +294,8 @@ class HAProxy(object):
         else:
             cmd = "clear map {}".format(mapid)
 
-        results = cmd_across_all_procs(self._hap_processes, 'command',
-                                       cmd)
+        results = cmd_across_all_servers(self._haproxy_servers, 'command',
+                                         cmd)
 
         return check_command(results)
 
@@ -290,8 +317,8 @@ class HAProxy(object):
         else:
             cmd = "clear counters"
 
-        results = cmd_across_all_procs(self._hap_processes, 'command',
-                                       cmd)
+        results = cmd_across_all_servers(self._haproxy_servers, 'command',
+                                         cmd)
 
         return check_command(results)
 
@@ -328,7 +355,7 @@ class HAProxy(object):
           >>> hap.processids
           [22029, 22028, 22027, 22026]
         """
-        return [x.metric('Pid') for x in self._hap_processes]
+        return [x.metric('Pid') for x in self._haproxy_servers]
 
     @should_die
     def del_acl(self, acl, key):
@@ -364,8 +391,8 @@ class HAProxy(object):
         else:
             cmd = "del acl {} {}".format(acl, key)
 
-        results = cmd_across_all_procs(self._hap_processes, 'command',
-                                       cmd)
+        results = cmd_across_all_servers(self._haproxy_servers, 'command',
+                                         cmd)
 
         return check_command(results)
 
@@ -407,8 +434,8 @@ class HAProxy(object):
         else:
             cmd = "del map {} {}".format(mapid, key)
 
-        results = cmd_across_all_procs(self._hap_processes, 'command',
-                                       cmd)
+        results = cmd_across_all_servers(self._haproxy_servers, 'command',
+                                         cmd)
 
         return check_command(results)
 
@@ -433,8 +460,8 @@ class HAProxy(object):
         else:
             cmd = "show errors"
 
-        return cmd_across_all_procs(self._hap_processes, 'command',
-                                    cmd, full_output=True)
+        return cmd_across_all_servers(self._haproxy_servers, 'command',
+                                      cmd, full_output=True)
 
     def frontends(self, name=None):
         """Build a list of :class:`Frontend <haproxyadmin.frontend.Frontend>`
@@ -449,17 +476,17 @@ class HAProxy(object):
         # store _Frontend objects for each frontend per haproxy process.
         # key: name of the frontend
         # value: a list of _Frontend objects
-        frontends_across_hap_processes = {}
+        frontends_across_haproxy_servers = {}
 
-        # loop over all haproxy processes and get a list of frontend objects
-        for haproxy in self._hap_processes:
+        # loop over all haproxy servers and get a list of frontend objects
+        for haproxy in self._haproxy_servers:
             for frontend in haproxy.frontends(name):
-                if frontend.name not in frontends_across_hap_processes:
-                    frontends_across_hap_processes[frontend.name] = []
-                frontends_across_hap_processes[frontend.name].append(frontend)
+                if frontend.name not in frontends_across_haproxy_servers:
+                    frontends_across_haproxy_servers[frontend.name] = []
+                frontends_across_haproxy_servers[frontend.name].append(frontend)
 
         # build the returned list
-        for value in frontends_across_hap_processes.values():
+        for value in frontends_across_haproxy_servers.values():
             return_list.append(Frontend(value))
 
         return return_list
@@ -510,7 +537,7 @@ class HAProxy(object):
         else:
             cmd = "get acl {} {}".format(acl, value)
 
-        get_results = cmd_across_all_procs(self._hap_processes, 'command', cmd)
+        get_results = cmd_across_all_servers(self._haproxy_servers, 'command', cmd)
         get_info_proc1 = get_results[0][1]
         if not check_output(get_info_proc1):
             raise ValueError(get_info_proc1)
@@ -544,8 +571,8 @@ class HAProxy(object):
         else:
             cmd = "get map {} {}".format(mapid, value)
 
-        get_results = cmd_across_all_procs(self._hap_processes, 'command',
-                                           cmd)
+        get_results = cmd_across_all_servers(self._haproxy_servers, 'command',
+                                             cmd)
         get_info_proc1 = get_results[0][1]
         if not check_output(get_info_proc1):
             raise CommandFailed(get_info_proc1[0])
@@ -560,7 +587,7 @@ class HAProxy(object):
         """
         return_list = []
 
-        for haproxy in self._hap_processes:
+        for haproxy in self._haproxy_servers:
             return_list.append(haproxy.proc_info())
 
         return return_list
@@ -592,9 +619,9 @@ class HAProxy(object):
         :rtype: ``list``
         """
         ret = []
-        for backend in self.backends(backend):
+        for _backend in self.backends(backend):
             try:
-                ret.append(backend.server(hostname))
+                ret.append(_backend.server(hostname))
             except ValueError:
                 # lookup for an nonexistent server in backend raise VauleError
                 # catch and pass as we query all backends
@@ -636,10 +663,29 @@ class HAProxy(object):
         :rtype: ``integer``
         :raise: ``ValueError`` when a given metric is not found
         """
+        errors = []
+        metrics = []
+        connected_sockets = 0
+
         if name not in HAPROXY_METRICS:
             raise ValueError("{} is not valid metric".format(name))
 
-        metrics = [x.metric(name) for x in self._hap_processes]
+        # metrics = [x.metric(name) for x in self._haproxy_servers]
+        for haproxy_server in self._haproxy_servers:
+            try:
+                metric = haproxy_server.metric(name)
+            except HAProxySocketError as exc:
+                errors.append(str(exc))
+            else:
+                connected_sockets += 1
+                metrics.append(metric)
+
+        if 0 < connected_sockets < len(self._haproxy_servers):
+            self.log.warning("socket errors from some HAProxy servers %s: ",
+                             errors)
+        elif connected_sockets == 0:
+            raise AllServersFailed(details=errors)
+
         metrics[:] = (converter(x) for x in metrics)
         metrics[:] = (x for x in metrics if x is not None)
 
@@ -658,18 +704,18 @@ class HAProxy(object):
         # store _Backend objects for each backend per haproxy process.
         # key: name of the backend
         # value: a list of _Backend objects
-        backends_across_hap_processes = {}
+        backends_across_haproxy_servers = {}
 
         # loop over all HAProxy processes and get a set of backends
-        for hap_process in self._hap_processes:
+        for hap_process in self._haproxy_servers:
             # Returns object _Backend
             for backend in hap_process.backends(name):
-                if backend.name not in backends_across_hap_processes:
-                    backends_across_hap_processes[backend.name] = []
-                backends_across_hap_processes[backend.name].append(backend)
+                if backend.name not in backends_across_haproxy_servers:
+                    backends_across_haproxy_servers[backend.name] = []
+                backends_across_haproxy_servers[backend.name].append(backend)
 
         # build the returned list
-        for backend_obj in backends_across_hap_processes.values():
+        for backend_obj in backends_across_haproxy_servers.values():
             return_list.append(Backend(backend_obj))
 
         return return_list
@@ -759,7 +805,7 @@ class HAProxy(object):
         else:
             cmd = "set map {} {} {}".format(mapid, key, value)
 
-        results = cmd_across_all_procs(self._hap_processes, 'command', cmd)
+        results = cmd_across_all_servers(self._haproxy_servers, 'command', cmd)
 
         return check_command(results)
 
@@ -791,8 +837,8 @@ class HAProxy(object):
           >>> hap.show_acl(acl=4)
           ['0x23181c0 /static/css/', '0x238f790 /foo/']
         """
-        return cmd_across_all_procs(self._hap_processes,
-                                    'command', cmd, full_output=True)
+        return cmd_across_all_servers(self._haproxy_servers,
+                                      'command', cmd, full_output=True)
 
     @should_die
     def setmaxconn(self, value):
@@ -814,7 +860,7 @@ class HAProxy(object):
             raise ValueError("Expected integer and got {}".format(type(value)))
         cmd = "set maxconn global {}".format(value)
 
-        results = cmd_across_all_procs(self._hap_processes, 'command', cmd)
+        results = cmd_across_all_servers(self._haproxy_servers, 'command', cmd)
 
         return check_command(results)
 
@@ -832,7 +878,7 @@ class HAProxy(object):
             raise ValueError("Expected integer and got {}".format(type(value)))
         cmd = "set rate-limit connections global {}".format(value)
 
-        results = cmd_across_all_procs(self._hap_processes, 'command', cmd)
+        results = cmd_across_all_servers(self._haproxy_servers, 'command', cmd)
 
         return check_command(results)
 
@@ -850,7 +896,7 @@ class HAProxy(object):
             raise ValueError("Expected integer and got {}".format(type(value)))
         cmd = "set rate-limit sessions global {}".format(value)
 
-        results = cmd_across_all_procs(self._hap_processes, 'command', cmd)
+        results = cmd_across_all_servers(self._haproxy_servers, 'command', cmd)
 
         return check_command(results)
 
@@ -868,7 +914,7 @@ class HAProxy(object):
             raise ValueError("Expected integer and got {}".format(type(value)))
         cmd = "set rate-limit ssl-sessions global {}".format(value)
 
-        results = cmd_across_all_procs(self._hap_processes, 'command', cmd)
+        results = cmd_across_all_servers(self._haproxy_servers, 'command', cmd)
 
         return check_command(results)
 
@@ -905,9 +951,8 @@ class HAProxy(object):
         else:
             cmd = "show acl"
 
-        acl_info = cmd_across_all_procs(self._hap_processes, 'command',
-                                        cmd,
-                                        full_output=True)
+        acl_info = cmd_across_all_servers(self._haproxy_servers, 'command',
+                                          cmd, full_output=True)
         # ACL can't be different per process thus we only return the acl
         # content found in 1st process.
         acl_info_proc1 = acl_info[0][1]
@@ -950,9 +995,8 @@ class HAProxy(object):
                 cmd = "show map {}".format(mapid)
         else:
             cmd = "show map"
-        map_info = cmd_across_all_procs(self._hap_processes, 'command',
-                                        cmd,
-                                        full_output=True)
+        map_info = cmd_across_all_servers(self._haproxy_servers, 'command',
+                                          cmd, full_output=True)
         # map can't be different per process thus we only return the map
         # content found in 1st process.
         map_info_proc1 = map_info[0][1]
@@ -978,8 +1022,8 @@ class HAProxy(object):
           >>> hap.uptime
           '4d 0h16m26s'
         """
-        values = cmd_across_all_procs(self._hap_processes, 'metric',
-                                      'Uptime')
+        values = cmd_across_all_servers(self._haproxy_servers, 'metric',
+                                        'Uptime')
 
         # Just return the uptime of the 1st process
         return values[0][1]
@@ -997,8 +1041,8 @@ class HAProxy(object):
           >>> hap.description
           'test'
         """
-        values = cmd_across_all_procs(self._hap_processes, 'metric',
-                                      'description')
+        values = cmd_across_all_servers(self._haproxy_servers, 'metric',
+                                        'description')
 
         return compare_values(values)
 
@@ -1015,8 +1059,8 @@ class HAProxy(object):
           >>> hap.nodename
           'test.foo.com'
         """
-        values = cmd_across_all_procs(self._hap_processes, 'metric',
-                                      'node')
+        values = cmd_across_all_servers(self._haproxy_servers, 'metric',
+                                        'node')
 
         return compare_values(values)
 
@@ -1033,8 +1077,8 @@ class HAProxy(object):
           >>> hap.uptimesec
           346588
         """
-        values = cmd_across_all_procs(self._hap_processes, 'metric',
-                                      'Uptime_sec')
+        values = cmd_across_all_servers(self._haproxy_servers, 'metric',
+                                        'Uptime_sec')
 
         # Just return the uptime of the 1st process
         return values[0][1]
@@ -1052,8 +1096,8 @@ class HAProxy(object):
           >>> hap.releasedate
           '2014/10/31'
         """
-        values = cmd_across_all_procs(self._hap_processes, 'metric',
-                                      'Release_date')
+        values = cmd_across_all_servers(self._haproxy_servers, 'metric',
+                                        'Release_date')
 
         return compare_values(values)
 
@@ -1072,6 +1116,7 @@ class HAProxy(object):
         # If multiple version of HAProxy share the same socket directory
         # then this wil always raise IncosistentData exception.
         # TODO: Document this on README
-        values = cmd_across_all_procs(self._hap_processes, 'metric', 'Version')
+        values = cmd_across_all_servers(self._haproxy_servers,
+                                        'metric', 'Version')
 
         return compare_values(values)

@@ -10,7 +10,7 @@ This module provides the :class:`Server <.Server>` class which allows to
 run operation for a server.
 
 """
-from haproxyadmin.utils import (calculate, cmd_across_all_procs, compare_values,
+from haproxyadmin.utils import (calculate, cmd_across_all_servers, compare_values,
                                 should_die, check_command, converter,
                                 check_command_addr_port, elements_of_list_same)
 from haproxyadmin.exceptions import IncosistentData
@@ -114,7 +114,7 @@ class Server:
 
         :rtype: ``integer``
         """
-        values = cmd_across_all_procs(
+        values = cmd_across_all_servers(
             self._server_per_proc, 'metric', 'check_code'
         )
 
@@ -126,7 +126,7 @@ class Server:
 
         :rtype: ``string``
         """
-        values = cmd_across_all_procs(
+        values = cmd_across_all_servers(
             self._server_per_proc, 'metric', 'check_status'
         )
 
@@ -142,7 +142,7 @@ class Server:
           :type port: ``string``
           :rtype: ``bool``
         """
-        values = cmd_across_all_procs(
+        values = cmd_across_all_servers(
             self._server_per_proc, 'metric', 'addr'
         )
 
@@ -168,7 +168,7 @@ class Server:
         cmd = "set server {}/{} addr {} port {}".format(
             self.backendname, self.name, self.address, port
         )
-        results = cmd_across_all_procs(self._server_per_proc, 'command', cmd)
+        results = cmd_across_all_servers(self._server_per_proc, 'command', cmd)
 
         return check_command_addr_port('port', results)
 
@@ -182,7 +182,7 @@ class Server:
           :type address: ``string``
           :rtype: ``bool``
         """
-        values = cmd_across_all_procs(
+        values = cmd_across_all_servers(
             self._server_per_proc, 'metric', 'addr'
         )
 
@@ -208,7 +208,7 @@ class Server:
         cmd = "set server {}/{} addr {}".format(
             self.backendname, self.name, address
         )
-        results = cmd_across_all_procs(self._server_per_proc, 'command', cmd)
+        results = cmd_across_all_servers(self._server_per_proc, 'command', cmd)
 
         return check_command_addr_port('addr', results)
 
@@ -218,7 +218,7 @@ class Server:
 
         :rtype: ``string``
         """
-        values = cmd_across_all_procs(
+        values = cmd_across_all_servers(
             self._server_per_proc, 'metric', 'last_chk'
         )
 
@@ -230,7 +230,7 @@ class Server:
 
         :rtype: ``string``
         """
-        values = cmd_across_all_procs(
+        values = cmd_across_all_servers(
             self._server_per_proc, 'metric', 'last_agt'
         )
 
@@ -284,7 +284,7 @@ class Server:
           element is requests.
 
         """
-        results = cmd_across_all_procs(self._server_per_proc, 'metric', 'stot')
+        results = cmd_across_all_servers(self._server_per_proc, 'metric', 'stot')
 
         return results
 
@@ -349,7 +349,7 @@ class Server:
                 self.backendname, self.name, state
             )
 
-        results = cmd_across_all_procs(self._server_per_proc, 'command', cmd)
+        results = cmd_across_all_servers(self._server_per_proc, 'command', cmd)
 
         return check_command(results)
 
@@ -364,7 +364,7 @@ class Server:
         :rtype: ``list``
 
         """
-        values = cmd_across_all_procs(self._server_per_proc, 'stats')
+        values = cmd_across_all_servers(self._server_per_proc, 'stats')
 
         return values
 
@@ -377,7 +377,7 @@ class Server:
           per process
 
         """
-        values = cmd_across_all_procs(self._server_per_proc, 'metric', 'status')
+        values = cmd_across_all_servers(self._server_per_proc, 'metric', 'status')
 
         return compare_values(values)
 
@@ -389,7 +389,7 @@ class Server:
         :raise: :class:`IncosistentData` exception if weight is different
           per process
         """
-        values = cmd_across_all_procs(self._server_per_proc, 'metric', 'weight')
+        values = cmd_across_all_servers(self._server_per_proc, 'metric', 'weight')
 
         return compare_values(values)
 
@@ -436,7 +436,7 @@ class Server:
         else:
             raise ValueError(msg)
 
-        results = cmd_across_all_procs(self._server_per_proc, 'command', cmd)
+        results = cmd_across_all_servers(self._server_per_proc, 'command', cmd)
 
         return check_command(results)
 
@@ -450,6 +450,6 @@ class Server:
 
         cmd = "shutdown sessions server {b}/{s}".format(b=self.backendname,
                                                         s=self.name)
-        results = cmd_across_all_procs(self._server_per_proc, 'command', cmd)
+        results = cmd_across_all_servers(self._server_per_proc, 'command', cmd)
 
         return check_command(results)

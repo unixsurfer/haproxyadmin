@@ -10,7 +10,7 @@ This module provides the :class:`Frontend <.Frontend>` class. This class can
 be used to run operations on a frontend and retrieve statistics.
 
 """
-from haproxyadmin.utils import (calculate, cmd_across_all_procs, converter,
+from haproxyadmin.utils import (calculate, cmd_across_all_servers, converter,
                                 check_command, should_die, compare_values)
 
 
@@ -43,7 +43,7 @@ FRONTEND_METRICS = [
 ]
 
 
-class Frontend(object):
+class Frontend:
     """Build a user-created :class:`Frontend` for a single frontend.
 
     :param frontend_per_proc: list of :class:`._Frontend` objects.
@@ -96,7 +96,7 @@ class Frontend(object):
 
         """
         cmd = "disable frontend {}".format(self.name)
-        results = cmd_across_all_procs(self._frontend_per_proc, 'command', cmd)
+        results = cmd_across_all_servers(self._frontend_per_proc, 'command', cmd)
 
         return check_command(results)
 
@@ -114,7 +114,7 @@ class Frontend(object):
           when something bad happens otherwise returns ``False``.
         """
         cmd = "enable frontend {}".format(self.name)
-        results = cmd_across_all_procs(self._frontend_per_proc, 'command', cmd)
+        results = cmd_across_all_servers(self._frontend_per_proc, 'command', cmd)
 
         return check_command(results)
 
@@ -179,7 +179,7 @@ class Frontend(object):
             raise ValueError("Expected integer and got {}".format(type(value)))
 
         cmd = "set maxconn frontend {} {}".format(self.name, value)
-        results = cmd_across_all_procs(self._frontend_per_proc, 'command', cmd)
+        results = cmd_across_all_servers(self._frontend_per_proc, 'command', cmd)
 
         return check_command(results)
 
@@ -245,8 +245,8 @@ class Frontend(object):
           >>> frontend.requests_per_process()
           [(4, 2), (3, 3)]
         """
-        results = cmd_across_all_procs(self._frontend_per_proc, 'metric',
-                                       'req_tot')
+        results = cmd_across_all_servers(self._frontend_per_proc, 'metric',
+                                         'req_tot')
 
         return results
 
@@ -261,7 +261,7 @@ class Frontend(object):
         :rtype: ``bool``
         """
         cmd = "shutdown frontend {}".format(self.name)
-        results = cmd_across_all_procs(self._frontend_per_proc, 'command', cmd)
+        results = cmd_across_all_servers(self._frontend_per_proc, 'command', cmd)
 
         return check_command(results)
 
@@ -276,7 +276,7 @@ class Frontend(object):
         :rtype: ``list``
 
         """
-        results = cmd_across_all_procs(self._frontend_per_proc, 'stats')
+        results = cmd_across_all_servers(self._frontend_per_proc, 'stats')
 
         return results
 
@@ -296,7 +296,7 @@ class Frontend(object):
           >>> frontend.status
           'OPEN'
         """
-        results = cmd_across_all_procs(self._frontend_per_proc, 'metric',
-                                       'status')
+        results = cmd_across_all_servers(self._frontend_per_proc, 'metric',
+                                         'status')
 
         return compare_values(results)
