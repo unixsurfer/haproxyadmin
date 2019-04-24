@@ -26,8 +26,8 @@ class _Frontend:
     def __init__(self, hap_process, name, iid):
         self.hap_process = hap_process
         self._name = name
-        self.hap_process_nb = self.hap_process.process_nb
         self._iid = iid
+        self.haproxy_server = hap_process.haproxy_server
 
     @property
     def name(self):
@@ -44,7 +44,7 @@ class _Frontend:
 
     @property
     def process_nb(self):
-        return int(self.hap_process_nb)
+        return int(self.hap_process.haproxy_server.process_number)
 
     def stats_data(self):
         """Return stats data

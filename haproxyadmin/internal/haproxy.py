@@ -53,7 +53,8 @@ class _HAProxyProcess:
         else:
             if _name != "HAProxy":
                 raise SocketApplicationError(haproxy_server=self.haproxy_server)
-        self.haproxy_server.process_number = self.metric('Process_num')
+        self.haproxy_server = self.haproxy_server._replace(
+                process_number=self.metric('Process_num'))
 
     def command(self, command, full_output=False):
         """Send a command to HAProxy.
@@ -74,12 +75,9 @@ class _HAProxyProcess:
 
         if self.haproxy_server.socket_file is not None:
             address = self.haproxy_server.socket_file
-            socket_info = "socket file {}".format(self.haproxy_server.socket_file)
             hap_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         else:
             address = (self.haproxy_server.address, self.haproxy_server.port)
-            socket_info = ("address {}:{}".format(
-                self.haproxy_server.address, self.haproxy_server.port))
             hap_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         hap_socket.settimeout(self.timeout)
@@ -97,11 +95,9 @@ class _HAProxyProcess:
             try:
                 hap_socket.connect(address)
             except socket.timeout as exc:
-                # error = "{}: {}".format(exc, socket_info)
                 error = HAProxySocketError(message=exc,
                                            haproxy_server=self.haproxy_server)
             except OSError as exc:
-                # error = "{}: {}".format(exc, socket_info)
                 error = HAProxySocketError(message=exc,
                                            haproxy_server=self.haproxy_server)
             else:
@@ -173,8 +169,9 @@ class _HAProxyProcess:
                                                                o=obj_type,
                                                                s=sid),
                                 full_output=True)
-        self.hap_stats = stat2dict(csv_data)
-        return self.hap_stats
+        # self.hap_stats = stat2dict(csv_data)
+
+        return stat2dict(csv_data)
 
     def metric(self, name):
         """Return the value of a metric."""

@@ -207,7 +207,17 @@ class Frontend:
         """
         process_numbers = []
         for frontend in self._frontend_per_proc:
-            process_numbers.append(frontend.process_nb)
+            if frontend.hap_process.haproxy_server.socket_file is not None:
+                process_numbers.append(
+                    "HAProxy server: socket {} process number {}".format(
+                        frontend.hap_process.haproxy_server.socket_file,
+                        frontend.hap_process.haproxy_server.process_number))
+            else:
+                process_numbers.append(
+                    "HAProxy server: address {}:{} process number {}".format(
+                        frontend.hap_process.haproxy_server.address,
+                        frontend.hap_process.haproxy_server.port,
+                        frontend.hap_process.haproxy_server.process_number))
 
         return process_numbers
 

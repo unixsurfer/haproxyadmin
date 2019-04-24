@@ -85,13 +85,7 @@ class HAProxySocketError(HAProxyBaseError):
 
     def __init__(self, message, haproxy_server):
         self.haproxy_server = haproxy_server
-        if self.haproxy_server.socket_file is not None:
-            self.message = ("{}: socket file {}".format(
-                message, self.haproxy_server.socket_file))
-        else:
-            self.message = ("{}: address {}:{}".format(
-                message, self.haproxy_server.address,
-                self.haproxy_server.port))
+        self.message = "{}: {}".format(message, self.haproxy_server)
         super(HAProxySocketError, self).__init__(self.message)
 
 
@@ -107,7 +101,6 @@ class SocketPermissionError(HAProxySocketError):
     message = 'No permissions are granted to access socket file'
 
 
-
 class SocketConnectionError(HAProxySocketError):
     """Raised when socket file is not bound to a process."""
 
@@ -119,13 +112,8 @@ class SocketApplicationError(HAProxyBaseError):
 
     def __init__(self, haproxy_server):
         self.haproxy_server = haproxy_server
-        if self.haproxy_server.socket_file is not None:
-            self.message = ("Process listening on UNIX socket {} isn't "
-                            "HAProxy!".format(self.haproxy_server.socket_file))
-        else:
-            self.message = ("Process listening on address {}:{} isn't "
-                            "HAProxy!".format(self.haproxy_server.address,
-                                              self.haproxy_server.port))
+        self.message = "Process listening on {} isn't HAProxy!".format(
+            self.haproxy_server.socket_file)
         super(SocketApplicationError, self).__init__(self.message)
 
 class SocketTransportError(HAProxySocketError):

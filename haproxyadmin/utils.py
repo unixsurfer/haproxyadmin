@@ -9,17 +9,18 @@ haproxyadmin.
 
 """
 
-import socket
-import os
-import stat
+import logging
 from functools import wraps
-import six
+from typing import NamedTuple
 import re
 
 from haproxyadmin.exceptions import (CommandFailed, MultipleCommandResults,
-                                     IncosistentData)
+                                     IncosistentData, HAProxySocketError,
+                                     AllServersFailed)
 from haproxyadmin.command_status import (ERROR_OUTPUT_STRINGS,
-        SUCCESS_OUTPUT_STRINGS, SUCCESS_STRING_PORT, SUCCESS_STRING_ADDRESS)
+                                         SUCCESS_OUTPUT_STRINGS,
+                                         SUCCESS_STRING_PORT,
+                                         SUCCESS_STRING_ADDRESS)
 
 METRICS_SUM = [
     'CompressBpsIn',
@@ -147,58 +148,6 @@ def should_die(old_implementation):
     return new_implementation
 
 
-def is_unix_socket(path):
-    """Return ``True`` if path is a valid UNIX socket otherwise False.
-
-    :param path: file name path
-    :type path: ``string``
-    :rtype: ``bool``
-    """
-    mode = os.stat(path).st_mode
-
-    return stat.S_ISSOCK(mode)
-
-def not_haproxy_connected_socket(address, timeout):
-    """Check if socket file is a valid HAProxy socket file.
-
-    We send a 'show info' command to the socket, build a dictionary structure
-    and check if 'Name' key is present in the dictionary to confirm that
-    there is a HAProxy process connected to it.
-
-    :param path: file name path
-    :type path: ``string``
-    :return: ``True`` is socket file is a valid HAProxy stats socket file False
-      otherwise
-    :rtype: ``bool``
-    """
-    if isinstance(address, str):
-        socket_type = socket.AF_UNIX
-    elif isinstance(address, tuple):
-        socket_type = socket.AF_INET
-
-    try:
-        hap_socket = socket.socket(socket_type, socket.SOCK_STREAM)
-        hap_socket.settimeout(timeout)
-        hap_socket.connect(address)
-    except (socket.timeout, OSError):
-        return False
-    else:
-        hap_socket.send(six.b('show info' + '\n'))
-        file_handle = hap_socket.makefile()
-        try:
-            data = file_handle.read().splitlines()
-        except (socket.timeout, OSError):
-            return False
-        else:
-            hap_info = info2dict(data)
-
-    try:
-        _ = hap_info['Name'] == 'HAProxy'
-    except KeyError:
-        return True
-    else:
-        return False
-
 
 def cmd_across_all_servers(hap_objects, method, *arg, **kargs):
     """Return the result of a command executed in all HAProxy process.
@@ -217,11 +166,25 @@ def cmd_across_all_servers(hap_objects, method, *arg, **kargs):
 
     :rtype: ``list``
     """
+    log = logging.getLogger('haproxyadmin')
+    errors = []
+    connected_sockets = 0
     results = []
     for obj in hap_objects:
-        results.append(
-            (getattr(obj, 'haproxy_server'), getattr(obj, method)(*arg, **kargs))
-        )
+        try:
+            result = (getattr(obj, 'haproxy_server'),
+                      getattr(obj, method)(*arg, **kargs)
+                      )
+        except HAProxySocketError as exc:
+            errors.append(str(exc))
+        else:
+            results.append(result)
+            connected_sockets += 1
+
+    if 0 < connected_sockets < len(hap_objects):
+        log.warning("socket errors from some HAProxy servers %s: ", errors)
+    elif connected_sockets == 0:
+        raise AllServersFailed(details=errors)
 
     return results
 
@@ -318,14 +281,14 @@ def check_command(results):
     :rtype: ``bool``
     :raise: :class:`.MultipleCommandResults` when output differers.
     """
-    if elements_of_list_same([msg[1] for msg in results]):
-        msg = results[0][1]
-        if msg in SUCCESS_OUTPUT_STRINGS:
-            return True
-        else:
-            raise CommandFailed(msg)
-    else:
+    if not elements_of_list_same([msg[1] for msg in results]):
         raise MultipleCommandResults(results)
+    else:
+        msg = results[0][1]
+        if msg not in SUCCESS_OUTPUT_STRINGS:
+            raise CommandFailed(msg)
+        else:
+            return True
 
 def check_command_addr_port(change_type, results):
     """Check if command to set port or address was successfully executed.
@@ -641,3 +604,20 @@ def stat2dict(csv_data):
                     dicts['backends'][parts[0]]['servers'][parts[1]] = csvline
 
     return dicts
+
+
+class HaproxyServer(NamedTuple):
+    port: int = -1
+    process_number: int = -1
+    socket_file: str = None
+    address: str = None
+
+    def __repr__(self):
+        if self.socket_file is not None:
+            _repr = "HAProxy server: UNIX socket {} process number {}".format(
+                self.socket_file, self.process_number)
+        else:
+            _repr = "HAProxy server: address {}:{} process number {}".format(
+                self.address, self.port, self.process_number)
+
+        return _repr

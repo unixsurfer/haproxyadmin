@@ -9,7 +9,6 @@ haproxyadmin.haproxy
 This module implements the main haproxyadmin API.
 
 """
-from collections import namedtuple
 import os
 import glob
 from urllib.parse import urlparse
@@ -19,7 +18,7 @@ from haproxyadmin.frontend import Frontend
 from haproxyadmin.backend import Backend
 from haproxyadmin.utils import (cmd_across_all_servers, converter,
                                 calculate, isint, should_die, check_command,
-                                check_output, compare_values)
+                                check_output, compare_values, HaproxyServer)
 from haproxyadmin.internal.haproxy import _HAProxyProcess
 from haproxyadmin.exceptions import (CommandFailed, HAProxySocketError,
                                      HAProxySocketErrors, AllServersFailed,
@@ -118,17 +117,17 @@ class HAProxy:
                  servers=None,
                  ):
         self.log = logging.getLogger("haproxyadmin")
-        self._haproxy_servers = []
+        self._haproxy_servers = []  # Hold _HAProxyProcess obj per server
         self.configured_sockets = []
         connected_sockets = 0
         errors = []
 
-        if socket_dir:
+        if socket_dir is not None:
             for _file in glob.glob(os.path.join(socket_dir, '*')):
                 self.configured_sockets.append(_file)
-        if socket_file:
+        if socket_file is not None:
             self.configured_sockets.append(os.path.realpath(socket_file))
-        if servers:
+        if servers is not None:
             for server in servers:
                 url = urlparse(server.strip())
                 if url.scheme == 'unix':
@@ -136,25 +135,14 @@ class HAProxy:
                 elif url.scheme == 'tcp':
                     self.configured_sockets.append((url.hostname, url.port))
 
+        if not self.configured_sockets:
+            raise ValueError("no HAProxy servers are defined")
+
         for name in self.configured_sockets:
-            haproxy_server = namedtuple(
-                'HaproxyServer',
-                [
-                    'socket_file',
-                    'address',
-                    'port',
-                    'process_number',
-                ]
-
-            )
-            for _field in haproxy_server._fields:
-                setattr(haproxy_server, _field, None)  # set default values
-
             if isinstance(name, str):
-                haproxy_server.socket_file = name
+                haproxy_server = HaproxyServer(socket_file=name)
             elif isinstance(name, tuple):
-                haproxy_server.address = name[0]
-                haproxy_server.port = name[1]
+                haproxy_server = HaproxyServer(address=name[0], port=name[1])
             try:
                 self._haproxy_servers.append(
                     _HAProxyProcess(
@@ -174,7 +162,6 @@ class HAProxy:
                              errors)
         elif connected_sockets == 0:
             raise AllServersFailed(details=errors)
-
 
 
     @should_die
@@ -471,6 +458,8 @@ class HAProxy:
         :return: list of :class:`Frontend <haproxyadmin.frontend.Frontend>`.
         :rtype: ``list``
         """
+        errors = []
+        connected_sockets = 0
         return_list = []
 
         # store _Frontend objects for each frontend per haproxy process.
@@ -480,10 +469,21 @@ class HAProxy:
 
         # loop over all haproxy servers and get a list of frontend objects
         for haproxy in self._haproxy_servers:
-            for frontend in haproxy.frontends(name):
-                if frontend.name not in frontends_across_haproxy_servers:
-                    frontends_across_haproxy_servers[frontend.name] = []
-                frontends_across_haproxy_servers[frontend.name].append(frontend)
+            try:
+                for frontend in haproxy.frontends(name):
+                    if frontend.name not in frontends_across_haproxy_servers:
+                        frontends_across_haproxy_servers[frontend.name] = []
+                    frontends_across_haproxy_servers[frontend.name].append(frontend)
+            except HAProxySocketError as exc:
+                errors.append(str(exc))
+            else:
+                connected_sockets += 1
+
+        if 0 < connected_sockets < len(self._haproxy_servers):
+            self.log.warning("socket errors from some HAProxy servers %s: ",
+                             errors)
+        elif connected_sockets == 0:
+            raise AllServersFailed(details=errors)
 
         # build the returned list
         for value in frontends_across_haproxy_servers.values():
@@ -663,14 +663,13 @@ class HAProxy:
         :rtype: ``integer``
         :raise: ``ValueError`` when a given metric is not found
         """
-        errors = []
         metrics = []
+        errors = []
         connected_sockets = 0
 
         if name not in HAPROXY_METRICS:
             raise ValueError("{} is not valid metric".format(name))
 
-        # metrics = [x.metric(name) for x in self._haproxy_servers]
         for haproxy_server in self._haproxy_servers:
             try:
                 metric = haproxy_server.metric(name)
