@@ -85,7 +85,7 @@ class HAProxySocketError(HAProxyBaseError):
 
     def __init__(self, message, haproxy_server):
         self.haproxy_server = haproxy_server
-        self.message = "{}: {}".format(message, self.haproxy_server)
+        self.message = "{}: {!s}".format(message, self.haproxy_server)
         super(HAProxySocketError, self).__init__(self.message)
 
 
@@ -112,8 +112,8 @@ class SocketApplicationError(HAProxyBaseError):
 
     def __init__(self, haproxy_server):
         self.haproxy_server = haproxy_server
-        self.message = "Process listening on {} isn't HAProxy!".format(
-            self.haproxy_server.socket_file)
+        self.message = "Process listening on {!s} isn't HAProxy!".format(
+            self.haproxy_server)
         super(SocketApplicationError, self).__init__(self.message)
 
 class SocketTransportError(HAProxySocketError):

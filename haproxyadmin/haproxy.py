@@ -108,14 +108,21 @@ class HAProxy:
     :rtype: :class:`HAProxy`
     """
 
-    def __init__(self,
-                 socket_dir=None,
-                 socket_file=None,
-                 retry=None,
-                 retry_interval=2,
-                 timeout=1,
-                 servers=None,
-                 ):
+    def __init__(
+            self,
+            socket_dir=None,
+            socket_file=None,
+            retry=None,
+            retry_interval=2,
+            timeout=1,
+            servers=None,
+    ):
+        self.socket_dir = socket_dir
+        self.socket_file = socket_file
+        self.retry = retry
+        self.retry_interval = retry_interval
+        self.timeout = timeout
+        self.servers = servers
         self.log = logging.getLogger("haproxyadmin")
         self._haproxy_servers = []  # Hold _HAProxyProcess obj per server
         self.configured_sockets = []
@@ -139,14 +146,10 @@ class HAProxy:
             raise ValueError("no HAProxy servers are defined")
 
         for name in self.configured_sockets:
-            if isinstance(name, str):
-                haproxy_server = HaproxyServer(socket_file=name)
-            elif isinstance(name, tuple):
-                haproxy_server = HaproxyServer(address=name[0], port=name[1])
             try:
                 self._haproxy_servers.append(
                     _HAProxyProcess(
-                        haproxy_server=haproxy_server,
+                        address=name,
                         retry=retry,
                         retry_interval=retry_interval,
                         timeout=timeout
@@ -163,6 +166,15 @@ class HAProxy:
         elif connected_sockets == 0:
             raise AllServersFailed(details=errors)
 
+    def __repr__(self):
+        return "HAProxy({!r}, {!r}, {!r}, {!r}, {!r}, {!r})".format(
+            self.socket_dir,
+            self.socket_file,
+            self.retry,
+            self.retry_interval,
+            self.timeout,
+            self.servers,
+            )
 
     @should_die
     def add_acl(self, acl, pattern):

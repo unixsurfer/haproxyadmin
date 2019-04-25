@@ -193,7 +193,7 @@ class Frontend:
 
     @property
     def process_nb(self):
-        """Return a list of process number in which frontend is configured.
+        """Return a list of process numbers on which the frontend is configured.
 
         :rtype: ``list``
 
@@ -203,21 +203,12 @@ class Frontend:
           >>> hap = haproxy.HAProxy(socket_dir='/run/haproxy')
           >>> frontend = hap.frontend('frontend2_proc34')
           >>> frontend.process_nb
-          [4, 3]
+          ['HAProxy server: UNIX socket /run/haproxy/admin4.sock process number 4',
+           'HAProxy server: UNIX socket /run/haproxy/admin3.sock process number 3']
         """
         process_numbers = []
         for frontend in self._frontend_per_proc:
-            if frontend.hap_process.haproxy_server.socket_file is not None:
-                process_numbers.append(
-                    "HAProxy server: socket {} process number {}".format(
-                        frontend.hap_process.haproxy_server.socket_file,
-                        frontend.hap_process.haproxy_server.process_number))
-            else:
-                process_numbers.append(
-                    "HAProxy server: address {}:{} process number {}".format(
-                        frontend.hap_process.haproxy_server.address,
-                        frontend.hap_process.haproxy_server.port,
-                        frontend.hap_process.haproxy_server.process_number))
+            process_numbers.append("{!s}".format(frontend.hap_process))
 
         return process_numbers
 

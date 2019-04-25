@@ -27,7 +27,6 @@ class _Frontend:
         self.hap_process = hap_process
         self._name = name
         self._iid = iid
-        self.haproxy_server = hap_process.haproxy_server
 
     @property
     def name(self):
@@ -44,7 +43,7 @@ class _Frontend:
 
     @property
     def process_nb(self):
-        return int(self.hap_process.haproxy_server.process_number)
+        return int(self.hap_process.process_number)
 
     def stats_data(self):
         """Return stats data

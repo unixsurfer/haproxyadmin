@@ -39,22 +39,48 @@ class _HAProxyProcess:
     :type timeout: ``float``
     :type retry_interval: ``integer``
     """
-    def __init__(self, haproxy_server, retry=3, retry_interval=2, timeout=1):
-        self.haproxy_server = haproxy_server
+    def __init__(
+            self,
+            address=None,
+            retry=3,
+            retry_interval=2,
+            timeout=1,
+        ):
         self.hap_stats = {}
         self.hap_info = {}
+        self.address = address
         self.retry = retry
         self.retry_interval = retry_interval
         self.timeout = timeout
+        # We pass ourselves to our custom exceptions, which use our modified
+        # __str__ and our string representation needs process number, but we
+        # may not have it yet as we failed to connect. Thus we must first set
+        # to None.
+        self.process_number = None
         try:
             _name = self.metric('Name')
         except KeyError:
-            raise SocketApplicationError(haproxy_server=self.haproxy_server)
+            raise SocketApplicationError(self)
         else:
             if _name != "HAProxy":
-                raise SocketApplicationError(haproxy_server=self.haproxy_server)
-        self.haproxy_server = self.haproxy_server._replace(
-                process_number=self.metric('Process_num'))
+                raise SocketApplicationError(self)
+
+        self.process_number = self.metric('Process_num')
+
+
+    def __repr__(self):
+        return "_HAProxyProcess({!r}, {!r}, {!r}, {!r})".format(
+            self.address, self.retry, self.retry_interval, self.timeout)
+
+    def __str__(self):
+        if isinstance(self.address, str):
+            _str = "HAProxy server: UNIX socket {} process number {}".format(
+                self.address, self.process_number)
+        else:
+            _str = "HAProxy server: address {}:{} process number {}".format(
+                self.address[0], self.address[1], self.process_number)
+
+        return _str
 
     def command(self, command, full_output=False):
         """Send a command to HAProxy.
@@ -73,12 +99,12 @@ class _HAProxyProcess:
         error = None
         attempt = 0 # times to attempt to connect after a connection failure
 
-        if self.haproxy_server.socket_file is not None:
-            address = self.haproxy_server.socket_file
+        if isinstance(self.address, str):
             hap_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-        else:
-            address = (self.haproxy_server.address, self.haproxy_server.port)
+        elif isinstance(self.address, tuple):
             hap_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        else:
+            ValueError("wrong value for address")
 
         hap_socket.settimeout(self.timeout)
 
@@ -93,13 +119,13 @@ class _HAProxyProcess:
             if error is not None:
                 time.sleep(self.retry_interval)
             try:
-                hap_socket.connect(address)
+                hap_socket.connect(self.address)
             except socket.timeout as exc:
                 error = HAProxySocketError(message=exc,
                                            haproxy_server=self.haproxy_server)
             except OSError as exc:
                 error = HAProxySocketError(message=exc,
-                                           haproxy_server=self.haproxy_server)
+                                           haproxy_server=self)
             else:
                 try:
                     hap_socket.send(six.b(command + '\n'))

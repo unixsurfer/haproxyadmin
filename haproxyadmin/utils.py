@@ -172,7 +172,7 @@ def cmd_across_all_servers(hap_objects, method, *arg, **kargs):
     results = []
     for obj in hap_objects:
         try:
-            result = (getattr(obj, 'haproxy_server'),
+            result = ("{!s}".format(getattr(obj, 'hap_process')),
                       getattr(obj, method)(*arg, **kargs)
                       )
         except HAProxySocketError as exc:
