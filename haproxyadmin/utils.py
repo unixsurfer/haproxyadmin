@@ -190,7 +190,7 @@ def connected_socket(path):
         unix_socket.close()
 
     try:
-        return hap_info['Name'] == 'HAProxy'
+        return hap_info['Name'] in ['HAProxy', 'hapee-lb']
     except KeyError:
         return False
 
