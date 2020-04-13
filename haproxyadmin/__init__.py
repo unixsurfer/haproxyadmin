@@ -10,7 +10,7 @@ A python library to interact with HAProxy over UNIX socket
 __title__ = 'haproxyadmin'
 __author__ = 'Pavlos Parissis'
 __license__ = 'Apache 2.0'
-__version__ = '0.2.2'
+__version__ = '0.2.3'
 __copyright__ = 'Copyright 2015-2019 Pavlos Parissis'
 
 from haproxyadmin.haproxy import HAPROXY_METRICS
