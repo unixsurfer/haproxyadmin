@@ -112,10 +112,10 @@ class HAProxy(object):
                                  "{}".format(socket_dir))
 
             for _file in glob.glob(os.path.join(socket_dir, '*')):
-                if is_unix_socket(_file) and connected_socket(_file):
+                if is_unix_socket(_file) and connected_socket(_file, timeout):
                     socket_files.append(_file)
         elif (socket_file and is_unix_socket(socket_file) and
-              connected_socket(socket_file)):
+              connected_socket(socket_file, timeout)):
             socket_files.append(os.path.realpath(socket_file))
         else:
             raise ValueError("UNIX socket file was not set")

@@ -158,7 +158,7 @@ def is_unix_socket(path):
 
     return stat.S_ISSOCK(mode)
 
-def connected_socket(path):
+def connected_socket(path, timeout):
     """Check if socket file is a valid HAProxy socket file.
 
     We send a 'show info' command to the socket, build a dictionary structure
@@ -167,13 +167,15 @@ def connected_socket(path):
 
     :param path: file name path
     :type path: ``string``
+    :param timeout: timeout for the connection, in seconds
+    :type timeout: ``float``
     :return: ``True`` is socket file is a valid HAProxy stats socket file False
       otherwise
     :rtype: ``bool``
     """
     try:
         unix_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-        unix_socket.settimeout(0.1)
+        unix_socket.settimeout(timeout)
         unix_socket.connect(path)
         unix_socket.send(six.b('show info' + '\n'))
         file_handle = unix_socket.makefile()
