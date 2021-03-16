@@ -1,6 +1,12 @@
 CHANGES
 =======
 
+0.2.4
+-----
+
+* RELEASE 0.2.4 version
+* Allow connected\_socket() to use custom timeout
+
 0.2.3
 -----
 
