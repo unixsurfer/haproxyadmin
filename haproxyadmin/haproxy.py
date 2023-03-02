@@ -114,7 +114,9 @@ class HAProxy(object):
             for _file in glob.glob(os.path.join(socket_dir, '*')):
                 if is_unix_socket(_file) and connected_socket(_file, timeout):
                     socket_files.append(_file)
-        elif (socket_file and is_unix_socket(socket_file) and
+        elif (socket_file and not os.path.exists(socket_file)):
+            raise ValueError("{} UNIX socket file was not found".format(socket_file))
+        elif (socket_file and os.path.exists(socket_file) and is_unix_socket(socket_file) and
               connected_socket(socket_file, timeout)):
             socket_files.append(os.path.realpath(socket_file))
         else:
