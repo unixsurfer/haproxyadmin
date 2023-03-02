@@ -154,7 +154,10 @@ def is_unix_socket(path):
     :type path: ``string``
     :rtype: ``bool``
     """
-    mode = os.stat(path).st_mode
+    try:
+        mode = os.stat(path).st_mode
+    except OSError:
+        return False
 
     return stat.S_ISSOCK(mode)
 
